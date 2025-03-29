@@ -19,3 +19,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 @app.get("/")
 async def read_root(request: Request):
     return {"Test": "Test"}
+
+@app.get("/item")
+async def read_item(request: Request):
+    return {"Item": "Item"}
