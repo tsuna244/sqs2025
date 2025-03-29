@@ -2,7 +2,7 @@ name: Create and publish a Docker image
 
 on:
   push:
-    branches: ['1-initial-setup-fastapi']
+    branches: ['main', 'develop']
 
 env:
   REGISTRY: ghcr.io
