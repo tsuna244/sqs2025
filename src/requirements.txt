@@ -1,0 +1,20 @@
+# requirements for fastapi and jinja2
+starlette
+uvicorn
+
+pydantic
+
+fastapi[standard]
+fastapi-login
+
+jinja2
+
+# requirements for Testing FastAPI
+httpx
+pytest
+
+# PokeAPI wrapper
+pokebase
+
+# PostgresDB Connection wrapper
+psycopg2
