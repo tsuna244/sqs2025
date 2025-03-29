@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from pydantic import BaseModel
 
-from .pokeapi import *
+from pokeapi import *
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -22,4 +22,8 @@ async def read_root(request: Request):
 
 @app.get("/pokesprite")
 async def read_item(request: Request):
-    return {"Test": "Pokeapi"}
+    return templates.TemplateResponse(
+        name="base.html",
+        request=request, 
+        context={"brand": get_pokesprite_url_by_id(444)}
+    )
