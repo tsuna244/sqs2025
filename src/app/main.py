@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 
 from pydantic import BaseModel
 
-# from pokesystem import *
+from .pokeapi import *
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -20,6 +20,6 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 async def read_root(request: Request):
     return {"Test": "Test"}
 
-@app.get("/item")
+@app.get("/pokesprite")
 async def read_item(request: Request):
-    return {"Item": "Item"}
+    return {"Test": "Pokeapi"}
