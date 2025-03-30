@@ -1,14 +1,15 @@
-name: Python package
+name: Python run tests
 
 on:
   pull_request:
     branches: ['main', 'develop']
 
+
 env:
   PYTHON_VERSION: '3.12'
 
 jobs:
-  build:
+  test-python-pytest:
 
     runs-on: ubuntu-latest
 
