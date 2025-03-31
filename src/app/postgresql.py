@@ -1,23 +1,36 @@
-import psycopg2
+import psycopg2 as ps
+import os
 
-conn = psycopg2.connect(database="db_name",
-                        host="db_host",
-                        user="db_user",
-                        password="db_pass",
-                        port="db_port")
+def get_postgress_conn():
+    DATABASE = os.getenv("db_name")
+    HOST = os.getenv("db_host")
+    USER = os.getenv("db_user")
+    PASSWORD = os.getenv("db_pass")
+    PORT = os.getenv("db_port")
+    
+    try:
+        conn = ps.connect(database=DATABASE,
+                                host=HOST,
+                                user=USER,
+                                password=PASSWORD,
+                                port=PORT)
 
-cursor = conn.cursor()
+        cursor = conn.cursor()
 
-cursor.execute("SELECT * FROM DB_table WHERE id = 1")
+        cursor.execute("SELECT * FROM DB_table WHERE id = 1")
 
-# outputs only first line of result
-print(cursor.fetchone())
+        # outputs only first line of result
+        print(cursor.fetchone())
 
-# outputs all lines of result
-print(cursor.fetchall())
+        # outputs all lines of result
+        print(cursor.fetchall())
 
-# ouputs first 3 lines ouf result
-print(cursor.fetchmany(size=3))
+        # ouputs first 3 lines ouf result
+        print(cursor.fetchmany(size=3))
+    except ps.OperationalError as e:
+        # log e
+        return None
 
-# close connection
-conn.close()
+#conn = get_postgress_conn()
+    # close connection
+#conn.close()
