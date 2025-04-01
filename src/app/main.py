@@ -25,5 +25,5 @@ async def read_item(request: Request):
     return templates.TemplateResponse(
         name="base.html",
         request=request, 
-        context={"brand": get_pokesprite_url_by_id(444)}
+        context={"brand": get_pokesprite_url_by_id(69)}
     )
