@@ -40,7 +40,7 @@ def create_table(conn):
     
     cursor = conn.cursor()
     Name = "DB_TEST"
-    create=f"""CREATE EXTENSION pgcrypto; CREATE TABLE IF NOT EXISTS {Name} (
+    create=f"""CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE IF NOT EXISTS {Name} (
         id INT GENERATED ALWAYS AS IDENTITY,
         user_name VARCHAR(255) NOT NULL, 
         password TEXT NOT NULL,
@@ -97,8 +97,11 @@ def get_user_tst(conn, passwd):
         """
     cursor = conn.cursor()
     cursor.execute(sql)
+    
+    print(cursor.fetchall())
+    
     conn.commit()
-    print("Added User Tsuna")
+    print("test User Tsuna")
 
 
 conn = get_postgress_conn()
@@ -106,7 +109,7 @@ create_table(conn)
 #delete_table(conn, "DB_TEST")
 
 user_with_crypt_pass(conn)
-
-
+get_user_tst(conn, "tsunapasswd")
+get_user_tst(conn, "wrongpass")
 
 conn.close()
