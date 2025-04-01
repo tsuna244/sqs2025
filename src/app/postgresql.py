@@ -1,5 +1,8 @@
 import psycopg2 as ps
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_postgress_conn():
     DATABASE = os.getenv("db_name")
@@ -17,16 +20,16 @@ def get_postgress_conn():
 
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM DB_table WHERE id = 1")
+        #cursor.execute("SELECT * FROM DB_table WHERE id = 1")
 
         # outputs only first line of result
-        print(cursor.fetchone())
+        #print(cursor.fetchone())
 
         # outputs all lines of result
-        print(cursor.fetchall())
+        #print(cursor.fetchall())
 
         # ouputs first 3 lines ouf result
-        print(cursor.fetchmany(size=3))
+        #print(cursor.fetchmany(size=3))
     except ps.OperationalError as e:
         # log e
         return None
