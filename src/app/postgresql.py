@@ -1,8 +1,11 @@
 import psycopg2 as ps
 import os
 from dotenv import load_dotenv
+from logger import Logger
 
 load_dotenv()
+
+log = Logger().getLogger()
 
 def get_postgress_conn():
     DATABASE = os.getenv("DB_NAME")
@@ -17,64 +20,56 @@ def get_postgress_conn():
                                 user=USER,
                                 password=PASSWORD,
                                 port=PORT)
-
-        #cursor.execute("SELECT * FROM DB_table WHERE id = 1")
-
-        # outputs only first line of result
-        #print(cursor.fetchone())
-
-        # outputs all lines of result
-        #print(cursor.fetchall())
-        print("worked")
-        # ouputs first 3 lines ouf result
-        #print(cursor.fetchmany(size=3))
     except ps.OperationalError as e:
         # log e
-        print(str(e))
+        log.error("creating connection to the postgresql DB failed. Error: \n" + str(e))
         return None
 
 def create_table(conn):
     if conn is None:
-        print("Connection is None")
+        log.error("Creating users table failed. Error: Connection to DB missing")
         return
     
-    cursor = conn.cursor()
-    Name = "DB_TEST"
-    create=f"""CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE IF NOT EXISTS {Name} (
-        id INT GENERATED ALWAYS AS IDENTITY,
-        user_name VARCHAR(255) NOT NULL, 
-        password TEXT NOT NULL,
-        deck_ids INTEGER[]
-    )"""
-    cursor.execute(create)
-    conn.commit()
-    print("Create Table Done")
+    try:
+        cursor = conn.cursor()
+        Name = "users"
+        create=f"""CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE IF NOT EXISTS {Name} (
+            id INT GENERATED ALWAYS AS IDENTITY,
+            user_name VARCHAR(255) NOT NULL, 
+            password TEXT NOT NULL,
+            deck_ids INTEGER[]
+        )"""
+        cursor.execute(create)
+        conn.commit()
+        log.info("Succesfully created users table")
+    except Exception as e:
+        log.error("Creating users table failed. Error: \n" + str(e))
 
 def clean_table(conn, table_name: str):
     if conn is None:
-        print("Connection is None")
+        log.error("Cleaning users table failed. Error: Connection to DB missing")
         return
     
     cursor = conn.cursor()
     clean=f"TRUNCATE {table_name};"
     cursor.execute(clean)
     conn.commit()
-    print("Clean Table Done")
+    log.info("Succesfully cleaned users table")
 
 def delete_table(conn, table_name):
     if conn is None:
-        print("Connection is None")
+        log.error("Deleting users table failed. Error: Connection to DB missing")
         return
     
     cursor = conn.cursor()
     clean=f"DROP TABLE IF EXISTS {table_name};"
     cursor.execute(clean)
     conn.commit()
-    print("Drop Table Done")
+    log.info("Succesfully deleted users table")
 
 def user_with_crypt_pass(conn):
     if conn is None:
-        print("Connection is None")
+        log.error("Creating user failed. Error: Connection to DB missing")
         return
     
     sql = f""" INSERT INTO DB_TEST (user_name, password) VALUES (
@@ -85,12 +80,13 @@ def user_with_crypt_pass(conn):
     cursor = conn.cursor()
     cursor.execute(sql)
     conn.commit()
-    print("Added User Tsuna")
+    log.info("Succesfully added test-user tsuna")
 
 def get_user_tst(conn, passwd):
     if conn is None:
-        print("Connection is None")
+        log.error("Receiving users from db failed. Error: Connection to DB missing")
         return
+    
     sql = f""" SELECT id FROM DB_TEST
             WHERE user_name = 'tsuna' 
             AND password = crypt('{passwd}', password);
