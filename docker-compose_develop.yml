@@ -6,7 +6,7 @@ services:
     image: ghcr.io/tsuna244/sqs2025:develop
     environment:
       DB_NAME: "postgres"
-      DB_HOST: "localhost"
+      DB_HOST: "db"
       DB_USER: "postgres"
       DB_PASS: "example"
       DB_PORT: 5432
