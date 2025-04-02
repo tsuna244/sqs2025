@@ -33,6 +33,10 @@ async def read_item(request: Request):
 @app.get("/test_postgresql")
 async def create_postgres_test(request: Request):
     conn = get_postgress_conn()
+    
+    if conn is None:
+        return {"Error": "Could not create DB"}
+    
     create_table(conn)
 
     user_with_crypt_pass(conn)
