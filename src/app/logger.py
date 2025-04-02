@@ -1,25 +1,41 @@
 import logging
 import sys
-import os
 from time import strftime
-import errno
 
-logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+# singelton Logger Class
+class Logger(object):
+    logger = None
+    _instance = None
 
-logger = logging.getLogger()
+    # ensure that there is only one instance of logger
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Logger, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+    
+    def getLogger(self):
+        if Logger.logger is None:
+        
+            # set logging format
+            logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 
-logPath = "app/log/"
+            # create logger
+            Logger.logger = logging.getLogger()
+            Logger.logger.setLevel(logging.INFO)
 
-logFile = logPath + strftime("%Y-%m-%d %H:%M:%S") + "_system.log"
+            # console handler
+            consoleHandler = logging.StreamHandler(sys.stdout)
+            consoleHandler.setFormatter(logFormatter)
+            Logger.logger.addHandler(consoleHandler)
 
-logger.addHandler(logging.StreamHandler(sys.stdout))
+            # file handler
+            try:
+                log_name = strftime("%Y-%m-%d %H:%M:%S") + "_system.log"
+                fileHandler = logging.FileHandler(log_name, mode="a", encoding="utf-8")
+                fileHandler.setFormatter(logFormatter)
+                Logger.logger.addHandler(fileHandler)
+            except:
+                Logger.logger.warning("creating file logging did not work only")
 
-try:
-    os.makedirs(logPath)
-    logger.addHandler(logging.FileHandler(logFile))
-except OSError as exception:
-    print(str(exception))
-    if exception.errno != errno.EEXIST:
-        logger.warning(f"File {logPath} not Found. Will only log to stdout")
-
-logger.info("Finished Logger setup")
+            Logger.logger.info("Logger setup succesfully")
+        return Logger.logger
