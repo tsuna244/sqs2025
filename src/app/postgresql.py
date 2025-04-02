@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_postgress_conn():
-    DATABASE = os.getenv("db_name")
-    HOST = os.getenv("db_host")
-    USER = os.getenv("db_user")
-    PASSWORD = os.getenv("db_pass")
-    PORT = os.getenv("db_port")
+    DATABASE = os.getenv("DB_NAME")
+    HOST = os.getenv("DB_HOST")
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASS")
+    PORT = os.getenv("DB_PORT")
     
     try:
         return ps.connect(database=DATABASE,
@@ -98,18 +98,7 @@ def get_user_tst(conn, passwd):
     cursor = conn.cursor()
     cursor.execute(sql)
     
-    print(cursor.fetchall())
+    users = cursor.fetchall()
     
     conn.commit()
-    print("test User Tsuna")
-
-
-conn = get_postgress_conn()
-create_table(conn)
-#delete_table(conn, "DB_TEST")
-
-user_with_crypt_pass(conn)
-get_user_tst(conn, "tsunapasswd")
-get_user_tst(conn, "wrongpass")
-
-conn.close()
+    return users
