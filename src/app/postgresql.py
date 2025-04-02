@@ -5,11 +5,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_postgress_conn():
-    DATABASE = os.getenv("db_name")
-    HOST = os.getenv("db_host")
-    USER = os.getenv("db_user")
-    PASSWORD = os.getenv("db_pass")
-    PORT = os.getenv("db_port")
+    DATABASE = os.getenv("DB_NAME")
+    HOST = os.getenv("DB_HOST")
+    USER = os.getenv("DB_USER")
+    PASSWORD = os.getenv("DB_PASS")
+    PORT = os.getenv("DB_PORT")
     
     try:
         return ps.connect(database=DATABASE,
