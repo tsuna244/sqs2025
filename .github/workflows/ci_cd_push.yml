@@ -1,15 +1,13 @@
 name: Create and publish a Docker image
 
-on:
-  push:
-    branches: ['main', 'develop']
+on: ['push']
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push-image:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -41,7 +39,7 @@ jobs:
         with:
           context: ./src
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main') && steps.meta.outputs.tags || 'testing' }}
           labels: ${{ steps.meta.outputs.labels }}
 
 #      - name: Generate artifact attestation
