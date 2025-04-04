@@ -8,9 +8,9 @@ from fastapi.templating import Jinja2Templates
 
 from pydantic import BaseModel
 
-from pokeapi import *
+import pokeapi as pika
 
-from postgresql import *
+import postgresql as sql
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -27,23 +27,23 @@ async def read_item(request: Request):
     return templates.TemplateResponse(
         name="base.html",
         request=request, 
-        context={"brand": get_pokesprite_url_by_id(69)}
+        context={"brand": pika.get_pokesprite_url_by_id(69)}
     )
 
 @app.get("/test_postgresql")
 async def create_postgres_test(request: Request):
-    conn = get_postgress_conn()
+    conn = sql.get_postgress_conn()
     
     if conn is None:
         return {"Error": "Could not create DB"}
     
-    create_table(conn)
+    sql.create_table(conn)
 
-    user_with_crypt_pass(conn)
-    R_PASS_TEST = get_user_tst(conn, "tsunapasswd")
-    W_PASS_TEST = get_user_tst(conn, "wrongpass")
+    sql.user_with_crypt_pass(conn)
+    R_PASS_TEST = sql.get_user_tst(conn, "tsunapasswd")
+    W_PASS_TEST = sql.get_user_tst(conn, "wrongpass")
 
-    delete_table(conn, "DB_TEST")
+    sql.delete_table(conn, "DB_TEST")
 
     conn.close()
 

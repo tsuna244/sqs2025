@@ -1,11 +1,11 @@
 import psycopg2 as ps
 import os
 from dotenv import load_dotenv
-from logger import Logger
+from logger import LoggerClass
 
 load_dotenv()
 
-log = Logger().getLogger()
+log = LoggerClass().get_logger()
 
 def get_postgress_conn():
     DATABASE = os.getenv("DB_NAME")
@@ -13,7 +13,7 @@ def get_postgress_conn():
     USER = os.getenv("DB_USER")
     PASSWORD = os.getenv("DB_PASS")
     PORT = os.getenv("DB_PORT")
-    
+
     try:
         return ps.connect(database=DATABASE,
                                 host=HOST,
@@ -32,8 +32,8 @@ def create_table(conn):
     
     try:
         cursor = conn.cursor()
-        Name = "users"
-        create=f"""CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE IF NOT EXISTS {Name} (
+        table_name = "users"
+        create=f"""CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE IF NOT EXISTS {table_name} (
             id INT GENERATED ALWAYS AS IDENTITY,
             user_name VARCHAR(255) NOT NULL, 
             password TEXT NOT NULL,
@@ -72,7 +72,7 @@ def user_with_crypt_pass(conn):
         log.error("Creating user failed. Error: Connection to DB missing")
         return
     
-    sql = f""" INSERT INTO DB_TEST (user_name, password) VALUES (
+    sql = """ INSERT INTO DB_TEST (user_name, password) VALUES (
             'tsuna',
             crypt('tsunapasswd', gen_salt('md5'))
         );
