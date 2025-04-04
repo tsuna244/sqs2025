@@ -1,11 +1,11 @@
 import psycopg2 as ps
 import os
 from dotenv import load_dotenv
-from logger import Logger
+from logger import LoggerClass
 
 load_dotenv()
 
-log = Logger().getLogger()
+log = LoggerClass().getLogger()
 
 def get_postgress_conn():
     DATABASE = os.getenv("DB_NAME")
