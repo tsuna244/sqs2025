@@ -17,4 +17,7 @@ pytest
 pokebase
 
 # PostgresDB Connection wrapper
-psycopg2
+psycopg2-binary
+
+# dotenv for local testing
+python-dotenv
