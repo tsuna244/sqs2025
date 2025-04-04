@@ -5,7 +5,7 @@ from logger import LoggerClass
 
 load_dotenv()
 
-log = LoggerClass().getLogger()
+log = LoggerClass().get_logger()
 
 def get_postgress_conn():
     DATABASE = os.getenv("DB_NAME")
