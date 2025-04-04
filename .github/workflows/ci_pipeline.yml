@@ -39,9 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarqube-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_ACCESS_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -49,7 +50,6 @@ jobs:
           args: >
             -Dsonar.organization=tsuna244
             -Dsonar.projectKey=sqs2025
-            -Dsonar.python.coverage.reportPaths=coverage.xml
   
   build-and-deploy:
     if: ${{ github.event_name == 'push' }}
