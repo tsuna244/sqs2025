@@ -1,0 +1,88 @@
+name: Python run tests
+
+on: ['push','pull_request']
+
+env:
+  PYTHON_VERSION: '3.12'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  TEST_IMG: ghcr.io/${{ github.repository }}:testing
+
+jobs:
+  test-python-pytest:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python # Set Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      # Install pip and pytest
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+          pip install -r src/requirements.txt
+      - name: Test with pytest
+        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=com --cov-report=xml --cov-report=html
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-${{ env.PYTHON_VERSION }}
+          path: junit/test-results-${{ env.PYTHON_VERSION }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+  
+  scan-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_ACCESS_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=tsuna244
+            -Dsonar.projectKey=sqs2025
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+  
+  build-and-deploy:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: ./src
+          push: true
+          tags: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main') && steps.meta.outputs.tags || env.TEST_IMG }}
+          labels: ${{ steps.meta.outputs.labels }}
