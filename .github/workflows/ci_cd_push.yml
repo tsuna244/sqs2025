@@ -5,7 +5,7 @@ on: ['push']
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  TEST_IMG: ghcr.io/${{ github.repository }}:testing'
+  TEST_IMG: ghcr.io/${{ github.repository }}:testing
 
 jobs:
   build-and-deploy:
