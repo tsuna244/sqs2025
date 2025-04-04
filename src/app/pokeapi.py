@@ -11,8 +11,6 @@ pb.cache.set_cache(CACHE_DIR)
 
 def get_pokesprite_url_by_id(id: int):
     file_name = SPRITE_POKEMON_CACHE + str(id) + ".png"
-    cached_file = ".cache/" + SPRITE_POKEMON_CACHE + str(id) + ".png"
-    if os.path.exists(CACHE_DIR + file_name):
-        return cached_file
-    pb.SpriteResource('pokemon', id)
-    return cached_file
+    if not os.path.exists(CACHE_DIR + file_name):
+        pb.SpriteResource('pokemon', id)
+    return ".cache/" + file_name
