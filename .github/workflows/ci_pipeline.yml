@@ -26,7 +26,7 @@ jobs:
           pip install pytest pytest-cov
           pip install -r src/requirements.txt
       - name: Test with pytest
-        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=com --cov-report=xml --cov-report=html
+        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=com --cov-report=xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
@@ -51,6 +51,7 @@ jobs:
           args: >
             -Dsonar.organization=tsuna244
             -Dsonar.projectKey=tsuna244_sqs2025
+            -Dsonar.python.coverage.reportPaths=/github/workspace/coverage.xml
   
   build-and-deploy:
     if: ${{ github.event_name == 'push' }}
