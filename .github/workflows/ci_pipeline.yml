@@ -26,7 +26,7 @@ jobs:
           pip install pytest pytest-cov
           pip install -r src/requirements.txt
       - name: Test with pytest
-        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=com --cov-report=xml
+        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=main --cov-report=xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
@@ -36,7 +36,7 @@ jobs:
         if: ${{ always() }}
   
   scan-code:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref != 'refs/heads/main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
