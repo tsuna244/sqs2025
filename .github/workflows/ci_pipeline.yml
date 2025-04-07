@@ -31,6 +31,8 @@ jobs:
       # Execute test with pytest and pytest-cov
       - name: Test with pytest
         run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=src/app --cov-report=xml
+      # Set coverage.xml as output
+      
       # Upload pytest results
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
@@ -49,6 +51,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: pytest-results-${{ env.PYTHON_VERSION }}
+          path: ./
+      - run: ls -al
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.1.0
         env:
