@@ -49,7 +49,7 @@ jobs:
           args: >
             -Dsonar.organization=tsuna244
             -Dsonar.projectKey=tsuna244_sqs2025
-            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.python.coverage.reportPaths=src/coverage.xml
             -Dsonar.python.version=3.12
         if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
   
