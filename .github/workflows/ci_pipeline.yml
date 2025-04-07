@@ -55,11 +55,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_ACCESS_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          projectBaseDir: src
           args: >
             -Dsonar.organization=tsuna244
             -Dsonar.projectKey=tsuna244_sqs2025
-            -Dsonar.python.coverage.reportPaths=/github/workspace/coverage.xml
+            -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.12
+            -Dsonar.sources=.
 
   build-and-deploy:
     if: ${{ github.event_name == 'push' }}
