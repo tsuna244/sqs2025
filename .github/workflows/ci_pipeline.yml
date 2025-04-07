@@ -37,8 +37,8 @@ jobs:
         with:
           name: pytest-results-${{ env.PYTHON_VERSION }}
           path: |
-            junit/test-results-${{ env.PYTHON_VERSION }}.xml
             coverage.xml
+            junit/test-results-${{ env.PYTHON_VERSION }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
@@ -58,7 +58,7 @@ jobs:
           args: >
             -Dsonar.organization=tsuna244
             -Dsonar.projectKey=tsuna244_sqs2025
-            -Dsonar.python.coverage.reportPaths=/github/workspace/coverage.xml
+            -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.12
 
   build-and-deploy:
