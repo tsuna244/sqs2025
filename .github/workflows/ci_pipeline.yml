@@ -9,13 +9,16 @@ env:
   TEST_IMG: ghcr.io/${{ github.repository }}:testing
 
 jobs:
-  test-python-pytest:
+  test-and-scan-code:
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python # Set Python version
+        with:
+          fetch-depth: 0
+      # Set Python version
+      - name: Setup Python 
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -25,8 +28,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
           pip install -r src/requirements.txt
+      # Execute test with pytest and pytest-cov
       - name: Test with pytest
         run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=app --cov-report=xml
+      # Upload pytest results
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
@@ -34,14 +39,7 @@ jobs:
           path: junit/test-results-${{ env.PYTHON_VERSION }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
-  
-  scan-code:
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      # Scan code with help of sonarcloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.1.0
         env:
@@ -53,6 +51,7 @@ jobs:
             -Dsonar.projectKey=tsuna244_sqs2025
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.12
+        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
   
   build-and-deploy:
     if: ${{ github.event_name == 'push' }}
