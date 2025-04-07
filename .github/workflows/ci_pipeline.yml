@@ -55,7 +55,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_ACCESS_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectBaseDir: src
           args: >
             -Dsonar.organization=tsuna244
             -Dsonar.projectKey=tsuna244_sqs2025
