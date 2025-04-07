@@ -45,6 +45,7 @@ jobs:
         if: ${{ always() }}
 
   scan-code:
+    needs: test-code
     if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
