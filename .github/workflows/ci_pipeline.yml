@@ -30,7 +30,7 @@ jobs:
           pip install -r src/requirements.txt
       # Execute test with pytest and pytest-cov
       - name: Test with pytest
-        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=app --cov-report=xml
+        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=app --cov-report=xml; if [ -f coverage.xml ]; then echo "File Exists"; fi
       # Upload pytest results
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
