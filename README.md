@@ -5,7 +5,7 @@
 - [x] 0003 why python
 - [x] 0004 why fastapi
 - [x] 0005 why starlette and jinja2
-- [ ] 0006 why postgresql
+- [x] 0006 why postgresql
 - [ ] 0007 why logging
 - [ ] 0008 why docker
 - [ ] 0009 why sonarcloud and ci/cd
