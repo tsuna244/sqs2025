@@ -16,10 +16,10 @@ We will use the pokebase wrapper for the PokeAPI. It is written in python
 
 ## Consequences
 
-### Positive
+### Pro
 This wrapper allows to access all the information that is provided by the PokeAPI with simple calls. It also comes with predefined functions that allow diffrent types of access. Be it with the id of a pokemon or its name. Furthermore it provides a function to access Sprites of a given pokemon. It also has auto caching as a feature.
 
-### Negative
+### Con
 Using this wrapper will force us to use Python as a programming language.
 
 ### Alternatives
