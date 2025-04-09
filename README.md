@@ -15,5 +15,5 @@ This is a project for learning purposes. It will consist of a webserver that con
 ## Developer: Emre Gülcino
 
 ## ADRs
-Under the folder '''doc/adr''' you can find all the ADRs.
+Under the folder ```doc/adr``` you can find all the ADRs.
 
