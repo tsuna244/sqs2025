@@ -4,7 +4,7 @@
 - [x] 0002 why pokebase
 - [x] 0003 why python
 - [x] 0004 why fastapi
-- [ ] 0005 why starlette and jinja2
+- [x] 0005 why starlette and jinja2
 - [ ] 0006 why postgresql
 - [ ] 0007 why logging
 - [ ] 0008 why docker
