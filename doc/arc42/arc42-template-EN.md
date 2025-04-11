@@ -12,7 +12,11 @@ contributors. See <https://arc42.org>.
 
 # Introduction and Goals
 
+
+
 ## Requirements Overview
+
+
 
 ## Quality Goals
 
