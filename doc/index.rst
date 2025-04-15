@@ -12,7 +12,7 @@ documentation for details.
 
 Additional Test Docu
 
-.. mdinclude:: ../README.md
+.. include:: ../README.md
 
 .. toctree::
    :maxdepth: 2
