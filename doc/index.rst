@@ -15,3 +15,4 @@ documentation for details.
    :caption: Contents:
 
    adr/0001-record-architecture-decisions.md
+   adr/0002-pokebase-as-api-for-this-project.md
