@@ -14,4 +14,4 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   adr
+   adr/0001-record-architecture-decisions.md
