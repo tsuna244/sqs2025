@@ -27,7 +27,7 @@ async def read_item(request: Request):
     return templates.TemplateResponse(
         name="base.html",
         request=request, 
-        context={"brand": pika.get_pokesprite_url_by_id(69)}
+        context={"brand": pika.get_pokesprite_url_by_id(20, 0)}
     )
 
 @app.get("/test_postgresql")
