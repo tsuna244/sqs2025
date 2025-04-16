@@ -14,5 +14,4 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   adr/0001-record-architecture-decisions.md
-   adr/0002-pokebase-as-api-for-this-project.md
+   arc42/architecture
