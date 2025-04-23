@@ -8,9 +8,9 @@ from fastapi.templating import Jinja2Templates
 
 from pydantic import BaseModel
 
-import pokeapi as pika
+# imports all necessary custom modules
+from .modules import PokemonObj, GenerationObj
 
-import postgresql as sql
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -18,9 +18,11 @@ templates = Jinja2Templates(directory="app/templates")
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+
 @app.get("/")
 async def read_root(request: Request):
     return {"Test": "Test"}
+
 
 @app.get("/pokesprite")
 async def read_item(request: Request):
@@ -29,6 +31,7 @@ async def read_item(request: Request):
         request=request, 
         context={"brand": pika.get_pokesprite_url_by_id(20, 0)}
     )
+
 
 @app.get("/test_postgresql")
 async def create_postgres_test(request: Request):
