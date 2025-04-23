@@ -7,8 +7,9 @@ log = LoggerClass.get_logger()
 
 class PokemonObj(object):
     
-    def __init__(self, poke_name: str, load_sprite = True):
+    def __init__(self, poke_id: int, poke_name: str, load_sprite = True):
 
+        self.poke_id = poke_id
         self.poke_name = poke_name
 
         self._load_stats()
@@ -25,6 +26,9 @@ class PokemonObj(object):
         self.name = ""
         self.generation = 0
         self.stats = {}
+    
+    def get_id(self):
+        return self.poke_id
     
     def get_name(self):
         return self.name
