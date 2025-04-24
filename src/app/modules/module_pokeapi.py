@@ -18,16 +18,6 @@ class PokemonRarity(Enum):
     MYTHIC = "mythical"
 
 
-# TODO: check if pokemon_source has is_mithical and is_legendary as parameter!!! and if they are boolean values
-def get_rarity_from_pokemon_species_api_source(pokemon_source):
-    rarity = PokemonRarity.NORMAL
-    if pokemon_source.is_mythical:
-        rarity = PokemonRarity.MYTHIC
-    if pokemon_source.is_legendary:
-        rarity = PokemonRarity.LEGENDARY
-    return rarity
-
-
 def get_pokemon_id_names_by_generation(generation: int, depth=0):
     if generation < 1 or generation > 3:
         log.error("Generation must be between 1 and 3")
@@ -45,9 +35,8 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0):
             log.info("Successfully loaded from cache")
             pokemon_list = []
             for pokemon_source in gen_resource["pokemon_species"]:
-                print(pokemon_source)
-                poke_id = pokemon_source["url"].split("/")[-2] # fetch id out of url
-                pokemon_list.append((poke_id, pokemon_source["name"])) # append tupel with pokemon ip and name (add pokemon rarity)
+                poke_id = int(pokemon_source["url"].split("/")[-2]) # fetch id out of url
+                pokemon_list.append({"pokemon_id": poke_id, "pokemon_name": pokemon_source["name"]})
             return pokemon_list
         # use api load function !!!
         elif depth == 1:
@@ -56,8 +45,7 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0):
             log.info("Successfully fetched from api")
             pokemon_list = []
             for pokemon_source in gen_resource.pokemon_species:
-                rarity = get_rarity_from_pokemon_species_api_source(pokemon_source)
-                pokemon_list.append((pokemon_source.id_, pokemon_source.name, rarity)) # add pokemon rarity
+                pokemon_list.append({"pokemon_id": pokemon_source.id_, "pokemon_name": pokemon_source.name}) # add pokemon rarity
             return pokemon_list
     # key error occurs if load function cant find a fetch for the generation value hence try api call first
     except KeyError as e:
@@ -88,7 +76,12 @@ def get_pokemon_rarity_by_id(poke_id: int, depth = 0):
             log.info("Fetching pokemon species from api")
             pokemon_species = pb.pokemon_species(poke_id)
             log.info("Fetched pokemon species from api successful")
-            return get_rarity_from_pokemon_species_api_source(pokemon_species)
+            rarity = PokemonRarity.NORMAL
+            if pokemon_species.is_mythical:
+                rarity = PokemonRarity.MYTHIC
+            if pokemon_species.is_legendary:
+                rarity = PokemonRarity.LEGENDARY
+            return rarity
     except KeyError as e:
         if depth == 0:
             log.info("Could not find pokemon species in cache. Will try api fetch next")
@@ -108,13 +101,12 @@ def get_pokemon_by_id(poke_id: int, depth=0):
             log.info("Try loading from cache")
             poke_resource = pb.cache.load("pokemon", poke_id)
             log.info("Successfully loaded from cache")
-            # id - name - stats: {(name, value)}
             
             poke_stats = []
             
             for stat in poke_resource["stats"]:
                 poke_stats.append((stat["stat"]["name"], stat["base_stat"]))
-                
+            
             return poke_resource["id"], poke_resource["name"], poke_stats
         # use api load function !!!
         elif depth == 1:
@@ -169,29 +161,5 @@ def get_pokesprite_url_by_id(poke_id: int, depth: int):
         return ""
 
 
-def get_pokemon_for_generation(generation: int):
-    log.info(f"Loading id-name list for generation {generation}")
-    gen = get_pokemon_id_names_by_generation(generation)
-    if len(gen) > 0:
-        log.info(f"Loading id-name list for pokemon in generation {generation} successful")
-        
-        pokemon_list = []
-        
-        for pokemon in gen:
-            if isinstance(pokemon[0], str):
-                pokemon_info = get_pokemon_by_id(int(pokemon[0]))
-            elif isinstance(pokemon[0], int):
-                pokemon_info = get_pokemon_by_id(pokemon[0])
-            else:
-                log.error(f"Pokemon idd is not of type str or int. Cannot fetch pokemon by id for id: {pokemon[0]}")
-            if pokemon_info is not None:
-                pokemon_list.append(pokemon_info)
-        return pokemon_list
-    else:
-        log.info(f"Could not load id-name list for generation {generation}")
-        return []
-
-
 if __name__ == "__main__":
-    
-    print(get_pokemon_for_generation(1))
+    print("UWU")
