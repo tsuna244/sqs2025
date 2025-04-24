@@ -1,5 +1,5 @@
 import pokebase as pb
-import enum
+from enum import Enum
 
 STATIC_FOLDER = "app/static/"
 
@@ -12,7 +12,7 @@ from module_logger import LoggerClass
 log = LoggerClass().get_logger()
 
 
-class PokemonRarity(enum):
+class PokemonRarity(Enum):
     NORMAL = "normal"
     LEGENDARY = "legendary"
     MYTHIC = "mythical"
@@ -108,23 +108,36 @@ def get_pokemon_by_id(poke_id: int, depth=0):
             log.info("Try loading from cache")
             poke_resource = pb.cache.load("pokemon", poke_id)
             log.info("Successfully loaded from cache")
-            return poke_resource
+            # id - name - stats: {(name, value)}
+            
+            poke_stats = []
+            
+            for stat in poke_resource["stats"]:
+                poke_stats.append((stat["stat"]["name"], stat["base_stat"]))
+                
+            return poke_resource["id"], poke_resource["name"], poke_stats
         # use api load function !!!
         elif depth == 1:
             log.info("Try fetching from api")
             poke_resource = pb.pokemon(poke_id)
             log.info("Successfully fetched from api")
-            return poke_resource
+            
+            poke_stats = []
+            
+            for stat in poke_resource.stats:
+                poke_stats.append((stat.stat.__getattr__("name"), stat.base_stat))
+            
+            return poke_resource.id, poke_resource.name, poke_stats
     except KeyError as e:
         if depth == 0:
             log.info("Could not find name list in cache. Will try api fetch next")
             return get_pokemon_by_id(poke_id, depth + 1)
         else:
             log.error(f"KeyError on depth != 0! Error: {e}")
-            return []
+            return None
     except Exception as e:
         log.error(f"Unresolfed error occured! Error:{e}")
-        return []
+        return None
 
 
 def get_pokesprite_url_by_id(poke_id: int, depth: int):
@@ -133,14 +146,26 @@ def get_pokesprite_url_by_id(poke_id: int, depth: int):
         return ""
     
     try:
+        sprite_path = ""
         if depth == 0:
-            return pb.cache.load_sprite("pokemon", poke_id)["path"].split("static")[1].replace("\\", "/")
+            log.info("Loading pokemon sprite from cache")
+            sprite_path = pb.cache.load_sprite("pokemon", poke_id)["path"].split("static")[1].replace("\\", "/")
+            log.info("Loaded pokemon sprite from cache successfuly")
+            return sprite_path
         if depth == 1:
-            return pb.SpriteResource('pokemon', poke_id).path.split("static")[1].replace("\\", "/")
+            log.info("Fetching pokemon sprite from api")
+            sprite_path = pb.SpriteResource('pokemon', poke_id).path.split("static")[1].replace("\\", "/")
+            log.info("Fetched pokemon sprite from api successfuly")
+        return sprite_path
     except FileNotFoundError as e:
-        return get_pokesprite_url_by_id(poke_id, depth+1)
+        if depth == 0:
+            log.info("Loading pokemon sprite from cache failed. Sprite not found.")
+            return get_pokesprite_url_by_id(poke_id, depth+1)
+        else:
+            log.error(f"KeyError on depth != 0! Error: {e}")
+            return ""
     except Exception as e:
-        log.error(f"Failed fetching sprite for pokemon with id {poke_id}")
+        log.error(f"Failed fetching sprite for pokemon with id {poke_id}. Error: {e}")
         return ""
 
 
@@ -152,14 +177,21 @@ def get_pokemon_for_generation(generation: int):
         
         pokemon_list = []
         
-        
+        for pokemon in gen:
+            if isinstance(pokemon[0], str):
+                pokemon_info = get_pokemon_by_id(int(pokemon[0]))
+            elif isinstance(pokemon[0], int):
+                pokemon_info = get_pokemon_by_id(pokemon[0])
+            else:
+                log.error(f"Pokemon idd is not of type str or int. Cannot fetch pokemon by id for id: {pokemon[0]}")
+            if pokemon_info is not None:
+                pokemon_list.append(pokemon_info)
+        return pokemon_list
     else:
         log.info(f"Could not load id-name list for generation {generation}")
+        return []
 
 
 if __name__ == "__main__":
-    #get_pokemon_id_names_by_generation(1)
-    #print(get_pokemon_by_id(40, 0).keys())
-    #test = get_pokemon_rarity_by_id(493)
-    #print(test)
-    pass
+    
+    print(get_pokemon_for_generation(1))
