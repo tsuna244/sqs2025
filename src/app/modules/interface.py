@@ -1,5 +1,5 @@
 from module_logger import LoggerClass
-from module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_by_id
+from module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_by_id, get_pokesprite_url_by_id, PokemonRarity
 import random as rand
 
 # create logger object to log system
@@ -8,32 +8,39 @@ log = LoggerClass().get_logger()
 
 class PokemonObj(object):
     
-    def __init__(self, poke_id: int, rarity = "", load_sprite = True):
+    def __init__(self, poke_id: int, load_sprite = True):
 
         self.poke_id = poke_id
 
-        self._load_stats(rarity)
+        self._load_stats()
 
         if load_sprite:
-            self.spirte = self._load_sprite_path()
+            self._load_sprite_path()
         else:
-            self.spirte = ""
+            self.sprite = ""
 
     def _load_sprite_path(self):
-        self.sprite = ""
+        self.sprite = get_pokesprite_url_by_id(self.poke_id)
 
-    def _load_stats(self, rarity):
+    def _load_stats(self):
         
         self.name = ""
         self.generation = 0
         self.rarity = ""
         self.points = 0
-        self.stats = {}
+        self.stats = []
         
-        if rarity != "":
-            self.rarity = rarity
-        else:
+        pokemon = get_pokemon_by_id(self.poke_id)
+        if pokemon is not None:
+            self.name = pokemon["pokemon_name"]
+            self.stats = pokemon["pokemon_stats"]
             self.rarity = get_pokemon_rarity_by_id(self.poke_id)
+            multiplier = 1
+            if self.rarity == PokemonRarity.LEGENDARY:
+                multiplier = 2
+            elif self.rarity == PokemonRarity.MYTHIC:
+                multiplier = 5
+            self.points = self.stats[0]["stat_value"] * multiplier  # hp base stat mal rarity multiplier
     
     def get_id(self):
         return self.poke_id
@@ -48,8 +55,10 @@ class PokemonObj(object):
         return self.stats
 
     def get_sprite_path(self):
-        return self.spirte
+        return self.sprite
 
+    def __str__(self):
+        return f"({self.poke_id} | {self.name}) - {self.generation} - {self.rarity} - {self.points} - sprite_url: {self.sprite} - {self.stats}"
 
 class GenerationObj(object):
     def __init__(self, gen_id: int):
@@ -96,7 +105,3 @@ class Database(object):
     
     def __init__(self):
         raise NotImplementedError("Database Object has not implemented yet")
-
-if __name__ == "__main__":
-    test = GenerationObj(3)
-    print(test.get_pokemon_list())

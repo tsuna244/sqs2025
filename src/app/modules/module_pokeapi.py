@@ -94,7 +94,7 @@ def get_pokemon_rarity_by_id(poke_id: int, depth = 0):
         return None
 
 
-def get_pokemon_by_id(poke_id: int, depth=0):
+def get_pokemon_by_id(poke_id: int, depth = 0):
     # try to fetch pokemon from database
     try:
         if depth == 0:
@@ -105,9 +105,9 @@ def get_pokemon_by_id(poke_id: int, depth=0):
             poke_stats = []
             
             for stat in poke_resource["stats"]:
-                poke_stats.append((stat["stat"]["name"], stat["base_stat"]))
+                poke_stats.append({"stat_name": stat["stat"]["name"], "stat_value": stat["base_stat"]})
             
-            return poke_resource["id"], poke_resource["name"], poke_stats
+            return {"pokemon_id": poke_resource["id"], "pokemon_name": poke_resource["name"], "pokemon_stats": poke_stats}
         # use api load function !!!
         elif depth == 1:
             log.info("Try fetching from api")
@@ -117,9 +117,9 @@ def get_pokemon_by_id(poke_id: int, depth=0):
             poke_stats = []
             
             for stat in poke_resource.stats:
-                poke_stats.append((stat.stat.__getattr__("name"), stat.base_stat))
+                poke_stats.append({"stat_name": stat.stat.__getattr__("name"), "stat_value": stat.base_stat})
             
-            return poke_resource.id, poke_resource.name, poke_stats
+            return {"pokemon_id": poke_resource.id, "pokemon_name": poke_resource.name, "pokemon_stats": poke_stats}
     except KeyError as e:
         if depth == 0:
             log.info("Could not find name list in cache. Will try api fetch next")
@@ -132,7 +132,7 @@ def get_pokemon_by_id(poke_id: int, depth=0):
         return None
 
 
-def get_pokesprite_url_by_id(poke_id: int, depth: int):
+def get_pokesprite_url_by_id(poke_id: int, depth = 0):
     if depth > 1:
         log.error(f"Could not load sprite for pokemon with id {poke_id}")
         return ""
