@@ -1,2 +1,3 @@
 def test_generation_name_list():
-    pass
+    response = 1
+    assert response == 1

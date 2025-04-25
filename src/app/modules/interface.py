@@ -1,5 +1,5 @@
-from module_logger import LoggerClass
-from module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_by_id, get_pokesprite_url_by_id, PokemonRarity
+from .module_logger import LoggerClass
+from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_by_id, get_pokesprite_url_by_id, PokemonRarity
 import random as rand
 
 # create logger object to log system
@@ -51,14 +51,21 @@ class PokemonObj(object):
     def get_generation(self):
         return self.generation
     
+    def get_rarity(self):
+        return self.rarity.value
+    
     def get_stats(self):
         return self.stats
 
     def get_sprite_path(self):
         return self.sprite
 
+    def __dict__(self):
+        return {"pokmone_id": self.get_id(), "pokemon_name": self.get_name(), "pokemon_generation": self.get_generation(), 
+                "pokemon_rarity": self.get_rarity(), "pokemon_stats": self.get_stats(), "pokemon_sprite_path": self.get_sprite_path()}
+
     def __str__(self):
-        return f"({self.poke_id} | {self.name}) - {self.generation} - {self.rarity} - {self.points} - sprite_url: {self.sprite} - {self.stats}"
+        return f"{self.__dict__()}"
 
 class GenerationObj(object):
     def __init__(self, gen_id: int):
