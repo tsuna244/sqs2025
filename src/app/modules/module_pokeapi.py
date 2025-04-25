@@ -70,39 +70,41 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0):
         return []
 
 
-# TODO: set return type to PokemonRarity check id < 0 ?
-def get_pokemon_rarity_by_id(poke_id: int, depth = 0):
+# TODO: set return type to dict check id < 0 ?
+def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0):
     try:
         if depth == 0:
-            log_function("get_pokemon_rarity_by_id", "Loading pokemon species from cache")
+            log_function("get_pokemon_rarity_and_generation_by_id", "Loading pokemon species from cache")
             pokemon_species = pb.cache.load("pokemon-species", poke_id)
-            log_function("get_pokemon_rarity_by_id", "Loaded pokemon species from cache successful")
+            log_function("get_pokemon_rarity_and_generation_by_id", "Loaded pokemon species from cache successful")
             rarity = PokemonRarity.NORMAL
             if pokemon_species["is_mythical"]:
                 rarity = PokemonRarity.MYTHIC
             if pokemon_species["is_legendary"]:
                 rarity = PokemonRarity.LEGENDARY
-            return rarity
+            pokemon_gen_id = pokemon_species["generation"]["url"].split("/")[-2]
+            return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species["generation"]["name"]}
         elif depth == 1:
-            log_function("get_pokemon_rarity_by_id", "Fetching pokemon species from api")
+            log_function("get_pokemon_rarity_and_generation_by_id", "Fetching pokemon species from api")
             pokemon_species = pb.pokemon_species(poke_id)
-            log_function("get_pokemon_rarity_by_id", "Fetched pokemon species from api successful")
+            log_function("get_pokemon_rarity_and_generation_by_id", "Fetched pokemon species from api successful")
             rarity = PokemonRarity.NORMAL
             if pokemon_species.is_mythical:
                 rarity = PokemonRarity.MYTHIC
             if pokemon_species.is_legendary:
                 rarity = PokemonRarity.LEGENDARY
-            return rarity
+            pokemon_gen_id = pokemon_species.generation.url.split("/")[-2]
+            return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species.generation.name}
     except KeyError as e:
         if depth == 0:
-            log_function("get_pokemon_rarity_by_id", "Could not find pokemon species in cache. Will try api fetch next")
-            return get_pokemon_rarity_by_id(poke_id, depth + 1)
+            log_function("get_pokemon_rarity_and_generation_by_id", "Could not find pokemon species in cache. Will try api fetch next")
+            return get_pokemon_rarity_and_generation_by_id(poke_id, depth + 1)
         else:
-            log_function("get_pokemon_rarity_by_id", f"KeyError on depth != 0! Error: {e.__str__()}", "error")
+            log_function("get_pokemon_rarity_and_generation_by_id", f"KeyError on depth != 0! Error: {e.__str__()}", "error")
             return None
     except Exception as e:
         log.error()
-        log_function("get_pokemon_rarity_by_id", f"Unresolfed error occured! Error: {e.__str__()}", "error")
+        log_function("get_pokemon_rarity_and_generation_by_id", f"Unresolfed error occured! Error: {e.__str__()}", "error")
         return None
 
 

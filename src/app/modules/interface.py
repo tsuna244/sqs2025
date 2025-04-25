@@ -1,5 +1,5 @@
 from .module_logger import LoggerClass
-from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_by_id, get_pokesprite_url_by_id, PokemonRarity
+from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_and_generation_by_id, get_pokesprite_url_by_id, PokemonRarity
 import random as rand
 
 # create logger object to log system
@@ -34,7 +34,10 @@ class PokemonObj(object):
         if pokemon is not None:
             self.name = pokemon["pokemon_name"]
             self.stats = pokemon["pokemon_stats"]
-            self.rarity = get_pokemon_rarity_by_id(self.poke_id)
+            
+            _gen_and_rarity = get_pokemon_rarity_and_generation_by_id(self.poke_id)
+            self.generation = _gen_and_rarity["pokemon_gen_name"]
+            self.rarity = _gen_and_rarity["pokemon_rarity"]
             multiplier = 1
             if self.rarity == PokemonRarity.LEGENDARY:
                 multiplier = 2
