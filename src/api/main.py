@@ -24,9 +24,9 @@ async def read_root(request: Request):
     return {"Test": "Test"}
 
 
-@app.get("/Pokemon")
-async def read_pokemon(request: Request):
-    return PokemonObj(13).__dict__()
+@app.get("/Pokemon/{pokemon_id}")
+async def read_pokemon(pokemon_id: int, request: Request):
+    return PokemonObj(pokemon_id).__dict__().__str__()
 
 
 #@app.get("/pokesprite")

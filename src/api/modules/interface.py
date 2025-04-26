@@ -64,11 +64,11 @@ class PokemonObj(object):
         return self.sprite
 
     def __dict__(self):
-        return {"pokmone_id": self.get_id(), "pokemon_name": self.get_name(), "pokemon_generation": self.get_generation(), 
+        return {"pokemon_id": self.get_id(), "pokemon_name": self.get_name(), "pokemon_generation": self.get_generation(), 
                 "pokemon_rarity": self.get_rarity(), "pokemon_stats": self.get_stats(), "pokemon_sprite_path": self.get_sprite_path()}
 
     def __str__(self):
-        return f"{self.__dict__()}"
+        return self.__dict__().__str__()
 
 class GenerationObj(object):
     def __init__(self, gen_id: int):
