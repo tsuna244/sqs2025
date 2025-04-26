@@ -149,25 +149,46 @@ def get_pokemon_by_id(poke_id: int, depth = 0):
 
 # TODO: check id < 0
 def get_pokesprite_url_by_id(poke_id: int, depth = 0) -> str:
+    # check input
+    def check_input(input, val_name: str) -> int:
+        try:
+            return int(input)
+        except ValueError:
+            log_function("get_pokesprite_url_by_id", f"{val_name} must be an integer or a string containing an integer!!! {val_name} = {input}", "error")
+            return -1
+    
+    poke_id = check_input(poke_id, "poke_id")
+    depth = check_input(depth, "depth")
+    
+    # check if poke id and depth are positive integers (pokemon id must be 1 or above)
+    if poke_id < 1 or depth < 0:
+        return ""
+    
+    # cast to int
+    poke_id = int(poke_id)
+    depth = int(depth)
+    
+    # check depth
     if depth > 1:
         log_function("get_pokesprite_url_by_id", f"Could not load sprite for pokemon with id {poke_id}", "error")
         return ""
     
+    # try fetching pokesprite url
     try:
         sprite_path = ""
         if depth == 0:
-            log_function("get_pokesprite_url_by_id", "Loading pokemon sprite from cache")
+            log_function("get_pokesprite_url_by_id", f"Loading pokemon sprite from cache for pokemon id: {poke_id}")
             sprite_path = pb.cache.load_sprite("pokemon", poke_id)["path"].split("static")[1].replace("\\", "/")
-            log_function("get_pokesprite_url_by_id", "Loaded pokemon sprite from cache successfuly")
+            log_function("get_pokesprite_url_by_id", f"Loaded pokemon sprite from cache successfuly for pokemon id: {poke_id}")
             return sprite_path
         if depth == 1:
-            log_function("get_pokesprite_url_by_id","Fetching pokemon sprite from api")
+            log_function("get_pokesprite_url_by_id", f"Fetching pokemon sprite from api for pokemon id: {poke_id}")
             sprite_path = pb.SpriteResource('pokemon', poke_id).path.split("static")[1].replace("\\", "/")
-            log_function("get_pokesprite_url_by_id", "Fetched pokemon sprite from api successfuly")
+            log_function("get_pokesprite_url_by_id", f"Fetched pokemon sprite from api successfuly for pokemon id: {poke_id}")
         return sprite_path
     except FileNotFoundError as e:
         if depth == 0:
-            log_function("get_pokesprite_url_by_id", "Loading pokemon sprite from cache failed. Sprite not found.")
+            log_function("get_pokesprite_url_by_id", f"Loading pokemon sprite from cache failed. Sprite not found for pokemon id: {poke_id}")
             return get_pokesprite_url_by_id(poke_id, depth+1)
         else:
             log_function("get_pokesprite_url_by_id", f"KeyError on depth != 0! Error: {e}", "error")

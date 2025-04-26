@@ -55,7 +55,7 @@ class PokemonObj(object):
         return self.generation
     
     def get_rarity(self):
-        return self.rarity.value
+        return self.rarity
     
     def get_stats(self):
         return self.stats

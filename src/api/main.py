@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 # imports all necessary custom modules
-from modules import PokemonObj, GenerationObj
+from .modules import PokemonObj, GenerationObj
 
 
 templates = Jinja2Templates(directory="app/templates")
