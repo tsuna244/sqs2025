@@ -1,7 +1,7 @@
 import psycopg2 as ps
 import os
 from dotenv import load_dotenv
-from logger import LoggerClass
+from .module_logger import LoggerClass
 
 load_dotenv()
 

@@ -30,7 +30,7 @@ jobs:
           pip install -r src/requirements.txt
       # Execute test with pytest and pytest-cov
       - name: Test with pytest
-        run: pytest src/app/test.py --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=src/app --cov-report=xml
+        run: pytest src/test --doctest-modules --junitxml=junit/test-results-${{ env.PYTHON_VERSION }}.xml --cov=src/api --cov-report=xml
       # Set coverage.xml as output
       
       # Upload pytest results
