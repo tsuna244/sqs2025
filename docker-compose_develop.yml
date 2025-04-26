@@ -3,7 +3,7 @@ version: '3.9'
 services:
 
   api:
-    image: ghcr.io/tsuna244/sqs2025:develop
+    image: ghcr.io/tsuna244/sqs2025:testing
     environment:
       DB_NAME: "postgres"
       DB_HOST: "db"
