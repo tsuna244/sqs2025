@@ -37,22 +37,32 @@ def check_input(function_name: str, input, val_name: str) -> int:
         log_function(function_name, f"{val_name} must be an integer or a string containing an integer!!! {val_name} = {input}", "error")
         return -1
 
-# Todo set return type to list
-def get_pokemon_id_names_by_generation(generation: int, depth=0):
+
+def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
+    # declare func_name for logging
+    func_name = "get_pokemon_id_names_by_generation"
+    
+    generation = check_input(func_name, generation, "generation")
+    depth = check_input(func_name, depth, "depth")
+    
+    # check if poke id and depth are positive integers (pokemon id must be 1 or above)
+    if generation < 0 or depth < 0:
+        return []
+    
     if generation < 1 or generation > 3:
-        log_function("get_pokemon_id_names_by_generation", "Generation must be between 1 and 3", "error")
-        raise ValueError("Generation must be between 1 and 3")
+        log_function(func_name, "Generation must be between 1 and 3", "error")
+        return []
     
     if depth > 1:
-        log_function("get_pokemon_id_names_by_generation", f"Could not fetch pokemon name list by generation id {generation}", "error")
+        log_function(func_name, f"Could not fetch pokemon name list by generation id {generation}", "error")
         return []
 
     try:
         # use cache load function !!!
         if depth == 0:
-            log_function("get_pokemon_id_names_by_generation", "Try loading from cache")
+            log_function(func_name, "Try loading from cache")
             gen_resource = pb.cache.load("generation", generation)
-            log_function("get_pokemon_id_names_by_generation", "Successfully loaded from cache")
+            log_function(func_name, "Successfully loaded from cache")
             pokemon_list = []
             for pokemon_source in gen_resource["pokemon_species"]:
                 poke_id = int(pokemon_source["url"].split("/")[-2]) # fetch id out of url
@@ -60,9 +70,9 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0):
             return pokemon_list
         # use api load function !!!
         elif depth == 1:
-            log_function("get_pokemon_id_names_by_generation", "Try fetching from api")
+            log_function(func_name, "Try fetching from api")
             gen_resource = pb.generation(generation)
-            log_function("get_pokemon_id_names_by_generation", "Successfully fetched from api")
+            log_function(func_name, "Successfully fetched from api")
             pokemon_list = []
             for pokemon_source in gen_resource.pokemon_species:
                 pokemon_list.append({"pokemon_id": pokemon_source.id_, "pokemon_name": pokemon_source.name}) # add pokemon rarity
@@ -70,23 +80,37 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0):
     # key error occurs if load function cant find a fetch for the generation value hence try api call first
     except KeyError as e:
         if depth == 0:
-            log_function("get_pokemon_id_names_by_generation", "Could not find name list in cache. Will try api fetch next")
+            log_function(func_name, "Could not find name list in cache. Will try api fetch next")
             return get_pokemon_id_names_by_generation(generation, depth + 1)
         else:
-            log_function("get_pokemon_id_names_by_generation", f"KeyError on depth != 0! Error: {e.__str__()}", "error")
+            log_function(func_name, f"KeyError on depth != 0! Error: {e.__str__()}", "error")
             return []
     except Exception as e:
-        log_function("get_pokemon_id_names_by_generation", f"Unresolfed error occured! Error:{e.__str__()}", "error")
+        log_function(func_name, f"Unresolfed error occured! Error:{e.__str__()}", "error")
         return []
 
 
-# TODO: set return type to dict check id < 0 ?
-def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0):
+def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0) -> dict:
+    # declare func_name for logging
+    func_name = "get_pokemon_rarity_and_generation_by_id"
+    
+    poke_id = check_input(func_name, poke_id, "poke_id")
+    depth = check_input(func_name, depth, "depth")
+    
+    # check if poke id and depth are positive integers (pokemon id must be 1 or above)
+    if poke_id < 1 or depth < 0:
+        return {}
+    
+    # check depth
+    if depth > 1:
+        log_function(func_name, f"Could not load pokemon with id {poke_id}", "error")
+        return {}
+    
     try:
         if depth == 0:
-            log_function("get_pokemon_rarity_and_generation_by_id", "Loading pokemon species from cache")
+            log_function(func_name, "Loading pokemon species from cache")
             pokemon_species = pb.cache.load("pokemon-species", poke_id)
-            log_function("get_pokemon_rarity_and_generation_by_id", "Loaded pokemon species from cache successful")
+            log_function(func_name, "Loaded pokemon species from cache successful")
             rarity = PokemonRarity.NORMAL
             if pokemon_species["is_mythical"]:
                 rarity = PokemonRarity.MYTHIC
@@ -95,27 +119,27 @@ def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0):
             pokemon_gen_id = pokemon_species["generation"]["url"].split("/")[-2]
             return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species["generation"]["name"]}
         elif depth == 1:
-            log_function("get_pokemon_rarity_and_generation_by_id", "Fetching pokemon species from api")
+            log_function(func_name, "Fetching pokemon species from api")
             pokemon_species = pb.pokemon_species(poke_id)
-            log_function("get_pokemon_rarity_and_generation_by_id", "Fetched pokemon species from api successful")
+            log_function(func_name, "Fetched pokemon species from api successful")
             rarity = PokemonRarity.NORMAL
             if pokemon_species.is_mythical:
                 rarity = PokemonRarity.MYTHIC
             if pokemon_species.is_legendary:
                 rarity = PokemonRarity.LEGENDARY
             pokemon_gen_id = pokemon_species.generation.url.split("/")[-2]
-            return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species.generation.name}
+            return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species.generation.__getattr__("name")}
     except KeyError as e:
         if depth == 0:
-            log_function("get_pokemon_rarity_and_generation_by_id", "Could not find pokemon species in cache. Will try api fetch next")
+            log_function(func_name, "Could not find pokemon species in cache. Will try api fetch next")
             return get_pokemon_rarity_and_generation_by_id(poke_id, depth + 1)
         else:
-            log_function("get_pokemon_rarity_and_generation_by_id", f"KeyError on depth != 0! Error: {e.__str__()}", "error")
-            return None
+            log_function(func_name, f"KeyError on depth != 0! Error: {e.__str__()}", "error")
+            return {}
     except Exception as e:
         log.error()
-        log_function("get_pokemon_rarity_and_generation_by_id", f"Unresolfed error occured! Error: {e.__str__()}", "error")
-        return None
+        log_function(func_name, f"Unresolfed error occured! Error: {e.__str__()}", "error")
+        return {}
 
 
 def get_pokemon_by_id(poke_id: int, depth = 0) -> dict:
@@ -164,10 +188,10 @@ def get_pokemon_by_id(poke_id: int, depth = 0) -> dict:
             log_function(func_name, f"Could not find name list in cache. Will try api fetch next for pokemon id {poke_id}")
             return get_pokemon_by_id(poke_id, depth + 1)
         else:
-            log_function(func_name, f"KeyError on depth != 0! Error: {e}", "error")
+            log_function(func_name, f"KeyError on depth != 0! Error: {e.__str__()}", "error")
             return {}
     except Exception as e:
-        log_function(func_name, f"Unresolfed error occured for pokemon id {poke_id}! Error:{e}", "error")
+        log_function(func_name, f"Unresolfed error occured for pokemon id {poke_id}! Error:{e.__str__()}", "error")
         return {}
 
 
@@ -209,8 +233,8 @@ def get_pokesprite_url_by_id(poke_id: int, depth = 0) -> str:
             log_function(func_name, f"Loading pokemon sprite from cache failed. Sprite not found for pokemon id: {poke_id}")
             return get_pokesprite_url_by_id(poke_id, depth+1)
         else:
-            log_function(func_name, f"KeyError on depth != 0! Error: {e}", "error")
+            log_function(func_name, f"KeyError on depth != 0! Error: {e.__str__()}", "error")
             return ""
     except Exception as e:
-        log_function(func_name, f"Failed fetching sprite for pokemon id {poke_id}. Error: {e}", "error")
+        log_function(func_name, f"Failed fetching sprite for pokemon id {poke_id}. Error: {e.__str__()}", "error")
         return ""
