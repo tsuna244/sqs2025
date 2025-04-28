@@ -69,6 +69,8 @@ jobs:
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.12
             -Dsonar.sources=.
+            -Dsonar.tests=**/test/
+            -Dsonar.test.exclusions=**/test/**
 
   build-and-deploy:
     if: ${{ github.event_name == 'push' }}
