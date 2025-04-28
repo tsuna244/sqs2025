@@ -39,3 +39,15 @@ class LoggerClass(object):
 
             LoggerClass._logger.info("Logger setup succesfully")
         return LoggerClass._logger
+
+
+# utility function: log message for each function in specific format
+def log_function(function_name: str, log_msg: str, log_type = "info"):
+    log = LoggerClass().getLogger()
+    msg = "(module_pokeapi | {:30s}) -> {}".format(function_name + "(...)", log_msg)
+    if log_type == "error":
+        log.error(msg)
+    if log_type == "warn":
+        log.warning(msg)
+    else:
+        log.info(msg)

@@ -1,5 +1,7 @@
 from .module_logger import LoggerClass
 from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_and_generation_by_id, get_pokesprite_url_by_id, PokemonRarity
+from .module_postgresql import get_postgress_conn
+
 import random as rand
 
 # create logger object to log system
@@ -114,4 +116,7 @@ class GenerationObj(object):
 class Database(object):
     
     def __init__(self):
-        raise NotImplementedError("Database Object has not implemented yet")
+        self.conn = get_postgress_conn()
+    
+    def close():
+        self.conn.close()

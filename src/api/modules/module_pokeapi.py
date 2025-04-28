@@ -7,7 +7,7 @@ CACHE_DIR = STATIC_FOLDER + ".cache/"
 
 pb.cache.set_cache(CACHE_DIR)
 
-from .module_logger import LoggerClass
+from .module_logger import LoggerClass, log_function
 
 log = LoggerClass().get_logger()
 
@@ -16,17 +16,6 @@ class PokemonRarity(Enum):
     NORMAL = "normal"
     LEGENDARY = "legendary"
     MYTHIC = "mythical"
-
-
-# utility function: log message for each function in specific format
-def log_function(function_name: str, log_msg: str, log_type = "info"):
-    msg = "(module_pokeapi | {:30s}) -> {}".format(function_name + "(...)", log_msg)
-    if log_type == "error":
-        log.error(msg)
-    if log_type == "warn":
-        log.warning(msg)
-    else:
-        log.info(msg)
 
 
 # utility function: check function for integer values (poke_id and depth)
