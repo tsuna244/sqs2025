@@ -1,13 +1,15 @@
 import psycopg2 as ps
 import os
 from dotenv import load_dotenv
-from .module_logger import LoggerClass
+from .module_logger import log_function
 
 load_dotenv()
 
-log = LoggerClass().get_logger()
+MODULE_NAME="module_posgresql"
 
 def get_postgress_conn():
+    function_name="get_postgress_conn"
+
     DATABASE = os.getenv("DB_NAME")
     HOST = os.getenv("DB_HOST")
     USER = os.getenv("DB_USER")
@@ -15,24 +17,29 @@ def get_postgress_conn():
     PORT = os.getenv("DB_PORT")
 
     try:
-        return ps.connect(database=DATABASE,
+        log_function(MODULE_NAME, function_name, "Try connecting to database")
+        conn = ps.connect(database=DATABASE,
                                 host=HOST,
                                 user=USER,
                                 password=PASSWORD,
                                 port=PORT)
+        log_function(MODULE_NAME, function_name, "Connected to database successfully")
+        return conn
     except ps.OperationalError as e:
         # log e
-        log.error("creating connection to the postgresql DB failed. Error: \n" + str(e))
+        log_function(MODULE_NAME, function_name, f"Connecting to database failed. Error: {e.__str__()}", "error")
         return None
 
-def create_table(conn):
+def create_table(conn, table_name="users"):
+    function_name="create_table"
+
     if conn is None:
-        log.error("Creating users table failed. Error: Connection to DB missing")
-        return
+        log_function(MODULE_NAME, function_name, f"Creating users table failed. Error: Connection to DB missing", "error")
+        return False
     
     try:
         cursor = conn.cursor()
-        table_name = "users"
+        log_function(MODULE_NAME, function_name, f"Try creating table with name {table_name}")
         create=f"""CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE TABLE IF NOT EXISTS {table_name} (
             id INT GENERATED ALWAYS AS IDENTITY,
             user_name VARCHAR(255) NOT NULL, 
@@ -41,22 +48,37 @@ def create_table(conn):
         )"""
         cursor.execute(create)
         conn.commit()
-        log.info("Succesfully created users table")
+        log_function(MODULE_NAME, function_name, f"Successfully created table with name {table_name}")
+        return True
     except Exception as e:
-        log.error("Creating users table failed. Error: \n" + str(e))
+        log.error()
+        log_function(MODULE_NAME, function_name, f"Creating users table failed. Error: {e.__str__()}", "error")
+        return False
 
-def clean_table(conn, table_name: str):
+
+def clean_table(conn, table_name="users"):
+    function_name="clean_table"
+
     if conn is None:
-        log.error("Cleaning users table failed. Error: Connection to DB missing")
-        return
+        log_function(MODULE_NAME, function_name, 
+        f"Cleaning table with name {table_name} failed. Error: Connection to DB missing. Error: {e.__str__()}", "error")
+        return False
     
-    cursor = conn.cursor()
-    clean=f"TRUNCATE {table_name};"
-    cursor.execute(clean)
-    conn.commit()
-    log.info("Succesfully cleaned users table")
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to clean table with name {table_name}")
+        cursor = conn.cursor()
+        clean=f"TRUNCATE {table_name};"
+        cursor.execute(clean)
+        conn.commit()
+        log.info("Succesfully cleaned users table")
+        log_function(MODULE_NAME, function_name, f"Cleaned table {table_name} successfully")
+        return True
+    except Exception as e:
+        log_function(MODULE_NAME, function_name, f"Cleaning table {table_name} failed. Error: {e.__str__()}", "error")
+        return False
 
-def delete_table(conn, table_name):
+
+def delete_table(conn, table_name="users"):
     if conn is None:
         log.error("Deleting users table failed. Error: Connection to DB missing")
         return
