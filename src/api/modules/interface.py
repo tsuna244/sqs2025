@@ -87,7 +87,6 @@ class GenerationObj(object):
             self.pokemon_list = _pokemon_list
     
     def get_pokemon_list(self):
-        #_pokemon_list = [{k: v for k, v in d.items() if k != 'rarity'} for d in self.pokemon_list]
         return self.pokemon_list
     
     def get_pokemon_by_index(self, index: int):

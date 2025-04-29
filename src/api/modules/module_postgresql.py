@@ -61,7 +61,7 @@ def clean_table(conn, table_name="users"):
 
     if conn is None:
         log_function(MODULE_NAME, function_name, 
-        f"Cleaning table with name {table_name} failed. Error: Connection to DB missing. Error: {e.__str__()}", "error")
+        f"Cleaning table with name {table_name} failed. Error: Connection to DB missing.", "error")
         return False
     
     try:
@@ -79,15 +79,25 @@ def clean_table(conn, table_name="users"):
 
 
 def delete_table(conn, table_name="users"):
+    function_name="delete_table"
+
     if conn is None:
-        log.error("Deleting users table failed. Error: Connection to DB missing")
-        return
+        log_function(MODULE_NAME, function_name, 
+        f"Deleting table with name {table_name} failed. Error: Connection to DB missing.", "error")
+        return False
     
-    cursor = conn.cursor()
-    clean=f"DROP TABLE IF EXISTS {table_name};"
-    cursor.execute(clean)
-    conn.commit()
-    log.info("Succesfully deleted users table")
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to delete table with name {table_name}")
+        cursor = conn.cursor()
+        clean=f"DROP TABLE IF EXISTS {table_name};"
+        cursor.execute(clean)
+        conn.commit()
+        log_function(MODULE_NAME, function_name, f"Deleted table {table_name} successfully")
+        return True
+    except Exception as e:
+        log_function(MODULE_NAME, function_name, f"Deleting table {table_name} failed. Error: {e.__str__()}", "error")
+        return False
+
 
 def user_with_crypt_pass(conn):
     if conn is None:
