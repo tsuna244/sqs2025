@@ -119,3 +119,15 @@ class Database(object):
     
     def close():
         close_connection(self.conn)
+    
+    def get_user(user_name: str):
+        return ""
+
+    def add_user(user_name: str, passwd: str, pokemon_list = []):
+        pass
+
+    def update_user(pokemon_list = []):
+        pass
+
+    def delete_user(user_name: str):
+        pass
