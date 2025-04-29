@@ -44,7 +44,7 @@ class LoggerClass(object):
 # utility function: log message for each function in specific format
 def log_function(module_name: str, function_name: str, log_msg: str, log_type = "info"):
     log = LoggerClass().get_logger()
-    msg = "({:15s}} | {:30s}) -> {}".format(module_name, function_name + "(...)", log_msg)
+    msg = "({:15s} | {:30s}) -> {}".format(module_name, function_name + "(...)", log_msg)
     if log_type == "error":
         log.error(msg)
     if log_type == "warn":
