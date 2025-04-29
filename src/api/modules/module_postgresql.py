@@ -7,6 +7,10 @@ load_dotenv()
 
 MODULE_NAME="module_posgresql"
 
+class DatabaseError(Exception):
+    def __init__(self, err_msg=""):
+        raise Exception(err_msg)
+
 def get_postgress_conn():
     function_name="get_postgress_conn"
 
@@ -94,6 +98,35 @@ def delete_table(conn, table_name="users"):
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Deleted table {table_name} successfully")
         return True
+    except Exception as e:
+        log_function(MODULE_NAME, function_name, f"Deleting table {table_name} failed. Error: {e.__str__()}", "error")
+        return False
+
+
+def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="users"):
+    function_name="add_user_with_crypt_pass"
+
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Adding user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return False
+    
+    # check input!!!
+
+    try:
+        # check if user already exists
+        
+        log_function(MODULE_NAME, function_name, f"Trying to add user {user_name}")
+        sql = f""" INSERT INTO {table_name} (user_name, password, deck_ids) VALUES (
+            {user_name},
+            crypt({passwd}, gen_salt('md5')),
+            {poke_id_list}
+        );
+        """
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        conn.commit()
+        log_function(MODULE_NAME, function_name, f"Added user {user_name} successfully")
     except Exception as e:
         log_function(MODULE_NAME, function_name, f"Deleting table {table_name} failed. Error: {e.__str__()}", "error")
         return False

@@ -1,6 +1,6 @@
 from .module_logger import LoggerClass
 from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_and_generation_by_id, get_pokesprite_url_by_id, PokemonRarity
-from .module_postgresql import get_postgress_conn, close_connection
+from .module_postgresql import get_postgress_conn, close_connection, create_table, DatabaseError
 
 import random as rand
 
@@ -116,6 +116,10 @@ class Database(object):
     
     def __init__(self):
         self.conn = get_postgress_conn()
+        if self.conn is None:
+            raise ConnectionError("Could not connect do Database")
+        if not create_table():
+            raise DatabaseError("Could not create initial users Table")
     
     def close():
         close_connection(self.conn)
