@@ -125,7 +125,6 @@ def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0) -> dict:
             log_function(MODULE_NAME, func_name, f"KeyError on depth != 0! Error: {e.__str__()}", "error")
             return {}
     except Exception as e:
-        log.error()
         log_function(MODULE_NAME, func_name, f"Unresolfed error occured! Error: {e.__str__()}", "error")
         return {}
 
