@@ -130,3 +130,19 @@ def get_user_tst(conn, passwd):
     
     conn.commit()
     return users
+
+
+def close_connection(conn):
+    function_name="close_connection"
+
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Closing database connection failed. Error: Connection to DB missing.", "error")
+    
+    try:
+        log_function(MODULE_NAME, function_name, "Closing database connection")
+        conn.close()
+        log_function(MODULE_NAME, function_name, "Closed database connection successfully")
+    except pb.OperationalError:
+        log_function(MODULE_NAME, function_name, 
+        f"Closing database connection failed. Error: {e.__str__()}", "error")

@@ -1,6 +1,6 @@
 from .module_logger import LoggerClass
 from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_and_generation_by_id, get_pokesprite_url_by_id, PokemonRarity
-from .module_postgresql import get_postgress_conn
+from .module_postgresql import get_postgress_conn, close_connection
 
 import random as rand
 
@@ -118,4 +118,4 @@ class Database(object):
         self.conn = get_postgress_conn()
     
     def close():
-        self.conn.close()
+        close_connection(self.conn)
