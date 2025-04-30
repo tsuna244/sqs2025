@@ -14,10 +14,17 @@ class DatabaseError(Exception):
         raise Exception(err_msg)
 
 class UserObj():
-    def __init__(self, user_id, user_name, deck_ids):
+    def __init__(self, user_id: str, user_name: str, deck_ids = []):
         self.user_id = user_id
         self.user_name = user_name
         self.deck_ids = deck_ids
+
+    @classmethod
+    def create_empty(cls):
+        return cls(-1, "")
+
+    def __empty__(self):
+        return self.user_id < 0
 
     def __dict__(self):
         return {"user_id": self.user_id, "user_name": self.user_name, "deck_ids": self.deck_ids}
@@ -109,6 +116,7 @@ def clean_table(conn, table_name="users"):
         return True
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Cleaning table {table_name} failed. Error: {e.__str__()}", "error")
+        conn.rollback()
         return False
 
 
@@ -137,21 +145,20 @@ def delete_table(conn, table_name="users"):
         return False
 
 
-def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="users"):
+def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="users") -> int:
     function_name="add_user_with_crypt_pass"
 
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Adding user with name {user_name} failed. Error: Connection to DB missing.", "error")
-        return False
+        return -1
     
-    # check input!!!
-
+    # TODO: password check
+    
     try:
         log_function(MODULE_NAME, function_name, f"Trying to add user {user_name}")
         
         col_names = sql.SQL(', ').join(sql.Identifier(n) for n in TABLE_COL_NAMES )
-        place_holders = sql.SQL(', ').join(sql.Placeholder() * len(TABLE_COL_NAMES)) # länge der tabelle + 1 (für id)
 
         query_base = sql.SQL("""insert into {table_name} ({col_names}) values (
             %s,
@@ -166,48 +173,53 @@ def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="
         cursor.execute(query_base, [user_name, passwd, poke_id_list])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Added user {user_name} successfully")
+        return 1
     except ps.errors.UniqueViolation as e:
         log_function(MODULE_NAME, function_name, f"Adding user {user_name} failed. Error: User already exists!!!", "error")
         conn.rollback()
-        return False
+        return -2
     except ps.Error as e:
-        # TODO: check error if user_name already exists
         log_function(MODULE_NAME, function_name, f"Creating user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
         conn.rollback()
-        return False
+        return -3
 
 
-def user_with_crypt_pass(conn):
+def get_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
+    function_name="get_user_from_db"
+
     if conn is None:
-        log_function(MODULE_NAME, function_name, "Creating user failed. Error: Connection to DB missing")
-        return
+        log_function(MODULE_NAME, function_name, 
+        f"Fetching user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return UserObj.create_empty()
     
-    sql_msg = """ INSERT INTO DB_TEST (user_name, password) VALUES (
-            'tsuna',
-            crypt('tsunapasswd', gen_salt('md5'))
-        );
-        """
-    cursor = conn.cursor()
-    cursor.execute(sql_msg)
-    conn.commit()
-    log_function(MODULE_NAME, function_name, "Succesfully added test-user tsuna")
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to fetch user {user_name}")
+        
+        query_base = sql.SQL("""SELECT id, {col_1}, {col_3} FROM {table_name} 
+                             WHERE {col_1} = %s
+                             AND {col_2} = crypt(%s, password);
+                             """).format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0]),
+        col_2=sql.Identifier(TABLE_COL_NAMES[1]),
+        col_3=sql.Identifier(TABLE_COL_NAMES[2])
+        )
 
-def get_user_tst(conn, passwd):
-    if conn is None:
-        log_function(MODULE_NAME, function_name, "Receiving users from db failed. Error: Connection to DB missing")
-        return
-    
-    sql_msg = f""" SELECT id FROM DB_TEST
-            WHERE user_name = 'tsuna' 
-            AND password = crypt('{passwd}', password);
-        """
-    cursor = conn.cursor()
-    cursor.execute(sql_msg)
-    
-    users = cursor.fetchall()
-    
-    conn.commit()
-    return users
+        cursor = conn.cursor()
+        cursor.execute(query_base, [user_name, user_password])
+        conn.commit()
+        fetch = cursor.fetchone()
+        if fetch is not None:
+            _id, _name, _deck_ids = fetch
+            log_function(MODULE_NAME, function_name, f"Fetched user {user_name} successfully")
+            return UserObj(_id, _name, _deck_ids)
+        else:
+            log_function(MODULE_NAME, function_name, f"Fetched user {user_name} not found", "warn")
+            return UserObj.create_empty()
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Fetching user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return UserObj.create_empty()
 
 
 def close_connection(conn):
@@ -221,16 +233,25 @@ def close_connection(conn):
         log_function(MODULE_NAME, function_name, "Closing database connection")
         conn.close()
         log_function(MODULE_NAME, function_name, "Closed database connection successfully")
-    except pb.OperationalError:
+    except ps.OperationalError:
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: {e.__str__()}", "error")
     
 
 conn = get_postgress_conn()
 
+if clean_table(conn):
+    print("Table clean")
+
 if create_table(conn):
-    add_user_with_crypt_pass(conn, "tsuna", "1234", [])
-    add_user_with_crypt_pass(conn, "tsuna", "1234", []) # check output if this happens
+    add_user_with_crypt_pass(conn, "tsuna", "1234", [1, 2, 3, 4])
+    add_user_with_crypt_pass(conn, "tsuna", "1234", [2, 4, 5, 6]) # check output if this happens
+    test_user = get_user_from_db(conn, "orhan", "1234")
+    if test_user.__empty__():
+        print("test user empty")
+    else:
+        print("test user not empty")
+    
 if delete_table(conn):
     print("table gone")
 

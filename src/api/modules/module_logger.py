@@ -47,7 +47,7 @@ def log_function(module_name: str, function_name: str, log_msg: str, log_type = 
     msg = "({:15s} | {:30s}) -> {}".format(module_name, function_name + "(...)", log_msg)
     if log_type == "error":
         log.error(msg)
-    if log_type == "warn":
+    elif log_type == "warn":
         log.warning(msg)
     else:
         log.info(msg)
