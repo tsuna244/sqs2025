@@ -13,6 +13,18 @@ class DatabaseError(Exception):
     def __init__(self, err_msg=""):
         raise Exception(err_msg)
 
+class UserObj():
+    def __init__(self, user_id, user_name, deck_ids):
+        self.user_id = user_id
+        self.user_name = user_name
+        self.deck_ids = deck_ids
+
+    def __dict__(self):
+        return {"user_id": self.user_id, "user_name": self.user_name, "deck_ids": self.deck_ids}
+    
+    def __str__(self):
+        return self.__dict__().__str__()
+
 TABLE_COL_NAMES = ['user_name','password','deck_ids']
 
 def get_postgress_conn():
