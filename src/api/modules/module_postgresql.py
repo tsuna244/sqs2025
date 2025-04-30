@@ -233,7 +233,7 @@ def close_connection(conn):
         log_function(MODULE_NAME, function_name, "Closing database connection")
         conn.close()
         log_function(MODULE_NAME, function_name, "Closed database connection successfully")
-    except ps.OperationalError:
+    except ps.OperationalError as e:
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: {e.__str__()}", "error")
     
