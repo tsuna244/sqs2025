@@ -14,11 +14,6 @@ host = f'{container.get_service_host("database", 5432)}'
 
 @pytest.fixture(scope='session')
 def db_connection():
-    """
-    :param docker_services: pytest-docker plugin fixture
-    :param docker_ip: pytest-docker plugin fixture
-    :return: psycopg2 connection class
-    """
     db_settings = {
         'database'        : 'test_database',
         'user'            : 'postgres',
@@ -47,5 +42,22 @@ def test_add_user(db_connection):
     # add user without user name
     assert add_user_with_crypt_pass(db_connection, 123, "1234ABCD", []) == 4
     assert add_user_with_crypt_pass(db_connection, "", "1234ABCD", []) == 5
+    # add user with bad deck_ids list
+    assert add_user_with_crypt_pass(db_connection, "test_user", "123456AB", "") == 7
+    assert add_user_with_crypt_pass(db_connection, "test_user", "123456AB", ["abc"]) == 8
     # add user successfully
-    assert add_user_with_crypt_pass(db_connection, "test_user", "123456AB", []) == 0
+    assert add_user_with_crypt_pass(db_connection, "test_user", "123456AB", [1, "1"]) == 0
+    # add same user again
+    assert add_user_with_crypt_pass(db_connection, "test_user", "123456AB", []) == 3
+    
+def test_update_user(db_connection):
+    # update user with none type connection
+    assert update_user_from_db(None, "", []) == 1
+    # update user with wrong name input
+    assert update_user_from_db(db_connection, 123, [])
+    assert update_user_from_db(db_connection, "", [])
+    # update user with bad deck_ids list
+    assert update_user_from_db(db_connection, "test_user", "") == 7
+    assert update_user_from_db(db_connection, "test_user", [2, "abc", 1]) == 8
+    # update user successfully
+    assert update_user_from_db(db_connection, "test_user", [1, "2", 3]) == 0

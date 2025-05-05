@@ -43,8 +43,8 @@ DB_SETTINGS = {
         'application_name': 'sqs_2025'
     }
 
-def check_passwd_input(password: str) -> int:
-    function_name="check_passwd_input"
+# INPUT CHECK
+def check_passwd_input(password: str, function_name="check_passwd_input") -> int:
     if not isinstance(password, str):
         log_function(MODULE_NAME, function_name, "Password must be a string", "error")
         return 10
@@ -62,6 +62,38 @@ def check_passwd_input(password: str) -> int:
         return 13
     
     log_function(MODULE_NAME, function_name, "Password check was successful")
+    return 0
+
+# check user input
+def check_user_input(user_name: str, function_name="check_user_input") -> int:
+    if not isinstance(user_name, str):
+        log_function(MODULE_NAME, function_name, "Username must be of type string", "Error")
+        return 4
+
+    if not len(user_name) > 0:
+        log_function(MODULE_NAME, function_name, "Username must not be empty", "Error")
+        return 5
+    if not user_name[0].isalpha():
+        log_function(MODULE_NAME, function_name, "Username must start with a letter", "Error")
+        return 6
+    log_function(MODULE_NAME, function_name, "Username check was successful")
+    return 0
+
+# check deck ids input
+def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_input") -> int:
+    # more indepth check maybe
+    if not isinstance(deck_ids, list):
+        log_function(MODULE_NAME, function_name, "deck_ids must be of type list", "Error")
+        return 7
+    deck_len = len(deck_ids)
+    if deck_len > 0:
+        for i in range(0, deck_len):
+            try:
+                deck_ids[i] = int(deck_ids[i])
+            except ValueError:
+                log_function(MODULE_NAME, function_name, "deck_ids list must contain digits only", "Error")
+                return 8
+    log_function(MODULE_NAME, function_name, "Deck_Ids check was successful")
     return 0
 
 
@@ -167,7 +199,7 @@ def delete_table(conn, table_name="users"):
         return False
 
 
-def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="users") -> int:
+def add_user_with_crypt_pass(conn, user_name, passwd, deck_ids, table_name="users") -> int:
     function_name="add_user_with_crypt_pass"
 
     if conn is None:
@@ -175,17 +207,17 @@ def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="
         f"Adding user with name {user_name} failed. Error: Connection to DB missing.", "error")
         return 1
     
-    passwd_check = check_passwd_input(passwd)
+    passwd_check = check_passwd_input(passwd, function_name)
     if not passwd_check == 0:
         return passwd_check # error >= 10 for password error
 
-    if not isinstance(user_name, str):
-        log_function(MODULE_NAME, function_name, "Username must be of type string", "Error")
-        return 4
+    user_name_check = check_user_input(user_name, function_name)
+    if not user_name_check == 0:
+        return user_name_check
 
-    if not len(user_name) > 0:
-        log_function(MODULE_NAME, function_name, "Username must not be empty", "Error")
-        return 5
+    deck_ids_check = check_deck_ids_input(deck_ids, function_name)
+    if not deck_ids_check == 0:
+        return deck_ids_check
 
     try:
         log_function(MODULE_NAME, function_name, f"Trying to add user {user_name}")
@@ -202,7 +234,7 @@ def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="
         )
 
         cursor = conn.cursor()
-        cursor.execute(query_base, [user_name, passwd, poke_id_list])
+        cursor.execute(query_base, [user_name, passwd, deck_ids])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Added user {user_name} successfully")
         return 0
@@ -254,13 +286,21 @@ def get_user_from_db(conn, user_name: str, user_password: str, table_name="users
         return UserObj.create_empty()
 
 
-def update_user_from_db(conn, user_name: str, deck_ids = [], table_name="users"):
+def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="users"):
     function_name="update_user_from_db"
 
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Updating user with name {user_name} failed. Error: Connection to DB missing.", "error")
         return 1
+
+    user_name_check = check_user_input(user_name, function_name)
+    if not user_name_check == 0:
+        return user_name_check
+    
+    deck_ids_check = check_deck_ids_input(deck_ids, function_name)
+    if not deck_ids_check == 0:
+        return deck_ids_check
 
     try:
         log_function(MODULE_NAME, function_name, f"Trying to update user {user_name}")
@@ -330,8 +370,7 @@ def close_connection(conn):
         return 2
 
 if __name__ == "__main__":
-
-
+    
     conn = get_postgress_conn(DB_SETTINGS)
 
     if clean_table(conn):
