@@ -17,7 +17,7 @@ class LoggerClass(object):
         if LoggerClass._logger is None:
         
             # set logging format
-            log_formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+            log_formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-7.7s]  %(message)s")
 
             # create logger
             LoggerClass._logger = logging.getLogger()

@@ -34,28 +34,51 @@ class UserObj():
 
 TABLE_COL_NAMES = ['user_name','password','deck_ids']
 
-def get_postgress_conn():
-    function_name="get_postgress_conn"
+# db connection settings
+DB_SETTINGS = {
+        'database'        : os.getenv("DB_NAME"),
+        'user'            : os.getenv("DB_USER"),
+        'host'            : os.getenv("DB_HOST"),
+        'password'        : os.getenv("DB_PASS"),
+        'port'            : os.getenv("DB_PORT"),
+        'application_name': 'sqs_2025'
+    }
 
-    DATABASE = os.getenv("DB_NAME")
-    HOST = os.getenv("DB_HOST")
-    USER = os.getenv("DB_USER")
-    PASSWORD = os.getenv("DB_PASS")
-    PORT = os.getenv("DB_PORT")
+def check_passwd_input(password: str) -> int:
+    function_name="check_passwd_input"
+    if not isinstance(password, str):
+        log_function(MODULE_NAME, function_name, "Password must be a string", "error")
+        return 2
+
+    if not any(char.isdigit() for char in password):
+        log_function(MODULE_NAME, function_name, "Password must contain at least one digit", "warn")
+        return 3
+    
+    if not any(char.isupper() for char in password):
+        log_function(MODULE_NAME, function_name, "Password must contain at least one upper character", "warn")
+        return 4
+    
+    if not len(password) > 7:
+        log_function(MODULE_NAME, function_name, "Password must contain at least 8 character", "warn")
+        return 5
+
+    log_function(MODULE_NAME, function_name, "Password check was successful")
+    return 1
+
+
+def get_postgress_conn(db_settings: dict):
+    function_name="get_postgress_conn"
 
     try:
         log_function(MODULE_NAME, function_name, "Try connecting to database")
-        conn = ps.connect(database=DATABASE,
-                                host=HOST,
-                                user=USER,
-                                password=PASSWORD,
-                                port=PORT)
+        conn = ps.connect(**db_settings)
         log_function(MODULE_NAME, function_name, "Connected to database successfully")
         return conn
     except ps.OperationalError as e:
         # log e
         log_function(MODULE_NAME, function_name, f"Connecting to database failed. Error: {e.__str__()}", "error")
         return None
+
 
 def create_table(conn, table_name="users"):
     function_name="create_table"
@@ -153,8 +176,10 @@ def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="
         f"Adding user with name {user_name} failed. Error: Connection to DB missing.", "error")
         return -1
     
-    # TODO: password check
-    
+    passwd_check = check_passwd_input(passwd)
+    if not passwd_check == 1:
+        return passwd_check # positive error codes for password check
+
     try:
         log_function(MODULE_NAME, function_name, f"Trying to add user {user_name}")
         
@@ -222,12 +247,43 @@ def get_user_from_db(conn, user_name: str, user_password: str, table_name="users
         return UserObj.create_empty()
 
 
+def update_user_from_db(conn, user_name: str, deck_ids = [], table_name="users"):
+    function_name="update_user_from_db"
+
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Updating user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return -1
+
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to update user {user_name}")
+        query_base = sql.SQL("""UPDATE {table_name} 
+                             SET {col_3} = %s 
+                             WHERE {col_1} = %s
+                             """).format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0]),
+        col_3=sql.Identifier(TABLE_COL_NAMES[2])
+        )
+
+        cursor = conn.cursor()
+        cursor.execute(query_base, [deck_ids, user_name])
+        conn.commit()
+        log_function(MODULE_NAME, function_name, f"Updated user {user_name} successfully")
+        return 0
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Updating user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return -2
+
+
 def close_connection(conn):
     function_name="close_connection"
 
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: Connection to DB missing.", "error")
+        return -1
     
     try:
         log_function(MODULE_NAME, function_name, "Closing database connection")
@@ -238,20 +294,24 @@ def close_connection(conn):
         f"Closing database connection failed. Error: {e.__str__()}", "error")
     
 
-conn = get_postgress_conn()
+conn = get_postgress_conn(DB_SETTINGS)
 
 if clean_table(conn):
     print("Table clean")
 
 if create_table(conn):
-    add_user_with_crypt_pass(conn, "tsuna", "1234", [1, 2, 3, 4])
+    add_user_with_crypt_pass(conn, "tsuna", "1234aA78", [1, 2, 3, 4])
     add_user_with_crypt_pass(conn, "tsuna", "1234", [2, 4, 5, 6]) # check output if this happens
-    test_user = get_user_from_db(conn, "orhan", "1234")
+    test_user = get_user_from_db(conn, "tsuna", "1234aA78")
     if test_user.__empty__():
         print("test user empty")
     else:
         print("test user not empty")
+        print(test_user)
     
+    update_user_from_db(conn, "tsuna", [2, 4, 6, 8, 10])
+    print(get_user_from_db(conn, "tsuna", "1234aA78"))
+
 if delete_table(conn):
     print("table gone")
 
