@@ -22,6 +22,9 @@ class UserObj():
     def create_empty(cls):
         return cls(-1, "")
 
+    def __eq__(self, user):
+        return user.user_id == self.user_id and user.user_name == self.user_name
+
     def __empty__(self):
         return self.user_id < 0
 
@@ -254,6 +257,14 @@ def get_user_from_db(conn, user_name: str, user_password: str, table_name="users
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Fetching user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return UserObj.create_empty()
+    
+    passwd_check = check_passwd_input(user_password, function_name)
+    if not passwd_check == 0:
+        return UserObj.create_empty() # error >= 10 for password error
+
+    user_name_check = check_user_input(user_name, function_name)
+    if not user_name_check == 0:
         return UserObj.create_empty()
     
     try:
