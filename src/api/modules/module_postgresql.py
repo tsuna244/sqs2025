@@ -3,7 +3,7 @@ from psycopg2 import sql
 import os
 from dotenv import load_dotenv
 #from .module_logger import log_function
-from module_logger import log_function # debug only
+from .module_logger import log_function # debug only
 
 load_dotenv()
 
@@ -277,6 +277,33 @@ def update_user_from_db(conn, user_name: str, deck_ids = [], table_name="users")
         return -2
 
 
+def delete_user_from_db(conn, user_name: str, table_name="users"):
+    function_name="delete_user_from_db"
+
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Deleting user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return -1
+
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to delete user {user_name}")
+        query_base = sql.SQL("""DELETE FROM {table_name}
+                             WHERE {col_1} = %s
+                             """).format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0])
+        )
+
+        cursor = conn.cursor()
+        cursor.execute(query_base, [user_name])
+        conn.commit()
+        log_function(MODULE_NAME, function_name, f"Deleted user {user_name} successfully")
+        return 0
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Deleting user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return -2
+
 def close_connection(conn):
     function_name="close_connection"
 
@@ -292,26 +319,31 @@ def close_connection(conn):
     except ps.OperationalError as e:
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: {e.__str__()}", "error")
-    
 
-conn = get_postgress_conn(DB_SETTINGS)
+if __name__ == "__main__":
 
-if clean_table(conn):
-    print("Table clean")
 
-if create_table(conn):
-    add_user_with_crypt_pass(conn, "tsuna", "1234aA78", [1, 2, 3, 4])
-    add_user_with_crypt_pass(conn, "tsuna", "1234", [2, 4, 5, 6]) # check output if this happens
-    test_user = get_user_from_db(conn, "tsuna", "1234aA78")
-    if test_user.__empty__():
-        print("test user empty")
-    else:
-        print("test user not empty")
-        print(test_user)
-    
-    update_user_from_db(conn, "tsuna", [2, 4, 6, 8, 10])
-    print(get_user_from_db(conn, "tsuna", "1234aA78"))
+    conn = get_postgress_conn(DB_SETTINGS)
 
-if delete_table(conn):
-    print("table gone")
+    if clean_table(conn):
+        print("Table clean")
+
+    if create_table(conn):
+        add_user_with_crypt_pass(conn, "tsuna", "1234aA78", [1, 2, 3, 4])
+        add_user_with_crypt_pass(conn, "tsuna", "1234", [2, 4, 5, 6]) # check output if this happens
+        test_user = get_user_from_db(conn, "tsuna", "1234aA78")
+        if test_user.__empty__():
+            print("test user empty")
+        else:
+            print("test user not empty")
+            print(test_user)
+        
+        update_user_from_db(conn, "tsuna", [2, 4, 6, 8, 10])
+        print(get_user_from_db(conn, "tsuna", "1234aA78"))
+        delete_user_from_db(conn, "tsuna")
+        print(get_user_from_db(conn, "tsuna", "1234aA78"))
+
+
+    if delete_table(conn):
+        print("table gone")
 

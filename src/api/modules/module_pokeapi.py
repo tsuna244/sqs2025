@@ -1,7 +1,7 @@
 import pokebase as pb
 from enum import Enum
 
-STATIC_FOLDER = "app/static/"
+STATIC_FOLDER = "api/static/"
 
 CACHE_DIR = STATIC_FOLDER + ".cache/"
 

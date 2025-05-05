@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+
+  database:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: test_database
+      POSTGRES_PASSWORD: 'test_passwd'
+    ports:
+      - 5432:5432
