@@ -2,8 +2,7 @@ import psycopg2 as ps
 from psycopg2 import sql
 import os
 from dotenv import load_dotenv
-#from .module_logger import log_function
-from .module_logger import log_function # debug only
+from .module_logger import log_function
 
 load_dotenv()
 
@@ -48,22 +47,22 @@ def check_passwd_input(password: str) -> int:
     function_name="check_passwd_input"
     if not isinstance(password, str):
         log_function(MODULE_NAME, function_name, "Password must be a string", "error")
-        return 2
+        return 10
 
+    if not len(password) > 7:
+        log_function(MODULE_NAME, function_name, "Password must contain at least 8 character", "warn")
+        return 11
+    
     if not any(char.isdigit() for char in password):
         log_function(MODULE_NAME, function_name, "Password must contain at least one digit", "warn")
-        return 3
+        return 12
     
     if not any(char.isupper() for char in password):
         log_function(MODULE_NAME, function_name, "Password must contain at least one upper character", "warn")
-        return 4
+        return 13
     
-    if not len(password) > 7:
-        log_function(MODULE_NAME, function_name, "Password must contain at least 8 character", "warn")
-        return 5
-
     log_function(MODULE_NAME, function_name, "Password check was successful")
-    return 1
+    return 0
 
 
 def get_postgress_conn(db_settings: dict):
@@ -174,11 +173,19 @@ def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Adding user with name {user_name} failed. Error: Connection to DB missing.", "error")
-        return -1
+        return 1
     
     passwd_check = check_passwd_input(passwd)
-    if not passwd_check == 1:
-        return passwd_check # positive error codes for password check
+    if not passwd_check == 0:
+        return passwd_check # error >= 10 for password error
+
+    if not isinstance(user_name, str):
+        log_function(MODULE_NAME, function_name, "Username must be of type string", "Error")
+        return 4
+
+    if not len(user_name) > 0:
+        log_function(MODULE_NAME, function_name, "Username must not be empty", "Error")
+        return 5
 
     try:
         log_function(MODULE_NAME, function_name, f"Trying to add user {user_name}")
@@ -198,15 +205,15 @@ def add_user_with_crypt_pass(conn, user_name, passwd, poke_id_list, table_name="
         cursor.execute(query_base, [user_name, passwd, poke_id_list])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Added user {user_name} successfully")
-        return 1
+        return 0
     except ps.errors.UniqueViolation as e:
         log_function(MODULE_NAME, function_name, f"Adding user {user_name} failed. Error: User already exists!!!", "error")
         conn.rollback()
-        return -2
+        return 3
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Creating user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
         conn.rollback()
-        return -3
+        return 2
 
 
 def get_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
@@ -253,7 +260,7 @@ def update_user_from_db(conn, user_name: str, deck_ids = [], table_name="users")
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Updating user with name {user_name} failed. Error: Connection to DB missing.", "error")
-        return -1
+        return 1
 
     try:
         log_function(MODULE_NAME, function_name, f"Trying to update user {user_name}")
@@ -274,7 +281,7 @@ def update_user_from_db(conn, user_name: str, deck_ids = [], table_name="users")
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Updating user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
         conn.rollback()
-        return -2
+        return 2
 
 
 def delete_user_from_db(conn, user_name: str, table_name="users"):
@@ -283,7 +290,7 @@ def delete_user_from_db(conn, user_name: str, table_name="users"):
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Deleting user with name {user_name} failed. Error: Connection to DB missing.", "error")
-        return -1
+        return 1
 
     try:
         log_function(MODULE_NAME, function_name, f"Trying to delete user {user_name}")
@@ -302,7 +309,7 @@ def delete_user_from_db(conn, user_name: str, table_name="users"):
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Deleting user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
         conn.rollback()
-        return -2
+        return 2
 
 def close_connection(conn):
     function_name="close_connection"
@@ -310,15 +317,17 @@ def close_connection(conn):
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: Connection to DB missing.", "error")
-        return -1
+        return 1
     
     try:
         log_function(MODULE_NAME, function_name, "Closing database connection")
         conn.close()
         log_function(MODULE_NAME, function_name, "Closed database connection successfully")
+        return 0
     except ps.OperationalError as e:
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: {e.__str__()}", "error")
+        return 2
 
 if __name__ == "__main__":
 
@@ -329,8 +338,8 @@ if __name__ == "__main__":
         print("Table clean")
 
     if create_table(conn):
-        add_user_with_crypt_pass(conn, "tsuna", "1234aA78", [1, 2, 3, 4])
-        add_user_with_crypt_pass(conn, "tsuna", "1234", [2, 4, 5, 6]) # check output if this happens
+        add_user_with_crypt_pass(conn, 123, "1234aA78", [1, 2, 3, 4])
+        add_user_with_crypt_pass(conn, "", "1234", [2, 4, 5, 6]) # check output if this happens
         test_user = get_user_from_db(conn, "tsuna", "1234aA78")
         if test_user.__empty__():
             print("test user empty")
