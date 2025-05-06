@@ -343,6 +343,10 @@ def delete_user_from_db(conn, user_name: str, table_name="users"):
         f"Deleting user with name {user_name} failed. Error: Connection to DB missing.", "error")
         return 1
 
+    user_name_check = check_user_input(user_name)
+    if not user_name_check == 0:
+        return user_name_check
+
     try:
         log_function(MODULE_NAME, function_name, f"Trying to delete user {user_name}")
         query_base = sql.SQL("""DELETE FROM {table_name}
