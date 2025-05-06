@@ -7,6 +7,7 @@ from .module_pokeapi import (
     PokemonRarity
 )
 from .module_postgresql import (
+    DB_SETTINGS,
     add_user_with_crypt_pass,
     close_connection,
     create_table,
@@ -132,11 +133,9 @@ class GenerationObj(object):
 class Database(object):
     
     def __init__(self):
-        self.conn = get_postgress_conn()
+        self.conn = get_postgress_conn(DB_SETTINGS)
         if self.conn is None:
             raise ConnectionError("Could not connect do Database")
-        if not create_table():
-            raise DatabaseError("Could not create initial users Table")
     
     def close(self):
         output = close_connection(self.conn)

@@ -10,13 +10,16 @@ MODULE_NAME="module_posgresql"
 
 class DatabaseError(Exception):
     def __init__(self, err_msg=""):
-        raise Exception(err_msg)
+        super().__init__(err_msg)
 
 class UserObj():
-    def __init__(self, user_id: str, user_name: str, deck_ids = []):
+    def __init__(self, user_id: str, user_name: str, deck_ids = None):
         self.user_id = user_id
         self.user_name = user_name
-        self.deck_ids = deck_ids
+        if deck_ids is None:
+            self.deck_ids = []
+        else:
+            self.deck_ids = deck_ids
 
     @classmethod
     def create_empty(cls):
@@ -52,7 +55,7 @@ def check_passwd_input(password: str, function_name="check_passwd_input") -> int
         log_function(MODULE_NAME, function_name, "Password must be a string", "error")
         return 10
 
-    if not len(password) > 7:
+    if len(password) <= 7:
         log_function(MODULE_NAME, function_name, "Password must contain at least 8 character", "warn")
         return 11
     
@@ -73,7 +76,7 @@ def check_user_input(user_name: str, function_name="check_user_input") -> int:
         log_function(MODULE_NAME, function_name, "Username must be of type string", "Error")
         return 4
 
-    if not len(user_name) > 0:
+    if len(user_name) <= 0:
         log_function(MODULE_NAME, function_name, "Username must not be empty", "Error")
         return 5
     if not user_name[0].isalpha():
@@ -118,7 +121,7 @@ def create_table(conn, table_name="users"):
     function_name="create_table"
 
     if conn is None:
-        log_function(MODULE_NAME, function_name, f"Creating users table failed. Error: Connection to DB missing", "error")
+        log_function(MODULE_NAME, function_name, f"Creating table {table_name} failed. Error: Connection to DB missing", "error")
         return False
     
     try:
@@ -211,15 +214,15 @@ def add_user_with_crypt_pass(conn, user_name, passwd, deck_ids, table_name="user
         return 1
     
     passwd_check = check_passwd_input(passwd, function_name)
-    if not passwd_check == 0:
+    if passwd_check != 0:
         return passwd_check # error >= 10 for password error
 
     user_name_check = check_user_input(user_name, function_name)
-    if not user_name_check == 0:
+    if user_name_check != 0:
         return user_name_check
 
     deck_ids_check = check_deck_ids_input(deck_ids, function_name)
-    if not deck_ids_check == 0:
+    if deck_ids_check != 0:
         return deck_ids_check
 
     try:
@@ -260,11 +263,11 @@ def get_user_from_db(conn, user_name: str, user_password: str, table_name="users
         return UserObj.create_empty()
     
     passwd_check = check_passwd_input(user_password, function_name)
-    if not passwd_check == 0:
+    if passwd_check != 0:
         return UserObj.create_empty() # error >= 10 for password error
 
     user_name_check = check_user_input(user_name, function_name)
-    if not user_name_check == 0:
+    if user_name_check != 0:
         return UserObj.create_empty()
     
     try:
@@ -306,11 +309,11 @@ def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="u
         return 1
 
     user_name_check = check_user_input(user_name, function_name)
-    if not user_name_check == 0:
+    if user_name_check != 0:
         return user_name_check
     
     deck_ids_check = check_deck_ids_input(deck_ids, function_name)
-    if not deck_ids_check == 0:
+    if deck_ids_check != 0:
         return deck_ids_check
 
     try:
@@ -344,7 +347,7 @@ def delete_user_from_db(conn, user_name: str, table_name="users"):
         return 1
 
     user_name_check = check_user_input(user_name)
-    if not user_name_check == 0:
+    if user_name_check != 0:
         return user_name_check
 
     try:
@@ -371,7 +374,7 @@ def close_connection(conn) -> int:
 
     if conn is None:
         log_function(MODULE_NAME, function_name, 
-        f"Closing database connection failed. Error: Connection to DB missing.", "error")
+        "Closing database connection failed. Error: Connection to DB missing.", "error")
         return 1
     
     try:
