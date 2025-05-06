@@ -124,3 +124,18 @@ def test_delete_user(db_connection):
     assert delete_user_from_db(db_connection, "test_user") == 0
 
 
+def test_clean_table(db_connection):
+    assert clean_table(None) == False
+    assert clean_table(db_connection, table_name="not_existing") == False
+    assert clean_table(db_connection) == True
+
+
+def test_delete_table(db_connection):
+    assert delete_table(None) == False
+    assert delete_table(db_connection, table_name="not_existing") == True
+    assert delete_table(db_connection) == True
+
+
+def test_close_connection(db_connection):
+    assert close_connection(None) == 1
+    assert close_connection(db_connection) == 0
