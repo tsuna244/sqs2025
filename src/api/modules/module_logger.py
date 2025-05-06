@@ -17,7 +17,7 @@ class LoggerClass(object):
         if LoggerClass._logger is None:
         
             # set logging format
-            log_formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+            log_formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-7.7s]  %(message)s")
 
             # create logger
             LoggerClass._logger = logging.getLogger()
@@ -39,3 +39,15 @@ class LoggerClass(object):
 
             LoggerClass._logger.info("Logger setup succesfully")
         return LoggerClass._logger
+
+
+# utility function: log message for each function in specific format
+def log_function(module_name: str, function_name: str, log_msg: str, log_type = "info"):
+    log = LoggerClass().get_logger()
+    msg = "({:15s} | {:30s}) -> {}".format(module_name, function_name + "(...)", log_msg)
+    if log_type == "error":
+        log.error(msg)
+    elif log_type == "warn":
+        log.warning(msg)
+    else:
+        log.info(msg)

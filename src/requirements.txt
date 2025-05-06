@@ -12,6 +12,9 @@ jinja2
 # requirements for Testing FastAPI
 httpx
 pytest
+pytest-mock
+pytest-docker
+testcontainers
 
 # PokeAPI wrapper
 pokebase

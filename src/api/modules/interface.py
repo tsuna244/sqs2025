@@ -1,5 +1,24 @@
 from .module_logger import LoggerClass
-from .module_pokeapi import get_pokemon_by_id, get_pokemon_id_names_by_generation, get_pokemon_rarity_and_generation_by_id, get_pokesprite_url_by_id, PokemonRarity
+from .module_pokeapi import (
+    get_pokemon_by_id, 
+    get_pokemon_id_names_by_generation, 
+    get_pokemon_rarity_and_generation_by_id, 
+    get_pokesprite_url_by_id, 
+    PokemonRarity
+)
+from .module_postgresql import (
+    add_user_with_crypt_pass,
+    close_connection,
+    create_table,
+    clean_table,
+    delete_table,
+    get_postgress_conn,
+    get_user_from_db,
+    update_user_from_db,
+    delete_user_from_db,
+    DatabaseError
+)
+
 import random as rand
 
 # create logger object to log system
@@ -85,7 +104,6 @@ class GenerationObj(object):
             self.pokemon_list = _pokemon_list
     
     def get_pokemon_list(self):
-        #_pokemon_list = [{k: v for k, v in d.items() if k != 'rarity'} for d in self.pokemon_list]
         return self.pokemon_list
     
     def get_pokemon_by_index(self, index: int):
@@ -114,4 +132,74 @@ class GenerationObj(object):
 class Database(object):
     
     def __init__(self):
-        raise NotImplementedError("Database Object has not implemented yet")
+        self.conn = get_postgress_conn()
+        if self.conn is None:
+            raise ConnectionError("Could not connect do Database")
+        if not create_table():
+            raise DatabaseError("Could not create initial users Table")
+    
+    def close(self):
+        output = close_connection(self.conn)
+        if output == 1:
+            raise ConnectionError("Close connection function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not close connection")
+        else:
+            return output
+    
+    def create_table(self):
+        output = create_table(self.conn)
+        if output == 1:
+            raise ConnectionError("Create table function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not create table")
+        else:
+            return output
+    
+    def drop_table(self):
+        output = clean_table(self.conn)
+        if output == 1:
+            raise ConnectionError("Create table function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not create table")
+        else:
+            return output
+    
+    def delete_table(self):
+        output = delete_table(self.conn)
+        if output == 1:
+            raise ConnectionError("Delete table function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not delete table")
+        else:
+            return output
+    
+    def get_user(self, user_name: str, user_password: str):
+        return get_user_from_db(self.conn, user_name, user_password)
+
+    def add_user(self, user_name: str, passwd: str, pokemon_list = []):
+        output = add_user_with_crypt_pass(self.conn, user_name, passwd, pokemon_list)
+        if output == 1:
+            raise ConnectionError("Add user function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not add new user")
+        else:
+            return output
+
+    def update_user(self, user_name: str, pokemon_list = []):
+        output = update_user_from_db(self.conn, user_name, pokemon_list)
+        if output == 1:
+            raise ConnectionError("Update user function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not update user")
+        else:
+            return output
+
+    def delete_user(self, user_name: str):
+        output = delete_user_from_db(self.conn, user_name)
+        if output == 1:
+            raise ConnectionError("Delete user function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not delete user")
+        else:
+            return output
