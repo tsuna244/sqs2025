@@ -156,7 +156,7 @@ def clean_table(conn, table_name="users"):
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Cleaning table with name {table_name} failed. Error: Connection to DB missing.", "error")
-        return False
+        return 1
     
     try:
         log_function(MODULE_NAME, function_name, f"Trying to clean table with name {table_name}")
@@ -170,11 +170,11 @@ def clean_table(conn, table_name="users"):
         cursor.execute(query_base)
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Cleaned table {table_name} successfully")
-        return True
+        return 0
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Cleaning table {table_name} failed. Error: {e.__str__()}", "error")
         conn.rollback()
-        return False
+        return 2
 
 
 def delete_table(conn, table_name="users") -> int:
