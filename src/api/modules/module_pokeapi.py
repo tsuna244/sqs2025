@@ -26,6 +26,18 @@ def check_input(function_name: str, input, val_name: str) -> int:
         return -1
 
 
+def _check_generation_and_depth(func_name, generation: int, depth: int):
+    if generation < 0 or depth < 0:
+        log_function(MODULE_NAME, func_name, "Generation must be between 1 and 3", "error")
+        return 1
+    if generation < 1 or generation > 3:
+        log_function(MODULE_NAME, func_name, "Generation must be between 1 and 3", "error")
+        return 2
+    if depth > 1:
+        log_function(MODULE_NAME, func_name, f"Could not fetch pokemon name list by generation id {generation}", "error")
+        return 3
+    return 0
+
 def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
     # declare func_name for logging
     func_name = "get_pokemon_id_names_by_generation"
@@ -33,16 +45,8 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
     generation = check_input(func_name, generation, "generation")
     depth = check_input(func_name, depth, "depth")
     
-    # check if poke id and depth are positive integers (pokemon id must be 1 or above)
-    if generation < 0 or depth < 0:
-        return []
-    
-    if generation < 1 or generation > 3:
-        log_function(MODULE_NAME, func_name, "Generation must be between 1 and 3", "error")
-        return []
-    
-    if depth > 1:
-        log_function(MODULE_NAME, func_name, f"Could not fetch pokemon name list by generation id {generation}", "error")
+    # check if generation id and depth are positive integers (pokemon id must be 1 or above)
+    if _check_generation_and_depth(func_name, generation, depth) != 0:
         return []
 
     try:
