@@ -177,13 +177,13 @@ def clean_table(conn, table_name="users"):
         return False
 
 
-def delete_table(conn, table_name="users"):
+def delete_table(conn, table_name="users") -> int:
     function_name="delete_table"
 
     if conn is None:
         log_function(MODULE_NAME, function_name, 
         f"Deleting table with name {table_name} failed. Error: Connection to DB missing.", "error")
-        return False
+        return 1
     
     try:
         log_function(MODULE_NAME, function_name, f"Trying to delete table with name {table_name}")
@@ -196,10 +196,10 @@ def delete_table(conn, table_name="users"):
         cursor.execute(query_base)
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Deleted table {table_name} successfully")
-        return True
+        return 0
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Deleting table {table_name} failed. Error: {e.__str__()}", "error")
-        return False
+        return 2
 
 
 def add_user_with_crypt_pass(conn, user_name, passwd, deck_ids, table_name="users") -> int:
@@ -366,7 +366,7 @@ def delete_user_from_db(conn, user_name: str, table_name="users"):
         conn.rollback()
         return 2
 
-def close_connection(conn):
+def close_connection(conn) -> int:
     function_name="close_connection"
 
     if conn is None:
@@ -383,30 +383,3 @@ def close_connection(conn):
         log_function(MODULE_NAME, function_name, 
         f"Closing database connection failed. Error: {e.__str__()}", "error")
         return 2
-
-if __name__ == "__main__":
-    
-    conn = get_postgress_conn(DB_SETTINGS)
-
-    if clean_table(conn):
-        print("Table clean")
-
-    if create_table(conn):
-        add_user_with_crypt_pass(conn, 123, "1234aA78", [1, 2, 3, 4])
-        add_user_with_crypt_pass(conn, "", "1234", [2, 4, 5, 6]) # check output if this happens
-        test_user = get_user_from_db(conn, "tsuna", "1234aA78")
-        if test_user.__empty__():
-            print("test user empty")
-        else:
-            print("test user not empty")
-            print(test_user)
-        
-        update_user_from_db(conn, "tsuna", [2, 4, 6, 8, 10])
-        print(get_user_from_db(conn, "tsuna", "1234aA78"))
-        delete_user_from_db(conn, "tsuna")
-        print(get_user_from_db(conn, "tsuna", "1234aA78"))
-
-
-    if delete_table(conn):
-        print("table gone")
-
