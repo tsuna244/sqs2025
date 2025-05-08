@@ -30,58 +30,58 @@ class PokemonObj(object):
     
     def __init__(self, poke_id: int, load_sprite = True):
 
-        self.poke_id = poke_id
+        self._poke_id = poke_id
 
         self._load_stats()
 
         if load_sprite:
             self._load_sprite_path()
         else:
-            self.sprite = ""
+            self._sprite = ""
 
     def _load_sprite_path(self):
-        self.sprite = get_pokesprite_url_by_id(self.poke_id)
+        self._sprite = get_pokesprite_url_by_id(self.poke_id)
 
     def _load_stats(self):
         
-        self.name = ""
-        self.generation = 0
-        self.rarity = ""
-        self.points = 0
-        self.stats = []
+        self._name = ""
+        self._generation = 0
+        self._rarity = ""
+        self._points = 0
+        self._stats = []
         
         pokemon = get_pokemon_by_id(self.poke_id)
         if pokemon is not None:
-            self.name = pokemon["pokemon_name"]
-            self.stats = pokemon["pokemon_stats"]
+            self._name = pokemon["pokemon_name"]
+            self._stats = pokemon["pokemon_stats"]
             
             _gen_and_rarity = get_pokemon_rarity_and_generation_by_id(self.poke_id)
-            self.generation = _gen_and_rarity["pokemon_gen_name"]
-            self.rarity = _gen_and_rarity["pokemon_rarity"]
+            self._generation = _gen_and_rarity["pokemon_gen_name"]
+            self._rarity = _gen_and_rarity["pokemon_rarity"]
             multiplier = 1
             if self.rarity == PokemonRarity.LEGENDARY:
                 multiplier = 2
             elif self.rarity == PokemonRarity.MYTHIC:
                 multiplier = 5
-            self.points = self.stats[0]["stat_value"] * multiplier  # hp base stat mal rarity multiplier
+            self._points = self.stats[0]["stat_value"] * multiplier  # hp base stat mal rarity multiplier
     
     def get_id(self):
-        return self.poke_id
+        return self._poke_id
     
     def get_name(self):
-        return self.name
+        return self._name
     
     def get_generation(self):
-        return self.generation
+        return self._generation
     
     def get_rarity(self):
-        return self.rarity
+        return self._rarity
     
     def get_stats(self):
-        return self.stats
+        return self._stats
 
     def get_sprite_path(self):
-        return self.sprite
+        return self._sprite
 
     def __dict__(self):
         return {"pokemon_id": self.get_id(), "pokemon_name": self.get_name(), "pokemon_generation": self.get_generation(), 
