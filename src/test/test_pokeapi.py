@@ -1,4 +1,5 @@
 from api.modules.module_pokeapi import *
+from api.modules.module_pokeapi import _check_generation_and_depth, _check_poke_rarity
 import tempfile
 import shutil
 import pytest
@@ -18,6 +19,46 @@ def manage_test_environment():
     # cleanup
     shutil.rmtree(TMP_DIR)
 
+def test_check_input():
+    func_name="test_check_input"
+    value_name="test_value"
+    assert check_input(func_name, "asdf", value_name) == -1
+    assert check_input(func_name, "123", value_name) == 123
+    assert check_input(func_name, 123, value_name) == 123
+    assert check_input(func_name, -4, value_name) == -1
+    assert check_input(func_name, "-2", value_name) == -1
+
+
+def test_check_gen_and_depth():
+    func_name="test_check_gen_and_depth"
+    assert _check_generation_and_depth(func_name, -1, 1) == 1
+    assert _check_generation_and_depth(func_name, 1, -1) == 1
+    assert _check_generation_and_depth(func_name, 0, 1) == 2
+    assert _check_generation_and_depth(func_name, 4, 1) == 2
+    assert _check_generation_and_depth(func_name, 1, 2) == 3
+    assert _check_generation_and_depth(func_name, 2, 1) == 0
+    
+    
+def test_check_poke_rarity():
+    # test for cached pokemon species
+    cached_pokemon_species_mock = {"is_legendary": True, "is_mythical": False}
+    assert _check_poke_rarity(cached_pokemon_species_mock) == PokemonRarity.LEGENDARY
+    cached_pokemon_species_mock = {"is_legendary": False, "is_mythical": True}
+    assert _check_poke_rarity(cached_pokemon_species_mock) == PokemonRarity.MYTHIC
+    cached_pokemon_species_mock = {"is_legendary": False, "is_mythical": False}
+    assert _check_poke_rarity(cached_pokemon_species_mock) == PokemonRarity.NORMAL
+    
+    class pokemon_species_mock():
+        is_legendary = True
+        is_mythical = False
+    
+    fetched_PSM = pokemon_species_mock()
+    assert _check_poke_rarity(fetched_PSM, False) == PokemonRarity.LEGENDARY
+    fetched_PSM.is_legendary = False
+    assert _check_poke_rarity(fetched_PSM, False) == PokemonRarity.NORMAL
+    fetched_PSM.is_mythical = True
+    assert _check_poke_rarity(fetched_PSM, False) == PokemonRarity.MYTHIC
+    
 
 def test_get_pokesprite_url_by_id():
     test_id = 20

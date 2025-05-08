@@ -12,6 +12,7 @@ from .module_logger import log_function
 MODULE_NAME="module_pokeapi"
 
 class PokemonRarity(Enum):
+    NONE = "none"
     NORMAL = "normal"
     LEGENDARY = "legendary"
     MYTHIC = "mythical"
@@ -20,7 +21,10 @@ class PokemonRarity(Enum):
 # utility function: check function for integer values (poke_id and depth)
 def check_input(function_name: str, input, val_name: str) -> int:
     try:
-        return int(input)
+        val = int(input)
+        if val < 0:
+            return -1
+        return val
     except ValueError:
         log_function(MODULE_NAME, function_name, f"{val_name} must be an integer or a string containing an integer!!! {val_name} = {input}", "error")
         return -1
@@ -37,6 +41,23 @@ def _check_generation_and_depth(func_name, generation: int, depth: int):
         log_function(MODULE_NAME, func_name, f"Could not fetch pokemon name list by generation id {generation}", "error")
         return 3
     return 0
+
+
+def _check_poke_rarity(pokemon_species, is_cache=True):
+    if is_cache:
+        if pokemon_species["is_mythical"]:
+            return PokemonRarity.MYTHIC
+        elif pokemon_species["is_legendary"]:
+            return PokemonRarity.LEGENDARY
+        else:
+            return PokemonRarity.NORMAL
+    else:
+        if pokemon_species.is_mythical:
+            return PokemonRarity.MYTHIC
+        elif pokemon_species.is_legendary:
+            return PokemonRarity.LEGENDARY
+        else:
+            return PokemonRarity.NORMAL
 
 def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
     # declare func_name for logging
@@ -103,22 +124,14 @@ def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0) -> dict:
             log_function(MODULE_NAME, func_name, "Loading pokemon species from cache")
             pokemon_species = pb.cache.load("pokemon-species", poke_id)
             log_function(MODULE_NAME, func_name, "Loaded pokemon species from cache successful")
-            rarity = PokemonRarity.NORMAL
-            if pokemon_species["is_mythical"]:
-                rarity = PokemonRarity.MYTHIC
-            if pokemon_species["is_legendary"]:
-                rarity = PokemonRarity.LEGENDARY
+            rarity = _check_poke_rarity(pokemon_species)
             pokemon_gen_id = pokemon_species["generation"]["url"].split("/")[-2]
             return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species["generation"]["name"]}
         elif depth == 1:
             log_function(MODULE_NAME, func_name, "Fetching pokemon species from api")
             pokemon_species = pb.pokemon_species(poke_id)
             log_function(MODULE_NAME, func_name, "Fetched pokemon species from api successful")
-            rarity = PokemonRarity.NORMAL
-            if pokemon_species.is_mythical:
-                rarity = PokemonRarity.MYTHIC
-            if pokemon_species.is_legendary:
-                rarity = PokemonRarity.LEGENDARY
+            rarity = _check_poke_rarity(pokemon_species, False)
             pokemon_gen_id = pokemon_species.generation.url.split("/")[-2]
             return {"pokemon_rarity": rarity, "pokemon_gen_id": pokemon_gen_id, "pokemon_gen_name": pokemon_species.generation.__getattr__("name")}
     except KeyError as e:

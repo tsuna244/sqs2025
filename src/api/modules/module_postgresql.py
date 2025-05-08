@@ -26,7 +26,7 @@ class UserObj():
         return cls(-1, "")
 
     def __eq__(self, user):
-        return user.user_id == self.user_id and user.user_name == self.user_name
+        return self.__str__() == user.__str__()
 
     def __empty__(self):
         return self.user_id < 0
@@ -122,7 +122,7 @@ def create_table(conn, table_name="users"):
 
     if conn is None:
         log_function(MODULE_NAME, function_name, f"Creating table {table_name} failed. Error: Connection to DB missing", "error")
-        return False
+        return 1
     
     try:
         query_base = sql.SQL(
@@ -147,10 +147,10 @@ def create_table(conn, table_name="users"):
 
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Successfully created table with name {table_name}")
-        return True
+        return 0
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Creating users table failed. Error: {e.__str__()}", "error")
-        return False
+        return 2
 
 
 def clean_table(conn, table_name="users"):
