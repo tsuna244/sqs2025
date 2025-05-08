@@ -12,6 +12,7 @@ from .module_logger import log_function
 MODULE_NAME="module_pokeapi"
 
 class PokemonRarity(Enum):
+    NONE = "none"
     NORMAL = "normal"
     LEGENDARY = "legendary"
     MYTHIC = "mythical"

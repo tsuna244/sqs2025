@@ -7,7 +7,8 @@ import testcontainers.compose
 
 # start the docker containers, based on tests/mocks/docker-compose.yml file
 container = testcontainers.compose.DockerCompose(os.path.abspath("tests/"))
-container.start()
+if len(container.get_containers()) != 1:
+    container.start()
 
 # get the host of postgresql container
 host = f'{container.get_service_host("database", 5432)}'
@@ -73,10 +74,10 @@ def test_user_object():
 # integration with db
 def test_create_table(db_connection):
     # create table with none type connection
-    assert create_table(None) == False
-    assert create_table(db_connection) == True
+    assert create_table(None) == 1
+    assert create_table(db_connection) == 0
     # create table again (should return true since IF NOT EXISTS checks internally)
-    assert create_table(db_connection) == True
+    assert create_table(db_connection) == 0
 
 def test_add_user(db_connection):
     # add user with none type connection

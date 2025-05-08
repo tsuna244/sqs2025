@@ -29,6 +29,9 @@ log = LoggerClass().get_logger()
 class PokemonObj(object):
     
     def __init__(self, poke_id: int, load_sprite = True):
+        if poke_id < 1:
+            log.error("Pokemon Id must be greater than 1")
+            raise ValueError("Pokemon Id must be greater than 1")
 
         self._poke_id = poke_id
 
@@ -40,22 +43,22 @@ class PokemonObj(object):
             self._sprite = ""
 
     def _load_sprite_path(self):
-        self._sprite = get_pokesprite_url_by_id(self.poke_id)
+        self._sprite = get_pokesprite_url_by_id(self._poke_id)
 
     def _load_stats(self):
         
         self._name = ""
         self._generation = 0
-        self._rarity = ""
+        self._rarity = PokemonRarity.NONE
         self._points = 0
         self._stats = []
         
-        pokemon = get_pokemon_by_id(self.poke_id)
-        if pokemon is not None:
+        pokemon = get_pokemon_by_id(self._poke_id)
+        if pokemon != {}:
             self._name = pokemon["pokemon_name"]
             self._stats = pokemon["pokemon_stats"]
             
-            _gen_and_rarity = get_pokemon_rarity_and_generation_by_id(self.poke_id)
+            _gen_and_rarity = get_pokemon_rarity_and_generation_by_id(self._poke_id)
             self._generation = _gen_and_rarity["pokemon_gen_name"]
             self._rarity = _gen_and_rarity["pokemon_rarity"]
             multiplier = 1
@@ -85,10 +88,13 @@ class PokemonObj(object):
 
     def __dict__(self):
         return {"pokemon_id": self.get_id(), "pokemon_name": self.get_name(), "pokemon_generation": self.get_generation(), 
-                "pokemon_rarity": self.get_rarity(), "pokemon_stats": self.get_stats(), "pokemon_sprite_path": self.get_sprite_path()}
+                "pokemon_rarity": self.get_rarity().value, "pokemon_stats": self.get_stats(), "pokemon_sprite_path": self.get_sprite_path()}
 
     def __str__(self):
         return self.__dict__().__str__()
+    
+    def __eq__(self, value):
+        return self.__str__() == value.__str__()
 
 class GenerationObj(object):
     def __init__(self, gen_id: int):
@@ -100,7 +106,7 @@ class GenerationObj(object):
     
     def _load_pokemon(self):
         self._pokemon_list = []
-        _pokemon_list = get_pokemon_id_names_by_generation(self.gen_id)
+        _pokemon_list = get_pokemon_id_names_by_generation(self._gen_id)
         if len(_pokemon_list) > 0:
             self._pokemon_list = _pokemon_list
     
@@ -133,10 +139,23 @@ class GenerationObj(object):
     def get_generation_id(self):
         return self._gen_id
 
+    def __dict__(self):
+        return {"generation_id": self.get_generation_id(), "pokemon_list": self.get_pokemon_list()}
+
+    def __str__(self):
+        return self.__dict__().__str__()
+
+    def __eq__(self, value):
+        return self.__str__() == value.__str__()
+    
+        
 class Database(object):
     
-    def __init__(self):
-        self._conn = get_postgress_conn(DB_SETTINGS)
+    def __init__(self, db_settings = None):
+        if db_settings is not None:
+            self._conn = get_postgress_conn(db_settings)
+        else:
+            self._conn = get_postgress_conn(DB_SETTINGS)
         if self._conn is None:
             raise ConnectionError("Could not connect do Database")
     
@@ -158,7 +177,7 @@ class Database(object):
         else:
             return output
     
-    def drop_table(self):
+    def clean_table(self):
         output = clean_table(self._conn)
         if output == 1:
             raise ConnectionError("Create table function received none type object for connection")
@@ -177,7 +196,7 @@ class Database(object):
             return output
     
     def get_user(self, user_name: str, user_password: str):
-        return get_user_from_db(self._conn, user_name, user_password)
+        return get_user_from_db(self._conn, user_name, user_password).__dict__()
 
     def add_user(self, user_name: str, passwd: str, pokemon_list = []):
         output = add_user_with_crypt_pass(self._conn, user_name, passwd, pokemon_list)
