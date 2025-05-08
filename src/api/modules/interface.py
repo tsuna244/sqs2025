@@ -59,11 +59,11 @@ class PokemonObj(object):
             self._generation = _gen_and_rarity["pokemon_gen_name"]
             self._rarity = _gen_and_rarity["pokemon_rarity"]
             multiplier = 1
-            if self.rarity == PokemonRarity.LEGENDARY:
+            if self._rarity == PokemonRarity.LEGENDARY:
                 multiplier = 2
-            elif self.rarity == PokemonRarity.MYTHIC:
+            elif self._rarity == PokemonRarity.MYTHIC:
                 multiplier = 5
-            self._points = self.stats[0]["stat_value"] * multiplier  # hp base stat mal rarity multiplier
+            self._points = self._stats[0]["stat_value"] * multiplier  # hp base stat mal rarity multiplier
     
     def get_id(self):
         return self._poke_id
@@ -95,24 +95,24 @@ class GenerationObj(object):
         if gen_id < 1 or gen_id > 3:
             log.error("Only Generation 1 - 3 are supported")
             raise ValueError("Only Generation 1 - 3 are supported")
-        self.gen_id = gen_id
+        self._gen_id = gen_id
         self._load_pokemon()
     
     def _load_pokemon(self):
-        self.pokemon_list = []
+        self._pokemon_list = []
         _pokemon_list = get_pokemon_id_names_by_generation(self.gen_id)
         if len(_pokemon_list) > 0:
-            self.pokemon_list = _pokemon_list
+            self._pokemon_list = _pokemon_list
     
     def get_pokemon_list(self):
-        return self.pokemon_list
+        return self._pokemon_list
     
     def get_pokemon_by_index(self, index: int):
-        if index < 0 or index > len(self.pokemon_list):
+        if index < 0 or index > len(self._pokemon_list):
             log.error("Index out of bounds")
             raise IndexError("Index out of bounds")
-        if len(self.pokemon_list) > 0:
-            pokemon_json = self.pokemon_list[0]
+        if len(self._pokemon_list) > 0:
+            pokemon_json = self._pokemon_list[0]
             if "rarity" in pokemon_json:
                 return PokemonObj(pokemon_json["pokemon_id"], pokemon_json["rarity"])
             else:
@@ -122,23 +122,26 @@ class GenerationObj(object):
             raise IndexError("Pokemon List is empty")
 
     def get_random_pokemon(self):
-        if len(self.pokemon_list) > 0:
-            rand_index = rand.randint(0, len(self.pokemon_list)-1)
-            poke_id = self.pokemon_list[rand_index]["pokemon_id"]
+        if len(self._pokemon_list) > 0:
+            rand_index = rand.randint(0, len(self._pokemon_list)-1)
+            poke_id = self._pokemon_list[rand_index]["pokemon_id"]
             return PokemonObj(poke_id)
         else:
             log.error("Pokemon list is empty")
             raise IndexError("Pokemon List is empty")
 
+    def get_generation_id(self):
+        return self._gen_id
+
 class Database(object):
     
     def __init__(self):
-        self.conn = get_postgress_conn(DB_SETTINGS)
-        if self.conn is None:
+        self._conn = get_postgress_conn(DB_SETTINGS)
+        if self._conn is None:
             raise ConnectionError("Could not connect do Database")
     
     def close(self):
-        output = close_connection(self.conn)
+        output = close_connection(self._conn)
         if output == 1:
             raise ConnectionError("Close connection function received none type object for connection")
         elif output == 2:
@@ -147,7 +150,7 @@ class Database(object):
             return output
     
     def create_table(self):
-        output = create_table(self.conn)
+        output = create_table(self._conn)
         if output == 1:
             raise ConnectionError("Create table function received none type object for connection")
         elif output == 2:
@@ -156,7 +159,7 @@ class Database(object):
             return output
     
     def drop_table(self):
-        output = clean_table(self.conn)
+        output = clean_table(self._conn)
         if output == 1:
             raise ConnectionError("Create table function received none type object for connection")
         elif output == 2:
@@ -165,7 +168,7 @@ class Database(object):
             return output
     
     def delete_table(self):
-        output = delete_table(self.conn)
+        output = delete_table(self._conn)
         if output == 1:
             raise ConnectionError("Delete table function received none type object for connection")
         elif output == 2:
@@ -174,10 +177,10 @@ class Database(object):
             return output
     
     def get_user(self, user_name: str, user_password: str):
-        return get_user_from_db(self.conn, user_name, user_password)
+        return get_user_from_db(self._conn, user_name, user_password)
 
     def add_user(self, user_name: str, passwd: str, pokemon_list = []):
-        output = add_user_with_crypt_pass(self.conn, user_name, passwd, pokemon_list)
+        output = add_user_with_crypt_pass(self._conn, user_name, passwd, pokemon_list)
         if output == 1:
             raise ConnectionError("Add user function received none type object for connection")
         elif output == 2:
@@ -186,7 +189,7 @@ class Database(object):
             return output
 
     def update_user(self, user_name: str, pokemon_list = []):
-        output = update_user_from_db(self.conn, user_name, pokemon_list)
+        output = update_user_from_db(self._conn, user_name, pokemon_list)
         if output == 1:
             raise ConnectionError("Update user function received none type object for connection")
         elif output == 2:
@@ -195,7 +198,7 @@ class Database(object):
             return output
 
     def delete_user(self, user_name: str):
-        output = delete_user_from_db(self.conn, user_name)
+        output = delete_user_from_db(self._conn, user_name)
         if output == 1:
             raise ConnectionError("Delete user function received none type object for connection")
         elif output == 2:
