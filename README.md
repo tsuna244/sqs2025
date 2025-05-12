@@ -17,3 +17,5 @@ This is a project for learning purposes. It will consist of a webserver that con
 ## ADRs
 Under the folder ```doc/adr``` you can find all the ADRs.
 
+## Documentation
+```https://sqs2025.readthedocs.io/en/latest/```
