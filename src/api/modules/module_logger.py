@@ -4,20 +4,17 @@ from time import strftime
 
 # singelton Logger Class
 class LoggerClass(object):
+    """Singelton Class that allows to log with a configured format
     """
-        Class that allows to log with a configured format
-
-        Methods:
-            get_logger: returns a logger object
-    """
+    
     _logger = None
     _instance = None
 
     def __new__(cls, *args, **kwargs):
-        """Ensures that the logger class is a singelton
+        """This method will be called whenever a LoggerClass Object will be created. This leads to a Singelton Class
 
-        Returns:
-            logging.Logger: Logger from the logging class as singelton object
+        :return: the singelton instance. if there is no instance yet it will create a new one
+        :rtype: LoggerClass
         """
         if not cls._instance:
             cls._instance = super(LoggerClass, cls).__new__(cls, *args, **kwargs)
@@ -26,10 +23,11 @@ class LoggerClass(object):
     def get_logger(self):
         """Function that returns a configured logger
 
-        Returns:
-            logging.Logger: Logger object from the logging module that is configured with stream and file output
+        :return: Logger object from the logging module that is configured with stream and file output
                             File output only on linux systems
+        :rtype: class: `logging.Logger`
         """
+        
         if LoggerClass._logger is None:
         
             # set logging format
@@ -61,12 +59,16 @@ class LoggerClass(object):
 def log_function(module_name: str, function_name: str, log_msg: str, log_type = "info"):
     """Utility function to help log functions with a better format
 
-    Args:
-        module_name (str): The name of the module that calls the log function
-        function_name (str): The name of the function inside the module that calls the log function
-        log_msg (str): the message that should be logged
-        log_type (str, optional): Type of logging: "error", "warn" or "info". Defaults to "info".
+    :param module_name: The name of the module that calls the log function
+    :type module_name: str
+    :param function_name: The name of the function inside the module that calls the log function
+    :type function_name: str
+    :param log_msg: the message that should be logged
+    :type log_msg: str
+    :param log_type: Type of logging: "error", "warn" or "info". Defaults to "info", defaults to "info"
+    :type log_type: str, optional
     """
+
     log = LoggerClass().get_logger()
     msg = "({:15s} | {:30s}) -> {}".format(module_name, function_name + "(...)", log_msg)
     if log_type == "error":

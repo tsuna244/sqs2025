@@ -14,8 +14,10 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   apidoc/api
-   apidoc/api.modules
    apidoc/modules
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Architecture:
+   
    arc42/architecture
