@@ -27,8 +27,29 @@ log = LoggerClass().get_logger()
 
 
 class PokemonObj(object):
+    """This class represents a Pokemon
+    :class: `api.interface.PokemonObj`
+    
+    :param poke_id: Pokemon Id, must be 1 or higher
+    :type poke_id: int
+
+    :param load_sprite: Boolean to determin if the sprite should load or not, defaults to True.
+    :type load_sprite: bool, optional
+    
+    :raises ValueError: Pokemen Id must be an integer and at least 1
+    """
     
     def __init__(self, poke_id: int, load_sprite = True):
+        """constructor method
+
+        :param poke_id: Pokemon Id, must be 1 or higher
+        :type poke_id: int
+        :param load_sprite: Boolean to determin if the sprite should load or not. Defaults to True., defaults to True
+        :type load_sprite: bool, optional
+        
+        :raises ValueError: Pokemen Id must be an integer and at least 1
+        """
+        
         if poke_id < 1:
             log.error("Pokemon Id must be greater than 1")
             raise ValueError("Pokemon Id must be greater than 1")
@@ -43,9 +64,13 @@ class PokemonObj(object):
             self._sprite = ""
 
     def _load_sprite_path(self):
+        """Loads the sprite path for the pokemon with its id
+        """
         self._sprite = get_pokesprite_url_by_id(self._poke_id)
 
     def _load_stats(self):
+        """Loads the stats for the pokemon with its id
+        """
         
         self._name = ""
         self._generation = 0
@@ -66,7 +91,7 @@ class PokemonObj(object):
                 multiplier = 2
             elif self._rarity == PokemonRarity.MYTHIC:
                 multiplier = 5
-            self._points = self._stats[0]["stat_value"] * multiplier  # hp base stat mal rarity multiplier
+            self._points = self._stats[0]["stat_value"] * multiplier  # hp base stat times rarity multiplier
     
     def get_id(self):
         return self._poke_id
@@ -97,7 +122,23 @@ class PokemonObj(object):
         return self.__str__() == value.__str__()
 
 class GenerationObj(object):
+    """This class represents all Pokemon in a Generation
+
+    :param gen_id: The id of the generation. Must be one 1, 2 or 3
+    :type gen_id: int
+    
+    :raises ValueError: Generation id must be an integer and between 1 to 3
+    """
+    
     def __init__(self, gen_id: int):
+        """constructor method
+
+        :param gen_id: The id of the generation. Must be one 1, 2 or 3
+        :type gen_id: int
+    
+        :raises ValueError: Generation id must be an integer and between 1 to 3
+        """
+        
         if gen_id < 1 or gen_id > 3:
             log.error("Only Generation 1 - 3 are supported")
             raise ValueError("Only Generation 1 - 3 are supported")
@@ -105,6 +146,9 @@ class GenerationObj(object):
         self._load_pokemon()
     
     def _load_pokemon(self):
+        """try to load list with pokemon in this generation
+        """
+        
         self._pokemon_list = []
         _pokemon_list = get_pokemon_id_names_by_generation(self._gen_id)
         if len(_pokemon_list) > 0:
@@ -114,20 +158,34 @@ class GenerationObj(object):
         return self._pokemon_list
     
     def get_pokemon_by_index(self, index: int):
+        """Returns a pokemon object for the pokemon at the position <index> from the pokemon list of this generation.
+
+        :param index: Index for the pokemon that should be returned. This index is NOT the pokemon id. Index must be between 0 and length of pokemon list
+        :type index: int
+        :raises IndexError: Index must be between 0 and length of pokemon list
+        :raises IndexError: If list is empty it will also trigger IndexError
+        :return: returns a pokemon object with containing all information for the pokemon that was selected from the list via index
+        :rtype: PokemonObj
+        """
+        
         if index < 0 or index > len(self._pokemon_list):
             log.error("Index out of bounds")
             raise IndexError("Index out of bounds")
         if len(self._pokemon_list) > 0:
             pokemon_json = self._pokemon_list[0]
-            if "rarity" in pokemon_json:
-                return PokemonObj(pokemon_json["pokemon_id"], pokemon_json["rarity"])
-            else:
-                return PokemonObj(pokemon_json["pokemon_id"])
+            return PokemonObj(pokemon_json["pokemon_id"])
         else:
             log.error("Pokemon list is empty")
             raise IndexError("Pokemon List is empty")
 
     def get_random_pokemon(self):
+        """Returns a random pokemon out of the pokemon list of this generation
+
+        :raises IndexError: The pokemon list for this generation is empty
+        :return: Pokemon Object with a random pokemon_id
+        :rtype: PokemonObj
+        """
+        
         if len(self._pokemon_list) > 0:
             rand_index = rand.randint(0, len(self._pokemon_list)-1)
             poke_id = self._pokemon_list[rand_index]["pokemon_id"]
@@ -150,8 +208,23 @@ class GenerationObj(object):
     
         
 class Database(object):
+    """This class represents the connection to the database and offers methods for functionallity
+
+    :param db_settings: Dictionary containing all the information to connect to a database, defaults to None
+    :type db_settings: dict | None
+    
+    :raises ConnectionError: Raises if connection to database failed
+    """
     
     def __init__(self, db_settings = None):
+        """constructor method
+
+        :param db_settings: Dictionary containing all the information to connect to a database, defaults to None
+        :type db_settings: dict | None
+        
+        :raises ConnectionError: Raises if connection to database failed
+        """
+        
         if db_settings is not None:
             self._conn = get_postgress_conn(db_settings)
         else:
@@ -159,7 +232,15 @@ class Database(object):
         if self._conn is None:
             raise ConnectionError("Could not connect do Database")
     
-    def close(self):
+    def close(self) -> int:
+        """Closes the connection to the database
+
+        :raises ConnectionError: raises if the connection is already a none type object
+        :raises DatabaseError: raises if closing the connection failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
         output = close_connection(self._conn)
         if output == 1:
             raise ConnectionError("Close connection function received none type object for connection")
@@ -168,7 +249,15 @@ class Database(object):
         else:
             return output
     
-    def create_table(self):
+    def create_table(self) -> int:
+        """Creates a table with default name inside the db
+
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError: raises if creating the table failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
         output = create_table(self._conn)
         if output == 1:
             raise ConnectionError("Create table function received none type object for connection")
@@ -177,7 +266,15 @@ class Database(object):
         else:
             return output
     
-    def clean_table(self):
+    def clean_table(self) -> int:
+        """Cleans a table with default name inside the db
+
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError: raises if cleaning the table failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+
         output = clean_table(self._conn)
         if output == 1:
             raise ConnectionError("Create table function received none type object for connection")
@@ -186,7 +283,15 @@ class Database(object):
         else:
             return output
     
-    def delete_table(self):
+    def delete_table(self) -> int:
+        """Deletes a table with default name inside the db
+
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError: raises if deleting the table failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
         output = delete_table(self._conn)
         if output == 1:
             raise ConnectionError("Delete table function received none type object for connection")
@@ -195,10 +300,36 @@ class Database(object):
         else:
             return output
     
-    def get_user(self, user_name: str, user_password: str):
+    def get_user(self, user_name: str, user_password: str) -> dict:
+        """Returns a user in dictionary format containing his id, name, and list of pokemon_ids inside his deck called deck_id
+
+        :param user_name: the user name of the user to get
+        :type user_name: str
+        :param user_password: password of the user
+        :type user_password: str
+        :return: A dictionary containing information about the user:
+                  `{}` if user does not exists or password is wrong
+                  `{"user_id": int, "user_name": str, "deck_ids": list[int]}` if user does exists and password was correct
+        :rtype: dict
+        """
+        
         return get_user_from_db(self._conn, user_name, user_password).__dict__()
 
-    def add_user(self, user_name: str, passwd: str, pokemon_list = []):
+    def add_user(self, user_name: str, passwd: str, pokemon_list = []) -> int:
+        """Add a new user to the table
+
+        :param user_name: The name of the user
+        :type user_name: str
+        :param passwd: The password of the user: Must contain at least one digit, upper and must be at least 8 character long
+        :type passwd: str
+        :param pokemon_list: a list of pokemon ids representing the deck of the user, defaults to []
+        :type pokemon_list: list, optional
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError: raises if adding the user failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
         output = add_user_with_crypt_pass(self._conn, user_name, passwd, pokemon_list)
         if output == 1:
             raise ConnectionError("Add user function received none type object for connection")
@@ -207,7 +338,19 @@ class Database(object):
         else:
             return output
 
-    def update_user(self, user_name: str, pokemon_list = []):
+    def update_user(self, user_name: str, pokemon_list = []) -> int:
+        """Updates the deck of a user.
+
+        :param user_name: The user thats deck should be updated
+        :type user_name: str
+        :param pokemon_list: The new list of pokemon ids representing the new deck, defaults to []
+        :type pokemon_list: list, optional
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError: raises if updating the user failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
         output = update_user_from_db(self._conn, user_name, pokemon_list)
         if output == 1:
             raise ConnectionError("Update user function received none type object for connection")
@@ -216,7 +359,17 @@ class Database(object):
         else:
             return output
 
-    def delete_user(self, user_name: str):
+    def delete_user(self, user_name: str) -> int:
+        """Deletes a user
+
+        :param user_name: The user that should be deleted
+        :type user_name: str
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError:  raises if deleting the user failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
         output = delete_user_from_db(self._conn, user_name)
         if output == 1:
             raise ConnectionError("Delete user function received none type object for connection")

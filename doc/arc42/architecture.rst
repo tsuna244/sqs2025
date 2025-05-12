@@ -1,3 +1,6 @@
+architecture
+============
+
 .. toctree::
     :maxdepth: 2
     :caption: architecture
