@@ -13,8 +13,7 @@ from .module_logger import log_function
 MODULE_NAME="module_pokeapi"
 
 class PokemonRarity(Enum):
-    """
-        This Enum class represents the 3 types of pokemon rarity
+    """This Enum class represents the 3 types of pokemon rarity, None type is only a placeholder in case a pokemon could not be fetched from the api
     """
     NONE = "none"
     NORMAL = "normal"
@@ -26,14 +25,16 @@ class PokemonRarity(Enum):
 def check_input(function_name: str, input, val_name: str) -> int:
     """Checks if the input value is a postive integer. Returns -1 if not
 
-        Args:
-            function_name (str): The name of the function that calls the check (used for logging)
-            input: the input that will be checked
-            val_name (str): the name of the input that is beeing checked (used for logging)
-
-        Returns:
-            int: returns -1 if the input is not an integer or negative, returns the input value as integer otherwise
+    :param function_name: The name of the function that calls the check (used for logging)
+    :type function_name: str
+    :param input: the input that will be checked
+    :type input: _type_
+    :param val_name: the name of the input that is beeing checked (used for logging)
+    :type val_name: str
+    :return: `-1` if the input is not an integer or negative, `input` value as integer otherwise
+    :rtype: int
     """
+    
     try:
         val = int(input)
         if val < 0:
@@ -44,17 +45,19 @@ def check_input(function_name: str, input, val_name: str) -> int:
         return -1
 
 
-def _check_generation_and_depth(func_name, generation: int, depth: int):
+def _check_generation_and_depth(func_name: str, generation: int, depth: int):
     """Checks if the generation input and the depth input are correct
 
-        Args:
-            func_name (str): The name of the function that calls the check (used for logging)
-            generation (int): the pokemon generation value
-            depth (int): the depth value of the function
-
-        Returns:
-            int: returns 1 if one of both integer are less then 0. returns 2 if the generation is not between 1 and 3, returns 3 if depth is greater than 1. otherwise returns 0
+    :param func_name: The name of the function that calls the check (used for logging)
+    :type func_name: str
+    :param generation: the pokemon generation value
+    :type generation: int
+    :param depth: the depth value of the function
+    :type depth: int
+    :return: `0` if successful, `1` if one of both integer are less then 0, `2` if the generation is not between 1 and 3, `3` if depth is greater than 1
+    :rtype: int
     """
+    
     if generation < 0 or depth < 0:
         log_function(MODULE_NAME, func_name, "Generation must be between 1 and 3", "error")
         return 1
@@ -70,13 +73,14 @@ def _check_generation_and_depth(func_name, generation: int, depth: int):
 def _check_poke_rarity(pokemon_species, is_cache=True):
     """Checks the rarity of a pokemon
 
-        Args:
-            pokemon_species: the pokemon_species object of the pokebase api fetch
-            is_cache (bool): tells if the pokemon_species object is from the cache or directly from the pokebase api. Default is True
-
-        Returns:
-            PokemonRarity: returns the rarity of the pokemon
+    :param pokemon_species: the pokemon_species object of the pokebase api fetch
+    :type pokemon_species: dict | pokebase.APIResource
+    :param is_cache: tells if the pokemon_species object is from the cache or directly from the pokebase api, defaults to True
+    :type is_cache: bool, optional
+    :return: returns the rarity of the pokemon
+    :rtype: PokemonRarity
     """
+    
     if is_cache:
         if pokemon_species["is_mythical"]:
             return PokemonRarity.MYTHIC
@@ -95,13 +99,14 @@ def _check_poke_rarity(pokemon_species, is_cache=True):
 def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
     """Returns a list with all the pokemon for the given generation containing their pokemon id and name
 
-        Args:
-            generation (int): the pokemon generation (only between 1 and 3)
-            depth (int): the depth value: 0 => load from cache, 1 => fetch from pokebase api, <0 or >1 => fail
-
-        Returns:
-            list: returns a list with the pokemon for the given generation. If any check fails it returns an empty list
+    :param generation: the pokemon generation (only between 1 and 3)
+    :type generation: int
+    :param depth: `0` => load from cache, `1` => fetch from pokebase api, `otherwise` => fetch failed, defaults to 0
+    :type depth: int, optional
+    :return:  returns a list with the pokemon for the given generation. `[]` if any check fails
+    :rtype: list
     """
+    
     # declare func_name for logging
     func_name = "get_pokemon_id_names_by_generation"
     
@@ -152,13 +157,14 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
 def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0) -> dict:
     """Returns the rarity and generation of a pokemon given its id
 
-        Args:
-            poke_id (int): id of the pokemon
-            depth (int): the depth value: 0 => load from cache, 1 => fetch from pokebase api, <0 or >1 => fail
-
-        Returns:
-            dict: Returns empty dict {} if fetch fails. Returns a dictionary containing the pokemon rarity and generation -> {"pokemon_rarity": <rarity>, "pokemon_gen_id": <generation_id>, "pokemon_gen_name": <generation>}
+    :param poke_id: id of the pokemon
+    :type poke_id: int
+    :param depth: `0` => load from cache, `1` => fetch from pokebase api, `otherwise` => fetch failed, defaults to 0
+    :type depth: int, optional
+    :return: `{}` if fetch fails. `{"pokemon_rarity": <rarity>, "pokemon_gen_id": <generation_id>, "pokemon_gen_name": <generation>}` if successfull
+    :rtype: dict
     """
+    
     # declare func_name for logging
     func_name = "get_pokemon_rarity_and_generation_by_id"
     
@@ -209,13 +215,14 @@ def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0) -> dict:
 def get_pokemon_by_id(poke_id: int, depth = 0) -> dict:
     """Returns information of a pokemon with the given poke_id
 
-        Args:
-            poke_id (int): id of the pokemon
-            depth (int): the depth value: 0 => load from cache, 1 => fetch from pokebase api, <0 or >1 => fail
-
-        Returns:
-            dict: Returns empty dict {} if fetch fails. Returns a dictionary containing informations about a pokemon -> {"pokemon_id": <pokemon_id>, "pokemon_name": <pokemon_name>, "pokemon_stats": <poke_stats>}
+    :param poke_id: id of the pokemon
+    :type poke_id: int
+    :param depth: `0` => load from cache, `1` => fetch from pokebase api, `otherwise` => fetch failed, defaults to 0
+    :type depth: int, optional
+    :return: `{}` if fetch fails, `{"pokemon_id": <pokemon_id>, "pokemon_name": <pokemon_name>, "pokemon_stats": <poke_stats>}` if successfull
+    :rtype: dict
     """
+    
     # declare func_name for logging
     func_name = "get_pokemon_by_id"
     
@@ -272,13 +279,14 @@ def get_pokemon_by_id(poke_id: int, depth = 0) -> dict:
 def get_pokesprite_url_by_id(poke_id: int, depth = 0) -> str:
     """Returns an url to the sprite of the pokemon with poke_id
 
-        Args:
-            poke_id (int): id of the pokemon
-            depth (int): the depth value: 0 => load from cache, 1 => fetch from pokebase api, <0 or >1 => fail
-
-        Returns:
-            str: Returns an empty string if fetch fails. Returns a string containing the path to the sprite of the pokemon
+    :param poke_id: id of the pokemon
+    :type poke_id: int
+    :param depth: `0` => load from cache, `1` => fetch from pokebase api, `otherwise` => fetch failed, defaults to 0
+    :type depth: int, optional
+    :return: Returns empty string if fetch fails. Returns a string containing the path to the sprite of the pokemon if successfull
+    :rtype: str
     """
+    
     # declare func_name for logging
     func_name = "get_pokesprite_url_by_id"
     

@@ -16,8 +16,4 @@ documentation for details.
 
    apidoc/modules
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Architecture:
-   
    arc42/architecture
