@@ -6,10 +6,6 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath("../src"))
-
 project = 'sqs2025'
 copyright = '2025, Emre Gülcino'
 author = 'Emre Gülcino'
