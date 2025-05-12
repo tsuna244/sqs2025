@@ -6,8 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import os
 import sys
-from pathlib import Path
+sys.path.insert(0, os.path.abspath("../src"))
 
 project = 'sqs2025'
 copyright = '2025, Emre Gülcino'
@@ -16,10 +17,10 @@ author = 'Emre Gülcino'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['myst_parser', 'sphinx.ext.autodoc']
+extensions = ['myst_parser', 'sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc']
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thubs.db', '.DS_Store']
 
 
 
