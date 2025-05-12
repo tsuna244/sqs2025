@@ -6,6 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import sys
+from pathlib import Path
+
 project = 'sqs2025'
 copyright = '2025, Emre Gülcino'
 author = 'Emre Gülcino'
@@ -13,7 +16,7 @@ author = 'Emre Gülcino'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['myst_parser']
+extensions = ['myst_parser', 'sphinx.ext.autodoc']
 
 templates_path = ['_templates']
 exclude_patterns = []

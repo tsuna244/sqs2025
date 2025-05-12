@@ -14,4 +14,6 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
+   .. autoclass:: ..src.api.modules.module_pokeapi
+
    arc42/architecture
