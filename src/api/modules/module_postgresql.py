@@ -13,21 +13,26 @@ class DatabaseError(Exception):
         super().__init__(err_msg)
 
 class UserObj():
-    """ 
-        This class represents a User entry in the database
-
-        Attributes:
-            user_id (str): the id of the user inside the database (auto generated)
-            user_name (str): the name of the user
-            deck_ids (list): list of integer containing pokemon ids. This represents the card deck of a user
-
-        Methods:
-            create_empty: creates empty user with id -1
-            __eq__: compairs two userobjects (compairs the __str__() method -> ALL ATTRIBUTES HAVE TO BE EQUAL)
-            __dict__: returns the user object as a dictionary
-            __str__: returns the user object as a string containing the dictionary
+    """This class represents a User entry in the database
+    
+    :param user_id: id of the user inside the database
+    :type user_id: int
+    :param user_name: name of the user inside the database
+    :type user_name: str
+    :param deck_ids: list of pokemon ids that represent the deck of the user, defaults to None
+    :type deck_ids: list | None
     """
+    
     def __init__(self, user_id: str, user_name: str, deck_ids = None):
+        """constructor method
+    
+        :param user_id: id of the user inside the database
+        :type user_id: int
+        :param user_name: name of the user inside the database
+        :type user_name: str
+        :param deck_ids: list of pokemon ids that represent the deck of the user, defaults to None
+        :type deck_ids: list | None
+        """
         self.user_id = user_id
         self.user_name = user_name
         if deck_ids is None:
@@ -37,6 +42,11 @@ class UserObj():
 
     @classmethod
     def create_empty(cls):
+        """Create empty user object
+
+        :return: `{"user_id": -1, "user_name": "", "deck_ids": None}` -> empty user object with id -1
+        :rtype: class: UserObj
+        """
         return cls(-1, "")
 
     def __eq__(self, user):
@@ -66,15 +76,16 @@ DB_SETTINGS = {
 
 # INPUT CHECK
 def check_passwd_input(password: str, function_name="check_passwd_input") -> int:
-    """ Check the password input if it is correct
+    """Check the password input if it is correct
 
-        Args:
-            password (str): The password that will be checked
-            function_name (str): The name of the function that calls this check. Defaults to check_passwd_input. (For logging only)
-
-        Returns:
-            int: 0 if check succesfull. 10 -> password not a string. 11 -> password < 8. 12 -> Must contain digit. 13 -> Must contain upper character.
+    :param password: The password that will be checked
+    :type password: str
+    :param function_name: The name of the function that calls this check, defaults to "check_passwd_input"
+    :type function_name: str, optional
+    :return: `0` if check succesfull, `10` if password not a string, `11` if password length < 8, `12` if no digit in password. `13` if no upper character in password
+    :rtype: int
     """
+    
     # check if password is a string
     if not isinstance(password, str):
         log_function(MODULE_NAME, function_name, "Password must be a string", "error")
@@ -100,15 +111,16 @@ def check_passwd_input(password: str, function_name="check_passwd_input") -> int
 
 # check user input
 def check_user_input(user_name: str, function_name="check_user_input") -> int:
-    """ Check the username is correct
+    """Check the username is correct
 
-        Args:
-            user_name (str): The username that will be checked
-            function_name (str): The name of the function that calls this check. Defaults to check_user_input. (For logging only)
-
-        Returns:
-            int: 0 if check succesfull. 4 -> username must be string. 5 -> username is empty. 6 -> Must start with a letter.
+    :param user_name: The username that will be checked
+    :type user_name: str
+    :param function_name: The name of the function that calls this check, defaults to "check_user_input"
+    :type function_name: str, optional
+    :return: `0` if check succesfull, `4` if username is not a string. `5` if username is empty. `6` if username does not start with a letter
+    :rtype: int
     """
+    
     # check if username is of type string
     if not isinstance(user_name, str):
         log_function(MODULE_NAME, function_name, "Username must be of type string", "Error")
@@ -127,15 +139,16 @@ def check_user_input(user_name: str, function_name="check_user_input") -> int:
 
 # check deck ids input
 def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_input") -> int:
-    """ Check the deck_ids input if it is correct
+    """Check the deck_ids input if it is correct
 
-        Args:
-            deck_ids (list[int]): The deck_ids that will be checked
-            function_name (str): The name of the function that calls this check. Defaults to check_deck_ids_input. (For logging only)
-
-        Returns:
-            int: 0 if check succesfull. 7 -> deck_ids is empty. 8 -> the list must contain integer only.
+    :param deck_ids: The deck_ids that will be checked
+    :type deck_ids: list[int]
+    :param function_name: The name of the function that calls this check, defaults to "check_deck_ids_input"
+    :type function_name: str, optional
+    :return: `0` if check succesfull, `7` if deck_ids is empty, `8` if the list contains something diffrent than an integer
+    :rtype: int
     """
+    
     # check if deckid is of type list
     if not isinstance(deck_ids, list):
         log_function(MODULE_NAME, function_name, "deck_ids must be of type list", "Error")
@@ -154,14 +167,14 @@ def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_inpu
 
 
 def get_postgress_conn(db_settings: dict):
-    """ Create connection to a postgress database using the given settings
+    """Create connection to a postgress database using the given settings
 
-        Args:
-            db_settings (dict): settings for connection
-
-        Returns:
-            psycogp2.Connection | None: Returns a connection object if connection was successful. Returns None type object otherwise
+    :param db_settings: settings for connection
+    :type db_settings: dict
+    :return: returns a connection object if connection was successful, returns None type object otherwise
+    :rtype: psycopg2.connect | None
     """
+    
     function_name="get_postgress_conn"
 
     # try creating connection using the settings
@@ -176,16 +189,17 @@ def get_postgress_conn(db_settings: dict):
         return None
 
 
-def create_table(conn, table_name="users"):
-    """ Create a table inside the database
+def create_table(conn, table_name="users") -> int:
+    """Create a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Creating table failed.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param table_name: name of the table inside database, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if Creating table failed
+    :rtype: int
     """
+    
     function_name="create_table"
 
     if conn is None:
@@ -225,15 +239,16 @@ def create_table(conn, table_name="users"):
 
 
 def clean_table(conn, table_name="users"):
-    """ Clean a table inside the database
+    """Clean a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Cleaning table failed.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param table_name: name of the table inside database, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if Cleaning table failed
+    :rtype: int
     """
+    
     function_name="clean_table"
 
     # check connection
@@ -264,15 +279,16 @@ def clean_table(conn, table_name="users"):
 
 
 def delete_table(conn, table_name="users") -> int:
-    """ Delete a table inside the database
+    """Delete a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Deleting table failed.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param table_name: name of the table inside database, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if Deleting table failed
+    :rtype: int
     """
+    
     function_name="delete_table"
 
     # check connection
@@ -299,22 +315,26 @@ def delete_table(conn, table_name="users") -> int:
         return 2
 
 
-def add_user_with_crypt_pass(conn, user_name, passwd, deck_ids, table_name="users") -> int:
-    """ Add a new user to a table inside the database
+def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[int], table_name="users") -> int:
+    """Add a new user to a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            user_name (str): the name of the user
-            passwd (str): the password of the user
-            deck_ids (list[int]): list containing pokemon ids that resemble the deck of the user
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Deleting table failed.
-                 4 -> username must be string. 5 -> username is empty. 6 -> Must start with a letter.
-                 7 -> deck_ids is empty. 8 -> the list must contain integer only.
-                 10 -> password not a string. 11 -> password < 8. 12 -> Must contain digit. 13 -> Must contain upper character.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param user_name: the name of the user
+    :type user_name: str
+    :param passwd: the password of the user
+    :type passwd: str
+    :param deck_ids: list containing pokemon ids that resemble the deck of the user
+    :type deck_ids: list[int]
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens, 
+             `4` if username is not a string, `5` if username is empty, `6` if username does not start with a letter,
+             `7` if deck_ids is empty, `8` if the deck_ids list contains something diffrent that an integer,
+             `10` if password not a string, `11` if password is less than 8 characters long, `12` if password does not contain digit. `13` if password does not contain an upper character.
+    :rtype: int
     """
+    
     function_name="add_user_with_crypt_pass"
 
     if conn is None:
@@ -365,17 +385,20 @@ def add_user_with_crypt_pass(conn, user_name, passwd, deck_ids, table_name="user
 
 
 def get_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
-    """ Returns a user from a table inside the database
+    """Returns a user from a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            user_name (str): the name of the user
-            passwd (str): the password of the user
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            UserObj: Returns empty user with id -1 if fetch fails. Returns UserObj containing user information otherwise.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param user_name: the name of the user
+    :type user_name: str
+    :param user_password: the password of the user
+    :type user_password: str
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: Returns empty user with id `-1` if fetch fails. Returns UserObj containing user information otherwise.
+    :rtype: UserObj
     """
+    
     function_name="get_user_from_db"
 
     # check connection
@@ -424,20 +447,23 @@ def get_user_from_db(conn, user_name: str, user_password: str, table_name="users
         return UserObj.create_empty()
 
 
-def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="users"):
-    """ Update a user from a table inside the database
+def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="users") -> int:
+    """Update a user from a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            user_name (str): the name of the user
-            deck_ids (list[int]): list containing pokemon ids that resemble the deck of the user
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Deleting table failed.
-                 4 -> username must be string. 5 -> username is empty. 6 -> Must start with a letter.
-                 7 -> deck_ids is empty. 8 -> the list must contain integer only.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param user_name: the name of the user
+    :type user_name: str
+    :param deck_ids: list containing pokemon ids that resemble the deck of the user
+    :type deck_ids: list[int]
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens, 
+             `4` if username is not a string, `5` if username is empty, `6` if username does not start with a letter,
+             `7` if deck_ids is empty, `8` if the deck_ids list contains something diffrent that an integer
+    :rtype: int
     """
+    
     function_name="update_user_from_db"
 
     # check connection
@@ -479,17 +505,19 @@ def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="u
 
 
 def delete_user_from_db(conn, user_name: str, table_name="users"):
-    """ Delete a user from a table inside the database
+    """Delete a user from a table inside the database
 
-        Args:
-            conn: Connection object must not be None type
-            user_name (str): the name of the user
-            table_name (str): Name of the table. Default is "users"
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Deleting table failed.
-                 4 -> username must be string. 5 -> username is empty. 6 -> Must start with a letter.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param user_name: the name of the user
+    :type user_name: str
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens, 
+             `4` if username is not a string, `5` if username is empty, `6` if username does not start with a letter
+    :rtype: int
     """
+    
     function_name="delete_user_from_db"
 
     # check connection
@@ -524,14 +552,14 @@ def delete_user_from_db(conn, user_name: str, table_name="users"):
         return 2
 
 def close_connection(conn) -> int:
-    """ Close the connection to the database
+    """Close the connection to the database
 
-        Args:
-            conn: Connection object must not be None type
-
-        Returns:
-            int: 0 if successful. 1 -> None Type connection. 2 -> Deleting table failed.
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens
+    :rtype: int
     """
+    
     function_name="close_connection"
 
     # check connection
