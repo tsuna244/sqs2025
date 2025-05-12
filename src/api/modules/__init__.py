@@ -1,1 +1,1 @@
-from .interface import PokemonObj, GenerationObj, Database, UserObj
+from .interface import PokemonObj, GenerationObj, Database

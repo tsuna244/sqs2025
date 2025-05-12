@@ -21,6 +21,8 @@ SECRET_KEY = ""
 ALGORITHM = "HS256"
 ACESS_TOKEN_EXPIRE_MINUTES = 30
 
+db = Database()
+db.create_table()
 
 templates = Jinja2Templates(directory="api/templates")
 
@@ -32,7 +34,8 @@ class TokenData(BaseModel):
     username: str | None = None
 
 class User(BaseModel):
-    username: str
+    user_id: int
+    user_name: str
     deck_ids: list[int]
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -60,15 +63,11 @@ async def get_current_user(token: str = Depends(oauth_2_scheme)):
     except JWTError:
         raise credential_exception
     
-    user = Database.get_user(username, "")
-    if user is None:
+    user = db.get_user(token_data.username)
+    if user["user_id"] == -1:
         raise credential_exception
     
-    return user
-
-async def get_current_active_user(current_user: dict = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+    return User(user_id=user["user_id"], user_name=user["user_name"], deck_ids=user["deck_ids"])
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="api/static"), name="static")
@@ -97,12 +96,16 @@ async def user_registration_page(request: Request):
         request=request
     )
 
-@app.post("/game", response_model=User)
-async def game_page(current_user: User = Depends(get_current_active_user)):
+@app.get("/test_register")
+async def register_test(request: Request):
+    return db.add_user("tsuna2", "1234ABCD", [1, 2, 3])
+
+@app.get("/game", response_model=User)
+async def game_page(current_user: User = Depends(get_current_user)):
     return current_user
 
-@app.post("/leaderboard")
-async def leaderboard_page(current_user: User = Depends(get_current_active_user)):
+@app.get("/leaderboard")
+async def leaderboard_page(current_user: User = Depends(get_current_user)):
     return current_user.deck_ids
 
 @app.get("/Pokemon/{pokemon_id}")
@@ -111,9 +114,9 @@ async def read_pokemon(pokemon_id: int, request: Request):
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = Database.get_user(form_data.username, form_data.password)
-    if not user:
+    user = db.authenticate_user(form_data.username, form_data.password)
+    if user["user_id"] == -1:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers={"WWW_Authenticate": "Bearer"})
     access_token_expires = timedelta(minutes=ACESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": user["user_name"]}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}

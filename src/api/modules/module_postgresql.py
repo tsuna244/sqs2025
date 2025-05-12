@@ -384,8 +384,64 @@ def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[i
         return 2
 
 
-def get_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
+def get_user_from_db(conn, user_name: str, table_name="users") -> UserObj:
     """Returns a user from a table inside the database
+
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param user_name: the name of the user
+    :type user_name: str
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: Returns empty user with id `-1` if fetch fails. Returns UserObj containing user information otherwise.
+    :rtype: UserObj
+    """
+    
+    function_name="get_user_from_db"
+
+    # check connection
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Fetching user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return UserObj.create_empty()
+    
+    # check input
+    user_name_check = check_user_input(user_name, function_name)
+    if user_name_check != 0:
+        return UserObj.create_empty()
+    
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to fetch user {user_name}")
+        # create querry. get current courser of database, execute querry and commit changes
+        query_base = sql.SQL("""SELECT id, {col_1}, {col_3} FROM {table_name} 
+                             WHERE {col_1} = %s
+                             """).format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0]),
+        col_2=sql.Identifier(TABLE_COL_NAMES[1]),
+        col_3=sql.Identifier(TABLE_COL_NAMES[2])
+        )
+
+        cursor = conn.cursor()
+        cursor.execute(query_base, [user_name])
+        conn.commit()
+        fetch = cursor.fetchone()
+        # check if the fetch was successful -> User exists or not?
+        if fetch is not None:
+            _id, _name, _deck_ids = fetch
+            log_function(MODULE_NAME, function_name, f"Fetched user {user_name} successfully")
+            return UserObj(_id, _name, _deck_ids)
+        else:
+            log_function(MODULE_NAME, function_name, f"Fetched user {user_name} not found", "warn")
+            return UserObj.create_empty()
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Fetching user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return UserObj.create_empty()
+
+
+def authenticate_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
+    """Returns a user from a table inside the database if password is correct
 
     :param conn: Connection object must not be None type
     :type conn: psycopg2.connect
@@ -399,7 +455,7 @@ def get_user_from_db(conn, user_name: str, user_password: str, table_name="users
     :rtype: UserObj
     """
     
-    function_name="get_user_from_db"
+    function_name="authenticate_user_from_db"
 
     # check connection
     if conn is None:
