@@ -1,10 +1,57 @@
 {% extends "base.html" %}
 
-{% block body %} 
-<div class="container">
-    <form class="d-flex" role="search">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-      <button class="btn btn-outline-success" type="submit">Search</button>
+{% block scripts %} 
+
+<script>
+
+  function onSearch() {
+    const serach_value = document.getElementById("search_input").value;
+    fetch("/Pokemon/1", {
+      method: "POST"
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(JSON.stringify(data));
+      console.log(serach_value);
+    })
+  }
+</script>
+
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <form class="container-fluid justify-content-center row" role="search">
+      <input id="search_input" class="form-control col-9 mr-2" type="search" placeholder="Search">
+      <button class="form-control btn col-2 me-2" type="button" onclick="onSearch()">Search</button>
     </form>
+
+    <div id="poke_elem" class="container justify-content-center mt-5">
+      <div class="row">
+        <div class="col-10">
+          <span>Pokemon Id:</span><p id="poke_id"></p>
+          <span>Pokemon Name:</span><p id="poke_name"></p>
+          <span>Pokemon Generation:</span><p id="poke_gen"></p>
+          <span>Pokemon Rarity:</span><p id="poke_rarity"></p>
+          <span>Pokemon Stats:</span>
+          <div class="container">
+            <p id="poke_hp"></p>
+            <p id="poke_atk"></p>
+            <p id="poke_def"></p>
+            <p id="poke_satk"></p>
+            <p id="poke_sdef"></p>
+            <p id="poke_spd"></p>
+          </div>
+        </div>
+        <div class="col-2">
+        </div>
+      </div>
+    </div>
+
 </div>
+
+<script>
+  document.getElementById('poke_elem').innerHTML = ""
+</script>
+
 {% endblock %}

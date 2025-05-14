@@ -101,10 +101,6 @@ async def user_registration_page(request: Request):
         request=request
     )
 
-@app.post("/logout")
-async def logout_user(current_user: User = Depends(get_current_user)):
-    pass
-
 @app.get("/test_register")
 async def register_test(request: Request):
     return db.add_user("tsuna2", "1234ABCD", [1, 2, 3])
@@ -114,12 +110,20 @@ async def get_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 @app.get("/leaderboard")
-async def leaderboard_page(current_user: User = Depends(get_current_user)):
-    return current_user.deck_ids
+async def leaderboard_page():
+    return {"TBD": "TBD"}
 
-@app.get("/Pokemon/{pokemon_id}")
+@app.get("/my_deck")
+async def my_deck_page():
+    return {"TBD": "TBD"}
+
+@app.get("/pack_opening")
+async def get_pack_opening():
+    return {"TBD": "TBD"}
+
+@app.post("/Pokemon/{pokemon_id}")
 async def read_pokemon(pokemon_id: int, request: Request):
-    return PokemonObj(pokemon_id).__dict__().__str__()
+    return PokemonObj(pokemon_id).__dict__()
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

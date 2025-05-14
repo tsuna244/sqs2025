@@ -1,6 +1,6 @@
 <script>
 
-  var current_token = JSON.parse(window.localStorage.token);
+  var current_token = JSON.parse(window.sessionStorage.token);
 
   if (current_token != "undefined" || current_token != "null") {
 
@@ -16,6 +16,9 @@
                             <button class="btn btn-outline-success" type="button" onclick="logout()">Logout</button>
                             `
                 document.getElementById('login_register').innerHTML = html
+
+                document.getElementById('pack').classList.remove('disabled')
+                document.getElementById('deck').classList.remove('disabled')
               }
             }
         );
@@ -31,13 +34,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
   <div class="container-fluid">
-    <a class="navbar-brand" href="#"><img style="width: 25px;" src="{{ url_for('static', path='/icon.png') }}" alt="Home"></a>
+    <a class="navbar-brand" href="/"><img style="width: 25px;" src="{{ url_for('static', path='/icon.png') }}" alt="Home"></a>
     <div class="container-fluid">
       <div class="navbar-nav">
-        <a class="nav-link active" aria-current="page" href="#">Search Pokemon</a>
-        <a class="nav-link disabled" href="#">Packopening</a>
-        <a class="nav-link disabled" href="#">Leaderboard</a>
-        <a class="nav-link disabled" aria-disabled="true">My-Deck</a>
+        <a id="leader" class="nav-link" href="/leaderboard">Leaderboard</a>
+        <a id="pack" class="nav-link disabled" href="/pack_opening">Packopening</a>
+        <a id="deck" class="nav-link disabled" href="/my_deck">My-Deck</a>
       </div>
     </div>
 

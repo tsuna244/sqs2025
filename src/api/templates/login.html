@@ -16,7 +16,7 @@
         .then(response => response.json())
         .then(data => { // data is a JSON object
           if (data.hasOwnProperty("access_token")) {
-            window.localStorage.token = JSON.stringify(data);
+            window.sessionStorage.token = JSON.stringify(data);
             document.location.href = "/";
           }
           else
