@@ -8,7 +8,7 @@
     var formData = new FormData();
     formData.append("username", document.loginform.username.value);
     formData.append("password", document.loginform.password.value);
-  
+
     fetch('/token', {
           method: 'POST',
           body: formData,
@@ -16,15 +16,74 @@
         .then(response => response.json())
         .then(data => { // data is a JSON object
           if (data.hasOwnProperty("access_token")) {
-            window.localStorage.token = data;
-            console.log(JSON.stringify(data));
+            window.localStorage.token = JSON.stringify(data);
+            document.location.href = "/";
           }
           else
-            console.log(JSON.stringify(data)); 
+            console.log(JSON.stringify(data));
         })
         .catch(error => {
           console.error(error);
         });
+  }
+
+
+  function validatePassword(password) {
+    const elem_len = document.getElementById("length");
+    const elem_upper = document.getElementById("capital");
+    const elem_digit = document.getElementById("number");
+    const elem_lower = document.getElementById("letter");
+
+    var fail = false;
+
+    if (password.length >= 8) {
+       elem_len.classList.remove("bi-x-lg");
+       elem_len.classList.add("bi-check-lg");
+    }else {
+       fail = true;
+       elem_len.classList.add("bi-x-lg");
+       elem_len.classList.remove("bi-check-lg");
+    }
+
+    if (/[A-Z]/.test(password)) {
+       elem_upper.classList.remove("bi-x-lg");
+       elem_upper.classList.add("bi-check-lg");
+    }else {
+       fail = true;
+       elem_upper.classList.add("bi-x-lg");
+       elem_upper.classList.remove("bi-check-lg");
+    }
+
+    if (/[a-z]/.test(password)) {
+       elem_lower.classList.remove("bi-x-lg");
+       elem_lower.classList.add("bi-check-lg");
+    }else {
+       fail = true;
+       elem_lower.classList.add("bi-x-lg");
+       elem_lower.classList.remove("bi-check-lg");
+    }
+
+    if (/[0-9]/.test(password)) {
+       elem_digit.classList.remove("bi-x-lg");
+       elem_digit.classList.add("bi-check-lg");
+    }else {
+       fail = true;
+       elem_digit.classList.add("bi-x-lg");
+       elem_digit.classList.remove("bi-check-lg");
+    }
+   
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (fail == true) {
+      errorMessage.textContent = 'Weak Password';
+      errorMessage.classList.remove('text-success');
+      errorMessage.classList.add('text-danger');
+    }else {
+      errorMessage.textContent = 'Strong Password';
+      errorMessage.classList.remove('text-danger');
+      errorMessage.classList.add('text-success');
+    }
+
   }
 </script>
 
@@ -50,8 +109,9 @@
     				<input id="username" name="username" type="text" class="form-control" placeholder="Username">
   				</div>
  					<div class="form-group">
-    				<input id="password" name="password" type="password" class="form-control" placeholder="Password">
-  				</div>
+    				<input id="password" name="password" type="password" class="form-control" placeholder="Password" oninput="validatePassword(this.value)">
+            <span id="errorMessage" class="font-weight-bold text-danger"></span>
+          </div>
   				<div class="form-group mt-3">
   					<button type="button" class="btn btn-block btn-outline-primary btn-lg" onclick="send()"><small><i class="bi bi-person pr-2"></i>Login</small></button>
   				</div>
@@ -59,12 +119,11 @@
 
         <div class="division" id="passwd_message">
           <h3>Password must contain the following:</h3>
-          <p id="letter" class="invalid">A <b>lowercase</b> letter</p>
-          <p id="capital" class="invalid">A <b>capital (uppercase)</b> letter</p>
-          <p id="number" class="invalid">A <b>number</b></p>
-          <p id="length" class="invalid">Minimum <b>8 characters</b></p>
+          <p><i id="letter" class="bi bi-x-lg mr-1"></i>A <b>lowercase</b> letter</p>
+          <p><i id="capital" class="bi bi-x-lg mr-1"></i>A <b>capital (uppercase)</b> letter</p>
+          <p><i id="number" class="bi bi-x-lg mr-2"></i>A <b>number</b></p>
+          <p><i id="length" class="bi bi-x-lg mr-2"></i>Minimum <b>8 characters</b></p>
         </div>
-
 			</div>
 		</div>
 	</div>

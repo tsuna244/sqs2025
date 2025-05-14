@@ -1,15 +1,31 @@
 <script>
 
-  var current_token = window.localStorage.token;
+  var current_token = JSON.parse(window.localStorage.token);
 
   if (current_token != "undefined" || current_token != "null") {
-    
+
     const headers = { 'Authorization': current_token["token_type"] + " " + current_token["access_token"] }; // auth header with bearer token
-    //fetch('https://testapi.jasonwatmore.com/products/1', { headers })
-    //    .then(response => response.json())
-    //    .then(data => console.log(JSON.stringify(data)));
+    fetch("/get_user", { 
+      method: "POST",
+      headers: headers 
+    })
+        .then(response => response.json())
+        .then(data => {
+              if (data.hasOwnProperty('user_name')) {
+                var html = `<span class="navbar-text mr-2">${data["user_name"]}</span>
+                            <button class="btn btn-outline-success" type="button" onclick="logout()">Logout</button>
+                            `
+                document.getElementById('login_register').innerHTML = html
+              }
+            }
+        );
   }
 
+  function logout() {
+    window.localStorage.token = "null"
+    window.location.href = "/"
+  }
+  
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">

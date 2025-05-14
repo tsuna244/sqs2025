@@ -17,9 +17,9 @@ from jose import jwt, JWTError
 from .modules import PokemonObj, GenerationObj, Database
 
 # authentication settings
-SECRET_KEY = ""
+SECRET_KEY = "verysecretkey"
 ALGORITHM = "HS256"
-ACESS_TOKEN_EXPIRE_MINUTES = 30
+ACESS_TOKEN_EXPIRE_MINUTES = 1
 
 db = Database()
 db.create_table()
@@ -32,6 +32,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    expires: float
 
 class User(BaseModel):
     user_id: int
@@ -46,25 +47,29 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.now() + expires_delta
     else:
         expire = datetime.now() + timedelta(minutes=15)
-    
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire.timestamp()})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 async def get_current_user(token: str = Depends(oauth_2_scheme)):
     credential_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials", headers={"WWW_Authenticate": "Bearer"})
-    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        expires = payload.get("exp")
         if username is None:
             raise credential_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(username=username, expires=expires)
     except JWTError:
         raise credential_exception
     
     user = db.get_user(token_data.username)
     if user["user_id"] == -1:
+        raise credential_exception
+    
+    if expires is None:
+        raise credential_exception
+    if datetime.now().timestamp() > token_data.expires:
         raise credential_exception
     
     return User(user_id=user["user_id"], user_name=user["user_name"], deck_ids=user["deck_ids"])
@@ -96,12 +101,16 @@ async def user_registration_page(request: Request):
         request=request
     )
 
+@app.post("/logout")
+async def logout_user(current_user: User = Depends(get_current_user)):
+    pass
+
 @app.get("/test_register")
 async def register_test(request: Request):
     return db.add_user("tsuna2", "1234ABCD", [1, 2, 3])
 
-@app.get("/game", response_model=User)
-async def game_page(current_user: User = Depends(get_current_user)):
+@app.post("/get_user", response_model=User)
+async def get_user(current_user: User = Depends(get_current_user)):
     return current_user
 
 @app.get("/leaderboard")
