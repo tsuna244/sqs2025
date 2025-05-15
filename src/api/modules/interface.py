@@ -94,6 +94,10 @@ class PokemonObj(object):
                 multiplier = 5
             self._points = self._stats[0]["stat_value"] * multiplier  # hp base stat times rarity multiplier
     
+    @classmethod
+    def from_pokemon_name(cls, pokemon_name):
+        pass
+    
     def get_id(self):
         return self._poke_id
     
@@ -108,6 +112,9 @@ class PokemonObj(object):
     
     def get_stats(self):
         return self._stats
+
+    def get_points(self):
+        return self._points
 
     def get_sprite_path(self):
         return self._sprite

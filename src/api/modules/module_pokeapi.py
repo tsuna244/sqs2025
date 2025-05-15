@@ -1,5 +1,6 @@
 import pokebase as pb
 from enum import Enum
+import re
 
 # set chache folder for pokebase
 STATIC_FOLDER = "api/static/"
@@ -22,13 +23,13 @@ class PokemonRarity(Enum):
 
 
 # utility function: check function for integer values (poke_id and depth)
-def check_input(function_name: str, input, val_name: str) -> int:
+def check_input(function_name: str, input: int, val_name: str) -> int:
     """Checks if the input value is a postive integer. Returns -1 if not
 
     :param function_name: The name of the function that calls the check (used for logging)
     :type function_name: str
     :param input: the input that will be checked
-    :type input: _type_
+    :type input: int
     :param val_name: the name of the input that is beeing checked (used for logging)
     :type val_name: str
     :return: `-1` if the input is not an integer or negative, `input` value as integer otherwise
@@ -43,6 +44,33 @@ def check_input(function_name: str, input, val_name: str) -> int:
     except ValueError:
         log_function(MODULE_NAME, function_name, f"{val_name} must be an integer or a string containing an integer!!! {val_name} = {input}", "error")
         return -1
+
+
+def check_pokemon_name(function_name: str, pokemon_name: str):
+    """Checks if the pokemon name is correct. returns -1 if not
+
+    :param function_name: The name of the function that calls the check (used for logging)
+    :type function_name: str
+    :param pokemon_name: the pokemon name to check
+    :type pokemon_name: str
+    :return: `-1` if the pokemon name is wrong, '0' otherwise
+    :rtype: int
+    """
+    regex = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
+    if pokemon_name is None:
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not be None!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    if pokemon_name == "":
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not be emtpy!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    if any(char.isdigit() for char in pokemon_name):
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not contain digits!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    if regex.search(pokemon_name):
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not contain special characters!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    log_function(MODULE_NAME, function_name, f"Pokemon name checked successfully!!! Pokemon_name = {pokemon_name}")
+    return 0
 
 
 def _check_generation_and_depth(func_name: str, generation: int, depth: int):
@@ -273,6 +301,68 @@ def get_pokemon_by_id(poke_id: int, depth = 0) -> dict:
             return {}
     except Exception as e:
         log_function(MODULE_NAME, func_name, f"Unresolfed error occured for pokemon id {poke_id}! Error:{e.__str__()}", "error")
+        return {}
+
+
+def get_pokemon_by_name(pokemon_name: str, depth = 0) -> dict:
+    """Returns information of a pokemon with the given pokemon name
+
+    :param pokemon_name: name of the pokemon
+    :type pokemon_name: str
+    :param depth: `0` => load from cache, `1` => fetch from pokebase api, `otherwise` => fetch failed, defaults to 0
+    :type depth: int, optional
+    :return: `{}` if fetch fails, `{"pokemon_id": <pokemon_id>, "pokemon_name": <pokemon_name>, "pokemon_stats": <poke_stats>}` if successfull
+    :rtype: dict
+    """
+    
+    # declare func_name for logging
+    func_name = "get_pokemon_by_name"
+    
+    # check input
+    if check_pokemon_name(func_name, pokemon_name) == -1:
+        return {}
+    depth = check_input(func_name, depth, "depth")
+    
+    # check depth
+    if depth > 1:
+        log_function(MODULE_NAME, func_name, f"Could not load pokemon with id {pokemon_name}", "error")
+        return {}
+    
+    # try to fetch pokemon from database
+    try:
+        # load from cache
+        if depth == 0:
+            log_function(MODULE_NAME, func_name, f"Try loading from cache for pokemon id {pokemon_name}")
+            poke_resource = pb.cache.load("pokemon", pokemon_name)
+            log_function(MODULE_NAME, func_name, f"Successfully loaded from cache for pokemon id {pokemon_name}")
+            
+            poke_stats = []
+            
+            for stat in poke_resource["stats"]:
+                poke_stats.append({"stat_name": stat["stat"]["name"], "stat_value": stat["base_stat"]})
+            
+            return {"pokemon_id": poke_resource["id"], "pokemon_name": poke_resource["name"], "pokemon_stats": poke_stats}
+        elif depth == 1: # fetch from api
+            log_function(MODULE_NAME, func_name, f"Try fetching from api for pokemon id {pokemon_name}")
+            poke_resource = pb.pokemon(pokemon_name)
+            log_function(MODULE_NAME, func_name, f"Successfully fetched from api for pokemon id {pokemon_name}")
+            
+            poke_stats = []
+            
+            for stat in poke_resource.stats:
+                poke_stats.append({"stat_name": stat.stat.__getattr__("name"), "stat_value": stat.base_stat})
+            
+            return {"pokemon_id": poke_resource.id, "pokemon_name": poke_resource.name, "pokemon_stats": poke_stats}
+    except KeyError as e:
+        # load from cache failed -> retry with api fetch
+        if depth == 0:
+            log_function(MODULE_NAME, func_name, f"Could not find name list in cache. Will try api fetch next for pokemon id {pokemon_name}")
+            return get_pokemon_by_name(pokemon_name, depth + 1)
+        else:
+            log_function(MODULE_NAME, func_name, f"KeyError on depth != 0! Error: {e.__str__()}", "error")
+            return {}
+    except Exception as e:
+        log_function(MODULE_NAME, func_name, f"Unresolfed error occured for pokemon id {pokemon_name}! Error:{e.__str__()}", "error")
         return {}
 
 
