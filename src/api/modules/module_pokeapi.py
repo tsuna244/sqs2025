@@ -220,7 +220,6 @@ def get_pokemon_id_from_name(pokemon_name: str, depth = 0) -> int:
         cached_name_id_list = load_cached_name_id_list(FILE_CACHE_NAME)
         if pokemon_name in cached_name_id_list:
             log_function(MODULE_NAME, func_name, "Loaded pokemon id from cache successful")
-            print(cached_name_id_list[pokemon_name])
             return cached_name_id_list[pokemon_name]
         else:
             # fetch from api if loading from cache failed

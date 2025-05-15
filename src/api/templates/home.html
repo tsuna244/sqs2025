@@ -11,7 +11,27 @@
     })
     .then(response => response.json())
     .then(data => {
-      console.log(JSON.stringify(data));
+      if (data.hasOwnProperty("pokemon_id")) {
+        document.getElementById("poke_id").innerHTML = data["pokemon_id"];
+        document.getElementById("poke_name").innerHTML = data["pokemon_name"];
+        document.getElementById("poke_gen").innerHTML = data["pokemon_generation"];
+        document.getElementById("poke_rarity").innerHTML = data["pokemon_rarity"];
+        var pokemon_stats = data["pokemon_stats"]
+        document.getElementById("poke_hp").innerHTML = pokemon_stats[0]["stat_value"];
+        document.getElementById("poke_atk").innerHTML = pokemon_stats[1]["stat_value"];
+        document.getElementById("poke_def").innerHTML = pokemon_stats[2]["stat_value"];
+        document.getElementById("poke_satk").innerHTML = pokemon_stats[3]["stat_value"];
+        document.getElementById("poke_sdef").innerHTML = pokemon_stats[4]["stat_value"];
+        document.getElementById("poke_spd").innerHTML = pokemon_stats[5]["stat_value"];
+        
+        document.getElementById("poke_sprite").innerHTML = `<img src="/static/${data["pokemon_sprite_path"]}" alt="Pokemon Sprite not found" width=300 height=300>`
+
+        document.getElementById("poke_elem").style.display = "block";
+
+      }else {
+        document.getElementById("poke_elem").style.display = "none";
+      }
+
     })
   }
 </script>
@@ -27,30 +47,36 @@
 
     <div id="poke_elem" class="container justify-content-center mt-5">
       <div class="row">
-        <div class="col-10">
-          <span>Pokemon Id:</span><p id="poke_id"></p>
-          <span>Pokemon Name:</span><p id="poke_name"></p>
-          <span>Pokemon Generation:</span><p id="poke_gen"></p>
-          <span>Pokemon Rarity:</span><p id="poke_rarity"></p>
+        <div class="col-4">
+          <div class="row"><span class="mr-2">Pokemon Id:</span><span id="poke_id"></span></div>
+          <div class="row"><span class="mr-2">Pokemon Name:</span><span id="poke_name"></span></div>
+          <div class="row"><span class="mr-2">Pokemon Generation:</span><span id="poke_gen"></span></div>
+          <div class="row"><span class="mr-2">Pokemon Rarity:</span><span id="poke_rarity"></span></div>
+          
+        </div>
+        <div class="col-4">
           <span>Pokemon Stats:</span>
-          <div class="container">
-            <p id="poke_hp"></p>
-            <p id="poke_atk"></p>
-            <p id="poke_def"></p>
-            <p id="poke_satk"></p>
-            <p id="poke_sdef"></p>
-            <p id="poke_spd"></p>
+          <div class="container ml-4">
+            <div class="row"><span class="mr-2">Healt Points:</span><span id="poke_hp"></span></div>
+            <div class="row"><span class="mr-2">Attack:</span><span id="poke_atk"></span></div>
+            <div class="row"><span class="mr-2">Defense:</span><span id="poke_def"></span></div>
+            <div class="row"><span class="mr-2">Special Attack:</span><span id="poke_satk"></span></div>
+            <div class="row"><span class="mr-2">Special Defense:</span><span id="poke_sdef"></span></div>
+            <div class="row"><span class="mr-2">Speed:</span><span id="poke_spd"></span></div>
           </div>
         </div>
+
         <div class="col-2">
+          <div id="poke_sprite"></div>
         </div>
+        
       </div>
     </div>
 
 </div>
 
 <script>
-  document.getElementById('poke_elem').innerHTML = ""
+  document.getElementById('poke_elem').style.display = "none";
 </script>
 
 {% endblock %}
