@@ -121,9 +121,17 @@ async def my_deck_page():
 async def get_pack_opening():
     return {"TBD": "TBD"}
 
-@app.post("/Pokemon/{pokemon_id}")
+@app.post("/Pokemon_Id/{pokemon_id}")
 async def read_pokemon(pokemon_id: int, request: Request):
     return PokemonObj(pokemon_id).__dict__()
+
+@app.post("/Pokemon_Name/{pokemon_name}")
+async def get_pokemon_by_name(pokemon_name:str, request: Request):
+    pokemon = PokemonObj.from_pokemon_name(pokemon_name)
+    if isinstance(pokemon, dict):
+        return pokemon
+    else:
+        return pokemon.__dict__()
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

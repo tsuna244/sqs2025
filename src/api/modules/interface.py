@@ -1,6 +1,7 @@
 from .module_logger import LoggerClass
 from .module_pokeapi import (
     get_pokemon_by_id, 
+    get_pokemon_id_from_name,
     get_pokemon_id_names_by_generation, 
     get_pokemon_rarity_and_generation_by_id, 
     get_pokesprite_url_by_id, 
@@ -95,8 +96,20 @@ class PokemonObj(object):
             self._points = self._stats[0]["stat_value"] * multiplier  # hp base stat times rarity multiplier
     
     @classmethod
-    def from_pokemon_name(cls, pokemon_name):
-        pass
+    def from_pokemon_name(cls, pokemon_name: str, load_sprite=True):
+        """Returns pokemon object from pokemon name istead of id
+
+        :param pokemon_name: name of pokemon
+        :type pokemon_name: str
+        :param load_sprite: tells if pokemon sprite should be loaded or not, defaults to True
+        :type load_sprite: bool, optional
+        :return: a Pokemon object with this name
+        :rtype: PokemonObj
+        """
+        pokemon_id = get_pokemon_id_from_name(pokemon_name)
+        if pokemon_id == -1:
+            return {"details": "Pokemon with this Name not found"}
+        return cls(pokemon_id, load_sprite)
     
     def get_id(self):
         return self._poke_id
