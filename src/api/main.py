@@ -20,7 +20,7 @@ from .modules import PokemonObj, GenerationObj, Database
 # authentication settings
 SECRET_KEY = "verysecretkey"
 ALGORITHM = "HS256"
-ACESS_TOKEN_EXPIRE_MINUTES = 1
+ACESS_TOKEN_EXPIRE_MINUTES = 15
 
 db = None
 

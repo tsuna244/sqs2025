@@ -1,40 +1,8 @@
 {% extends "base.html" %}
 
-{% block scripts %} 
-
-<script>
-
-  function send() {
-    var formData = new FormData();
-    formData.append("username", document.loginform.username.value);
-    formData.append("password", document.loginform.password.value);
-
-    fetch('/token', {
-          method: 'POST',
-          body: formData,
-        })
-        .then(response => response.json())
-        .then(data => { // data is a JSON object
-          if (data.hasOwnProperty("access_token")) {
-            window.sessionStorage.token = JSON.stringify(data);
-            document.location.href = "/";
-          }
-          else
-            console.log(JSON.stringify(data));
-        })
-        .catch(error => {
-          console.error(error);
-        });
-  }
-
-</script>
-
-
-{% endblock %}
-
 {% block body %}
 
-<link rel="stylesheet" href="{{ url_for('static', path='/form_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/form_style.css') }}">
 
 <div class="container">
 	<div class="row d-flex justify-content-center mt-5">
@@ -66,4 +34,15 @@
 		</div>
 	</div>
 </div>
+
+<!-- Modal Popup -->
+<div class="modal fade" id="popupModal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <h4> Registration Failed!!! </h4>
+      <h4 id="modalMessage"></h4>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
