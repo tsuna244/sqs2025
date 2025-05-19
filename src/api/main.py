@@ -24,7 +24,7 @@ ACESS_TOKEN_EXPIRE_MINUTES = 1
 
 db = None
 
-if not os.environ.get("TEST", 'Not Set') != "1":
+if os.environ.get("TEST", 'Not Set') != "1":
     db = Database()
 
 def create_db(db_settings):
@@ -123,10 +123,6 @@ async def register_new_user(request: RegistrationModel):
         return {"details": "Connection error! Could not register user! Connection to database failed!"}
     else:
         return {"details": "Database Error! Could not register user! Unhandeled Error occured"}
-
-@app.get("/test_register")
-async def register_test(request: Request):
-    return db.add_user("tsuna2", "1234ABCD", [1, 2, 3])
 
 @app.post("/get_user", response_model=User)
 async def get_user(current_user: User = Depends(get_current_user)):
