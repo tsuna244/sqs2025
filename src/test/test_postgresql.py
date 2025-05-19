@@ -117,7 +117,7 @@ def test_get_user_from_db(db_connection):
 
 def test_authenticate_user_from_db(db_connection):
     # authenticate user with none type connection
-    assert authenticate_user_from_db(None, "").__eq__(UserObj.create_empty())
+    assert authenticate_user_from_db(None, "", "").__eq__(UserObj.create_empty())
     # authenticate user with wrong name type
     assert authenticate_user_from_db(db_connection, 123, "123456AB")
     # authenticate user with wrong password type
