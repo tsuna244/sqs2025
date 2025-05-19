@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<link rel="stylesheet" href="{{ url_for('static', path='/css/search_style.css') }}">
+
+<div class="container-fluid mt-5">
+    <form class="container-fluid justify-content-center row" role="search">
+      <input id="search_input" class="form-control col-9 mr-2" type="search" placeholder="Search">
+      <button class="form-control btn btn-outline-primary col-2 me-2" type="button" onclick="onSearch()">Search</button>
+    </form>
+
+    <p id="loading" class="container"></p>
+
+    <div id="poke_elem" class="container justify-content-center mt-5">
+      <div class="row">
+        <div class="col-4">
+          <div class="row"><span class="mr-2">Pokemon Id:</span><span id="poke_id"></span></div>
+          <div class="row"><span class="mr-2">Pokemon Name:</span><span id="poke_name"></span></div>
+          <div class="row"><span class="mr-2">Pokemon Generation:</span><span id="poke_gen"></span></div>
+          <div class="row"><span class="mr-2">Pokemon Rarity:</span><span id="poke_rarity"></span></div>
+          
+        </div>
+        <div class="col-4">
+          <span>Pokemon Stats:</span>
+          <div class="container ml-4">
+            <div class="row"><span class="mr-2">Healt Points:</span><span id="poke_hp"></span></div>
+            <div class="row"><span class="mr-2">Attack:</span><span id="poke_atk"></span></div>
+            <div class="row"><span class="mr-2">Defense:</span><span id="poke_def"></span></div>
+            <div class="row"><span class="mr-2">Special Attack:</span><span id="poke_satk"></span></div>
+            <div class="row"><span class="mr-2">Special Defense:</span><span id="poke_sdef"></span></div>
+            <div class="row"><span class="mr-2">Speed:</span><span id="poke_spd"></span></div>
+          </div>
+        </div>
+
+        <div class="col-2">
+          <div id="poke_sprite"></div>
+        </div>
+        
+      </div>
+    </div>
+
+</div>
+
+<script>
+  $('#poke_elem').hide();
+</script>
+
+{% endblock %}

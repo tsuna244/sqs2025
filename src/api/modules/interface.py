@@ -1,6 +1,7 @@
 from .module_logger import LoggerClass
 from .module_pokeapi import (
     get_pokemon_by_id, 
+    get_pokemon_id_from_name,
     get_pokemon_id_names_by_generation, 
     get_pokemon_rarity_and_generation_by_id, 
     get_pokesprite_url_by_id, 
@@ -15,6 +16,7 @@ from .module_postgresql import (
     delete_table,
     get_postgress_conn,
     get_user_from_db,
+    authenticate_user_from_db,
     update_user_from_db,
     delete_user_from_db,
     DatabaseError
@@ -93,6 +95,22 @@ class PokemonObj(object):
                 multiplier = 5
             self._points = self._stats[0]["stat_value"] * multiplier  # hp base stat times rarity multiplier
     
+    @classmethod
+    def from_pokemon_name(cls, pokemon_name: str, load_sprite=True):
+        """Returns pokemon object from pokemon name istead of id
+
+        :param pokemon_name: name of pokemon
+        :type pokemon_name: str
+        :param load_sprite: tells if pokemon sprite should be loaded or not, defaults to True
+        :type load_sprite: bool, optional
+        :return: a Pokemon object with this name
+        :rtype: PokemonObj
+        """
+        pokemon_id = get_pokemon_id_from_name(pokemon_name)
+        if pokemon_id == -1:
+            return {"details": "Pokemon with this Name not found"}
+        return cls(pokemon_id, load_sprite)
+    
     def get_id(self):
         return self._poke_id
     
@@ -107,6 +125,9 @@ class PokemonObj(object):
     
     def get_stats(self):
         return self._stats
+
+    def get_points(self):
+        return self._points
 
     def get_sprite_path(self):
         return self._sprite
@@ -219,7 +240,7 @@ class Database(object):
     def __init__(self, db_settings = None):
         """constructor method
 
-        :param db_settings: Dictionary containing all the information to connect to a database, defaults to None
+        :param db_settings: Dictionary containing all the information to connect to a database, if none environment variables will be used, defaults to None
         :type db_settings: dict | None
         
         :raises ConnectionError: Raises if connection to database failed
@@ -300,7 +321,20 @@ class Database(object):
         else:
             return output
     
-    def get_user(self, user_name: str, user_password: str) -> dict:
+    def get_user(self, user_name: str) -> dict:
+        """Returns a user in dictionary format containing his id, name, and list of pokemon_ids inside his deck called deck_id
+
+        :param user_name: the user name of the user to get
+        :type user_name: str
+        :return: A dictionary containing information about the user:
+                  `{"user_id": -1, "user_name": "", "deck_ids": []}` if user does not exists
+                  `{"user_id": int, "user_name": str, "deck_ids": list[int]}` if user does exists
+        :rtype: dict
+        """
+        
+        return get_user_from_db(self._conn, user_name).__dict__()
+
+    def authenticate_user(self, user_name: str, user_password: str) -> dict:
         """Returns a user in dictionary format containing his id, name, and list of pokemon_ids inside his deck called deck_id
 
         :param user_name: the user name of the user to get
@@ -308,12 +342,12 @@ class Database(object):
         :param user_password: password of the user
         :type user_password: str
         :return: A dictionary containing information about the user:
-                  `{}` if user does not exists or password is wrong
+                  `{"user_id": -1, "user_name": "", "deck_ids": []}` if user does not exists or password is wrong
                   `{"user_id": int, "user_name": str, "deck_ids": list[int]}` if user does exists and password was correct
         :rtype: dict
         """
         
-        return get_user_from_db(self._conn, user_name, user_password).__dict__()
+        return authenticate_user_from_db(self._conn, user_name, user_password).__dict__()
 
     def add_user(self, user_name: str, passwd: str, pokemon_list = []) -> int:
         """Add a new user to the table

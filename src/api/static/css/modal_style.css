@@ -1,0 +1,16 @@
+.modal-content {
+    border: none;
+	border-top: 5px solid  rgb(176,106,252);
+	background: #212042;
+	color: #68557a;
+}
+
+h4 {
+    margin: auto;
+    justify-content: center;
+    color: #fff;
+}
+
+#modalMessage {
+    color: #c78af8;
+}

@@ -9,6 +9,9 @@ fastapi-login
 
 jinja2
 
+# internally used by fastapi
+python-multipart
+
 # requirements for Testing FastAPI
 httpx
 pytest
@@ -24,3 +27,6 @@ psycopg2-binary
 
 # dotenv for local testing
 python-dotenv
+
+# jwt
+python-jose[cryptography]

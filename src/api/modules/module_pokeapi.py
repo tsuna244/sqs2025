@@ -1,5 +1,8 @@
 import pokebase as pb
 from enum import Enum
+import re
+import json
+import os
 
 # set chache folder for pokebase
 STATIC_FOLDER = "api/static/"
@@ -7,6 +10,8 @@ STATIC_FOLDER = "api/static/"
 CACHE_DIR = STATIC_FOLDER + ".cache/"
 
 pb.cache.set_cache(CACHE_DIR)
+
+FILE_CACHE_NAME = CACHE_DIR + "cache_ids.json"
 
 from .module_logger import log_function
 
@@ -21,14 +26,27 @@ class PokemonRarity(Enum):
     MYTHIC = "mythical"
 
 
+def load_cached_name_id_list(file_path):
+    if os.path.exists(file_path):
+        with open(file_path) as file:
+            return json.load(file)#
+    else:
+        return {}
+
+def add_name_id_to_cache(file_path, poke_name: str, poke_id: int):
+    current_cache = load_cached_name_id_list(file_path)
+    current_cache[poke_name] = poke_id
+    with open(file_path, "w") as file:
+        json.dump(current_cache, file)
+
 # utility function: check function for integer values (poke_id and depth)
-def check_input(function_name: str, input, val_name: str) -> int:
+def check_input(function_name: str, input: int, val_name: str) -> int:
     """Checks if the input value is a postive integer. Returns -1 if not
 
     :param function_name: The name of the function that calls the check (used for logging)
     :type function_name: str
     :param input: the input that will be checked
-    :type input: _type_
+    :type input: int
     :param val_name: the name of the input that is beeing checked (used for logging)
     :type val_name: str
     :return: `-1` if the input is not an integer or negative, `input` value as integer otherwise
@@ -43,6 +61,36 @@ def check_input(function_name: str, input, val_name: str) -> int:
     except ValueError:
         log_function(MODULE_NAME, function_name, f"{val_name} must be an integer or a string containing an integer!!! {val_name} = {input}", "error")
         return -1
+
+
+def check_pokemon_name(function_name: str, pokemon_name: str):
+    """Checks if the pokemon name is correct. returns -1 if not
+
+    :param function_name: The name of the function that calls the check (used for logging)
+    :type function_name: str
+    :param pokemon_name: the pokemon name to check
+    :type pokemon_name: str
+    :return: `-1` if the pokemon name is wrong, '0' otherwise
+    :rtype: int
+    """
+    if not isinstance(pokemon_name, str):
+        log_function(MODULE_NAME, function_name, "Pokemon name must be of type str", "error")
+    
+    regex = re.compile('[^a-zA-Z]+')
+    if pokemon_name is None:
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not be None!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    if pokemon_name == "":
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not be emtpy!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    if any(char.isdigit() for char in pokemon_name):
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not contain digits!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    if regex.search(pokemon_name):
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not contain special characters!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+    log_function(MODULE_NAME, function_name, f"Pokemon name checked successfully!!! Pokemon_name = {pokemon_name}")
+    return 0
 
 
 def _check_generation_and_depth(func_name: str, generation: int, depth: int):
@@ -153,6 +201,40 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
         log_function(MODULE_NAME, func_name, f"Unresolfed error occured! Error:{e.__str__()}", "error")
         return []
 
+
+def get_pokemon_id_from_name(pokemon_name: str, depth = 0) -> int:
+    func_name = "get_pokemon_id_from_name"
+    
+    if check_pokemon_name(func_name, pokemon_name) == -1:
+        return -1
+    
+    depth = check_input(func_name, depth, "depth")
+    
+    # check depth
+    if depth > 1:
+        log_function(MODULE_NAME, func_name, f"Could not load pokemon with id {pokemon_name}", "error")
+        return -1
+    
+    try:
+        log_function(MODULE_NAME, func_name, "Loading pokemon id from cache")
+        cached_name_id_list = load_cached_name_id_list(FILE_CACHE_NAME)
+        if pokemon_name in cached_name_id_list:
+            log_function(MODULE_NAME, func_name, "Loaded pokemon id from cache successful")
+            return cached_name_id_list[pokemon_name]
+        else:
+            # fetch from api if loading from cache failed
+            log_function(MODULE_NAME, func_name, "Fetching pokemon id from api")
+            pokemon_species = pb.pokemon_species(pokemon_name)
+            log_function(MODULE_NAME, func_name, "Fetched pokemon id from api successful")
+            add_name_id_to_cache(FILE_CACHE_NAME, pokemon_name, pokemon_species.id)
+            return pokemon_species.id
+    except KeyError as e:
+        # otherwise its a keyerror from api -> error return {}
+        log_function(MODULE_NAME, func_name, f"KeyError! Could not get pokemon id for name {pokemon_name} Error: {e.__str__()}", "error")
+        return -1
+    except Exception as e:
+        log_function(MODULE_NAME, func_name, f"Unresolfed error occured! Error: {e.__str__()}", "error")
+        return -1
 
 def get_pokemon_rarity_and_generation_by_id(poke_id: int, depth = 0) -> dict:
     """Returns the rarity and generation of a pokemon given its id
