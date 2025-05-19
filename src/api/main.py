@@ -32,7 +32,7 @@ def create_db(db_settings):
 if os.environ.get("TEST", 'Not Set') != "1":
     templates = Jinja2Templates(directory="api/templates")
 else:
-    templates = Jinja2Templates(directory="../api/templates")
+    templates = Jinja2Templates(directory=os.path.abspath("src/api/templates"))
 class Token(BaseModel):
     access_token: str
     token_type: str
