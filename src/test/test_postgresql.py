@@ -16,7 +16,6 @@ test_table = "test_table"
 
 @pytest.fixture(scope='session')
 def db_connection():
-    os.environ["TEST"] = "1"
     db_settings = {
         'database'        : 'test_database',
         'user'            : 'postgres',
