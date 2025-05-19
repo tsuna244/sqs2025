@@ -107,14 +107,23 @@ def test_update_user(db_connection):
 
 def test_get_user_from_db(db_connection):
     # get user with none type connection
-    assert get_user_from_db(None, "", "").__eq__(UserObj.create_empty())
-    # get user with wrong password
-    assert get_user_from_db(db_connection, "test_user", 1234).__eq__(UserObj.create_empty())
-    # get user with wrong username
-    assert get_user_from_db(db_connection, 123, "123456AB").__eq__(UserObj.create_empty())
+    assert get_user_from_db(None, "").__eq__(UserObj.create_empty())
+    # get user with wrong username type
+    assert get_user_from_db(db_connection, 123).__eq__(UserObj.create_empty())
+    # get non existing user
+    assert get_user_from_db(db_connection, "idontexist").__eq__(UserObj.create_empty())
     # get user successfully
-    assert get_user_from_db(db_connection, "test_user", "123456AB").__eq__(UserObj(1, "test_user", [1, 2, 3]))
+    assert get_user_from_db(db_connection, "test_user").__eq__(UserObj(1, "test_user", [1, 2, 3]))
 
+def test_authenticate_user_from_db(db_connection):
+    # authenticate user with none type connection
+    assert authenticate_user_from_db(None, "").__eq__(UserObj.create_empty())
+    # authenticate user with wrong name type
+    assert authenticate_user_from_db(db_connection, 123, "123456AB")
+    # authenticate user with wrong password type
+    assert authenticate_user_from_db(db_connection, "test_user", 123)
+    # authenticate user successfully
+    assert authenticate_user_from_db(db_connection, "test_user", "123456AB").__eq__(UserObj(1, "test_user", [1, 2, 3]))
 
 def test_delete_user(db_connection):
     # delete user with none type connection

@@ -329,9 +329,9 @@ def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[i
     :param table_name: Name of the table, defaults to "users"
     :type table_name: str, optional
     :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens, 
+             `3` if user already exists,
              `4` if username is not a string, `5` if username is empty, `6` if username does not start with a letter,
              `7` if deck_ids is empty, `8` if the deck_ids list contains something diffrent that an integer,
-             `9` if user already exists
              `10` if password not a string, `11` if password is less than 8 characters long, `12` if password does not contain digit. `13` if password does not contain an upper character.
              
     :rtype: int
@@ -356,11 +356,6 @@ def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[i
     deck_ids_check = check_deck_ids_input(deck_ids, function_name)
     if deck_ids_check != 0:
         return deck_ids_check
-
-    user_exists = get_user_from_db(conn, user_name)
-    if not user_exists.__empty__():
-        # this means that the user exists
-        return 9
 
     try:
         log_function(MODULE_NAME, function_name, f"Trying to add user {user_name}")

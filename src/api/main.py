@@ -111,8 +111,8 @@ async def register_new_user(request: RegistrationModel):
     if result == 0:
         # check inside registration if user already exists in db!!!
         return {"details": f"User {request.username} successfully registered"}
-    elif result == 9:
-        return {"details": f"User {request.username} already exists"}
+    elif result == 3:
+        return {"details": f"UnuiqeViolation! User {request.username} already exists"}
     elif result == 1:
         return {"details": "Connection error! Could not register user! Connection to database failed!"}
     else:
