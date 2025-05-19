@@ -1,0 +1,32 @@
+.form-control {
+    background: #212042;
+	  color: #57557A;
+  }
+  #search_input:focus {
+    background: #2d2042;
+    color: #fff;
+  }
+  .btn-outline-primary{
+    color: #fff;
+    background: linear-gradient(135deg, rgba(176,106,252,1) 39%,rgba(116,17,255,1) 101%);
+    border: none;
+    border-radius: 50px;
+  }
+  .btn-outline-primary:focus{
+    color: #fff;
+    box-shadow: none;
+    border: none;
+  }
+  .btn-outline-primary:hover{
+    color: #fff;
+    box-shadow: none;
+    border: none;
+  }
+  #loading {
+    color: #c78af8;
+    justify-content: center;
+  }
+  p {
+    margin-top: 10%;
+    font-size: 100px;
+  }

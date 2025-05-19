@@ -5,6 +5,9 @@
 <script>
 
   function onSearch() {
+    loading_elem = document.getElementById("loading");
+    loading_elem.innerHTML = "Loading";
+    document.getElementById("poke_elem").style.display = "none";
     const serach_value = document.getElementById("search_input").value;
     fetch("/Pokemon_Name/" + serach_value, {
       method: "POST"
@@ -27,8 +30,9 @@
         document.getElementById("poke_sprite").innerHTML = `<img src="/static/${data["pokemon_sprite_path"]}" alt="Pokemon Sprite not found" width=300 height=300>`
 
         document.getElementById("poke_elem").style.display = "block";
-
+        loading_elem.innerHTML = "";
       }else {
+        loading_elem.innerHTML = "Pokemon not found!";
         document.getElementById("poke_elem").style.display = "none";
       }
 
@@ -39,11 +43,16 @@
 {% endblock %}
 
 {% block body %}
+
+<link rel="stylesheet" href="{{ url_for('static', path='/search_style.css') }}">
+
 <div class="container-fluid mt-5">
     <form class="container-fluid justify-content-center row" role="search">
       <input id="search_input" class="form-control col-9 mr-2" type="search" placeholder="Search">
-      <button class="form-control btn col-2 me-2" type="button" onclick="onSearch()">Search</button>
+      <button class="form-control btn btn-outline-primary col-2 me-2" type="button" onclick="onSearch()">Search</button>
     </form>
+
+    <p id="loading" class="container"></p>
 
     <div id="poke_elem" class="container justify-content-center mt-5">
       <div class="row">
