@@ -5,7 +5,23 @@
 <script>
 
   function send_registration() {
+    
+  }
 
+  function validateRepeat(repeat_passwd) {
+    passwd = document.getElementById("password").value;
+    check = repeat_passwd === passwd;
+    err_message = document.getElementById("repeatMessage");
+    if (check) {
+      err_message.textContent = 'Same password';
+      err_message.classList.remove("text-danger");
+      err_message.classList.add("text-success");
+    }else {
+      err_message.textContent = 'Does not equal password';
+      err_message.classList.remove("text-success");
+      err_message.classList.add("text-danger");
+    }
+    return check;
   }
 
   function validatePassword(password) {
@@ -19,37 +35,53 @@
     if (password.length >= 8) {
       elem_len.classList.remove("bi-x-lg");
       elem_len.classList.add("bi-check-lg");
+      elem_len.classList.add("text-success");
+      elem_len.classList.remove("text-danger");
     }else {
       fail = true;
       elem_len.classList.add("bi-x-lg");
       elem_len.classList.remove("bi-check-lg");
+      elem_len.classList.remove("text-success");
+      elem_len.classList.add("text-danger");
     }
 
     if (/[A-Z]/.test(password)) {
       elem_upper.classList.remove("bi-x-lg");
       elem_upper.classList.add("bi-check-lg");
+      elem_upper.classList.add("text-success");
+      elem_upper.classList.remove("text-danger");
     }else {
       fail = true;
       elem_upper.classList.add("bi-x-lg");
       elem_upper.classList.remove("bi-check-lg");
+      elem_upper.classList.remove("text-success");
+      elem_upper.classList.add("text-danger");
     }
 
     if (/[a-z]/.test(password)) {
       elem_lower.classList.remove("bi-x-lg");
       elem_lower.classList.add("bi-check-lg");
+      elem_lower.classList.add("text-success");
+      elem_lower.classList.remove("text-danger");
     }else {
       fail = true;
       elem_lower.classList.add("bi-x-lg");
       elem_lower.classList.remove("bi-check-lg");
+      elem_lower.classList.remove("text-success");
+      elem_lower.classList.add("text-danger");
     }
 
     if (/[0-9]/.test(password)) {
       elem_digit.classList.remove("bi-x-lg");
       elem_digit.classList.add("bi-check-lg");
+      elem_digit.classList.add("text-success");
+      elem_digit.classList.remove("text-danger");
     }else {
       fail = true;
       elem_digit.classList.add("bi-x-lg");
       elem_digit.classList.remove("bi-check-lg");
+      elem_digit.classList.remove("text-success");
+      elem_digit.classList.add("text-danger");
     }
   
     const errorMessage = document.getElementById('errorMessage');
@@ -63,6 +95,8 @@
       errorMessage.classList.remove('text-danger');
       errorMessage.classList.add('text-success');
     }
+
+    return !fail;
 
   }
 
@@ -98,7 +132,8 @@
             <span id="errorMessage" class="font-weight-bold text-danger"></span>
           </div>
           <div class="form-group">
-    				<input id="password_repeat" name="password_repeat" type="password" class="form-control" placeholder="Repeat password">
+    				<input id="password_repeat" name="password_repeat" type="password" class="form-control" placeholder="Repeat password" oninput="validateRepeat(this.value)">
+            <span id="repeatMessage" class="font-weight-bold text-danger"></span>
           </div>
   				<div class="form-group mt-3">
   					<button type="button" class="btn btn-block btn-outline-primary btn-lg" onclick="send_registration()"><small><i class="bi bi-person pr-2"></i>Register</small></button>
@@ -107,10 +142,10 @@
 
         <div class="division" id="passwd_message">
           <h3>Password must contain the following:</h3>
-          <p><i id="letter" class="bi bi-x-lg mr-1"></i>A <b>lowercase</b> letter</p>
-          <p><i id="capital" class="bi bi-x-lg mr-1"></i>A <b>capital (uppercase)</b> letter</p>
-          <p><i id="number" class="bi bi-x-lg mr-2"></i>A <b>number</b></p>
-          <p><i id="length" class="bi bi-x-lg mr-2"></i>Minimum <b>8 characters</b></p>
+          <p><i id="letter" class="bi bi-x-lg text-danger mr-1"></i>A <b>lowercase</b> letter</p>
+          <p><i id="capital" class="bi bi-x-lg text-danger mr-1"></i>A <b>capital (uppercase)</b> letter</p>
+          <p><i id="number" class="bi bi-x-lg text-danger mr-2"></i>A <b>number</b></p>
+          <p><i id="length" class="bi bi-x-lg text-danger mr-2"></i>Minimum <b>8 characters</b></p>
         </div>
 
       </div>
