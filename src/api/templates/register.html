@@ -9,16 +9,37 @@
     var password = document.loginform.password.value;
     var repeat_passwd = document.loginform.password_repeat.value;
     var fail = false;
-    if (!validatePassword(password) || !validateRepeat(repeat_passwd)) {
+    if (!validatePassword(password)) {
       fail = true;
-      // popup wrong passwd
+      $("#modalMessage").text("Password validation failed");
+      $("#popupModal").modal();
+    }else if (!validateRepeat(repeat_passwd)) {
+      $("#modalMessage").text("Password was repeated incorrectly");
+      $("#popupModal").modal();
     }
     let regExp = /[a-z]/i;
     if (!regExp.test(username.charAt(0))) {
       fail = true;
-      // popup wrong username
+      $("#modalMessage").text("Username must start with a letter");
+      $("#popupModal").modal();
     }
     
+    if (!fail) {
+      
+      fetch('/register_user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({username: username, password: password}),
+      })
+      .then(response => response.json())
+      .then(data => { // data is a JSON object
+        console.log(JSON.stringify(data));
+      })
+
+    }
+
   }
 
   function validateRepeat(repeat_passwd) {
@@ -120,6 +141,7 @@
 {% block body %}
 
 <link rel="stylesheet" href="{{ url_for('static', path='/form_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/modal_style.css') }}">
 
 <div class="container">
 
@@ -164,6 +186,16 @@
       </div>
     </div>
   </div>
+
+<!-- Modal Popup -->
+<div class="modal fade" id="popupModal" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <h4> Registration Failed!!! </h4>
+      <h4 id="modalMessage"></h4>
+    </div>
+  </div>
+</div>
 
 </div>
 {% endblock %}
