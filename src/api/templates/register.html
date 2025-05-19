@@ -5,6 +5,19 @@
 <script>
 
   function send_registration() {
+    var username =  document.loginform.username.value;
+    var password = document.loginform.password.value;
+    var repeat_passwd = document.loginform.password_repeat.value;
+    var fail = false;
+    if (!validatePassword(password) || !validateRepeat(repeat_passwd)) {
+      fail = true;
+      // popup wrong passwd
+    }
+    let regExp = /[a-z]/i;
+    if (!regExp.test(username.charAt(0))) {
+      fail = true;
+      // popup wrong username
+    }
     
   }
 
