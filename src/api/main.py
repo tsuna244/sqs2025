@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from jose import jwt, JWTError
+import os
 
 # imports all necessary custom modules
 from .modules import PokemonObj, GenerationObj, Database
@@ -21,8 +22,13 @@ SECRET_KEY = "verysecretkey"
 ALGORITHM = "HS256"
 ACESS_TOKEN_EXPIRE_MINUTES = 1
 
-db = Database()
-db.create_table()
+db = None
+
+if not os.environ.get("TEST", 'Not Set') != "1":
+    db = Database()
+
+def create_db(db_settings):
+    return Database(db_settings)
 
 templates = Jinja2Templates(directory="api/templates")
 
