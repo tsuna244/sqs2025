@@ -1,47 +1,121 @@
 {% extends "base.html" %}
 
+{% block scripts %} 
+
+<script>
+
+  function send_registration() {
+
+  }
+
+  function validatePassword(password) {
+    const elem_len = document.getElementById("length");
+    const elem_upper = document.getElementById("capital");
+    const elem_digit = document.getElementById("number");
+    const elem_lower = document.getElementById("letter");
+
+    var fail = false;
+
+    if (password.length >= 8) {
+      elem_len.classList.remove("bi-x-lg");
+      elem_len.classList.add("bi-check-lg");
+    }else {
+      fail = true;
+      elem_len.classList.add("bi-x-lg");
+      elem_len.classList.remove("bi-check-lg");
+    }
+
+    if (/[A-Z]/.test(password)) {
+      elem_upper.classList.remove("bi-x-lg");
+      elem_upper.classList.add("bi-check-lg");
+    }else {
+      fail = true;
+      elem_upper.classList.add("bi-x-lg");
+      elem_upper.classList.remove("bi-check-lg");
+    }
+
+    if (/[a-z]/.test(password)) {
+      elem_lower.classList.remove("bi-x-lg");
+      elem_lower.classList.add("bi-check-lg");
+    }else {
+      fail = true;
+      elem_lower.classList.add("bi-x-lg");
+      elem_lower.classList.remove("bi-check-lg");
+    }
+
+    if (/[0-9]/.test(password)) {
+      elem_digit.classList.remove("bi-x-lg");
+      elem_digit.classList.add("bi-check-lg");
+    }else {
+      fail = true;
+      elem_digit.classList.add("bi-x-lg");
+      elem_digit.classList.remove("bi-check-lg");
+    }
+  
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (fail == true) {
+      errorMessage.textContent = 'Weak Password';
+      errorMessage.classList.remove('text-success');
+      errorMessage.classList.add('text-danger');
+    }else {
+      errorMessage.textContent = 'Strong Password';
+      errorMessage.classList.remove('text-danger');
+      errorMessage.classList.add('text-success');
+    }
+
+  }
+
+</script>
+
+{% endblock %}
+
 {% block body %}
+
+<link rel="stylesheet" href="{{ url_for('static', path='/form_style.css') }}">
+
 <div class="container">
 
-<form>
-  <div class="row mb-3">
-    <label for="inputUser" class="col-sm-2 col-form-label">Username</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" id="inputUser" aria-describedby="usernameHelpBlock">
-    </div>
-  </div>
-  <div class="row mb-3">
-    <div class="col-sm-2"></div>
-    <div class="col-sm-10">
-        <div id="usernameHelpBlock" class=" form-text">
-            Your username must not be empty and start with a letter.
-        </div>
-    </div>
-  </div>
+  <div class="row d-flex justify-content-center mt-5">
+    <div class="col-12 col-md-8">
+      <div class="card py-3 px-2">
 
-  <div class="row mb-3">
-    <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="inputPassword3" aria-describedby="passwordHelpBlock">
-    </div>
-  </div>
-  <div class="row mb-3">
-    <div class="col-sm-2"></div>
-    <div class="col-sm-10">
-        <div id="passwordHelpBlock" class="form-text">
-        Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
-        </div>
-    </div>
-  </div>
+        <div class="division">
+					<div class="row">
+						<div class="col-3"><div class="line l"></div></div>
+						<div class="col-6"><span>Register with username and password</span></div>
+						<div class="col-3"><div class="line r"></div></div>
+					</div>
+				</div>
 
-  <div class="row mb-3">
-    <label for="repeatPassword" class="col-sm-2 col-form-label">Repeat Password</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="repeatPassword">
+        <form class="myform" name="loginform">
+					<div class="form-group">
+    				<input id="username" name="username" type="text" class="form-control" placeholder="Username">
+            <span id="username_block">Your username must not be empty and start with a letter.</span>
+  				</div>
+ 					<div class="form-group">
+    				<input id="password" name="password" type="password" class="form-control" placeholder="Password" oninput="validatePassword(this.value)">
+            <span id="errorMessage" class="font-weight-bold text-danger"></span>
+          </div>
+          <div class="form-group">
+    				<input id="password_repeat" name="password_repeat" type="password" class="form-control" placeholder="Repeat password">
+          </div>
+  				<div class="form-group mt-3">
+  					<button type="button" class="btn btn-block btn-outline-primary btn-lg" onclick="send_registration()"><small><i class="bi bi-person pr-2"></i>Register</small></button>
+  				</div>
+				</form>
+
+        <div class="division" id="passwd_message">
+          <h3>Password must contain the following:</h3>
+          <p><i id="letter" class="bi bi-x-lg mr-1"></i>A <b>lowercase</b> letter</p>
+          <p><i id="capital" class="bi bi-x-lg mr-1"></i>A <b>capital (uppercase)</b> letter</p>
+          <p><i id="number" class="bi bi-x-lg mr-2"></i>A <b>number</b></p>
+          <p><i id="length" class="bi bi-x-lg mr-2"></i>Minimum <b>8 characters</b></p>
+        </div>
+
+      </div>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Register</button>
-</form>
 
 </div>
 {% endblock %}

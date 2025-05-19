@@ -27,64 +27,6 @@
         });
   }
 
-
-  function validatePassword(password) {
-    const elem_len = document.getElementById("length");
-    const elem_upper = document.getElementById("capital");
-    const elem_digit = document.getElementById("number");
-    const elem_lower = document.getElementById("letter");
-
-    var fail = false;
-
-    if (password.length >= 8) {
-       elem_len.classList.remove("bi-x-lg");
-       elem_len.classList.add("bi-check-lg");
-    }else {
-       fail = true;
-       elem_len.classList.add("bi-x-lg");
-       elem_len.classList.remove("bi-check-lg");
-    }
-
-    if (/[A-Z]/.test(password)) {
-       elem_upper.classList.remove("bi-x-lg");
-       elem_upper.classList.add("bi-check-lg");
-    }else {
-       fail = true;
-       elem_upper.classList.add("bi-x-lg");
-       elem_upper.classList.remove("bi-check-lg");
-    }
-
-    if (/[a-z]/.test(password)) {
-       elem_lower.classList.remove("bi-x-lg");
-       elem_lower.classList.add("bi-check-lg");
-    }else {
-       fail = true;
-       elem_lower.classList.add("bi-x-lg");
-       elem_lower.classList.remove("bi-check-lg");
-    }
-
-    if (/[0-9]/.test(password)) {
-       elem_digit.classList.remove("bi-x-lg");
-       elem_digit.classList.add("bi-check-lg");
-    }else {
-       fail = true;
-       elem_digit.classList.add("bi-x-lg");
-       elem_digit.classList.remove("bi-check-lg");
-    }
-   
-    const errorMessage = document.getElementById('errorMessage');
-
-    if (fail == true) {
-      errorMessage.textContent = 'Weak Password';
-      errorMessage.classList.remove('text-success');
-      errorMessage.classList.add('text-danger');
-    }else {
-      errorMessage.textContent = 'Strong Password';
-      errorMessage.classList.remove('text-danger');
-      errorMessage.classList.add('text-success');
-    }
-
-  }
 </script>
 
 
@@ -112,7 +54,7 @@
     				<input id="username" name="username" type="text" class="form-control" placeholder="Username">
   				</div>
  					<div class="form-group">
-    				<input id="password" name="password" type="password" class="form-control" placeholder="Password" oninput="validatePassword(this.value)">
+    				<input id="password" name="password" type="password" class="form-control" placeholder="Password">
             <span id="errorMessage" class="font-weight-bold text-danger"></span>
           </div>
   				<div class="form-group mt-3">
@@ -120,13 +62,6 @@
   				</div>
 				</form>
 
-        <div class="division" id="passwd_message">
-          <h3>Password must contain the following:</h3>
-          <p><i id="letter" class="bi bi-x-lg mr-1"></i>A <b>lowercase</b> letter</p>
-          <p><i id="capital" class="bi bi-x-lg mr-1"></i>A <b>capital (uppercase)</b> letter</p>
-          <p><i id="number" class="bi bi-x-lg mr-2"></i>A <b>number</b></p>
-          <p><i id="length" class="bi bi-x-lg mr-2"></i>Minimum <b>8 characters</b></p>
-        </div>
 			</div>
 		</div>
 	</div>
