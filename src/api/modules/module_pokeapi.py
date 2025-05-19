@@ -76,7 +76,7 @@ def check_pokemon_name(function_name: str, pokemon_name: str):
     if not isinstance(pokemon_name, str):
         log_function(MODULE_NAME, function_name, "Pokemon name must be of type str", "error")
     
-    regex = re.compile('[@_!#$%^&*()<>?/\|}{~:]')
+    regex = re.compile('[^a-zA-Z]+')
     if pokemon_name is None:
         log_function(MODULE_NAME, function_name, f"Pokemon name must not be None!!! Pokemon_name = {pokemon_name}", "error")
         return -1
