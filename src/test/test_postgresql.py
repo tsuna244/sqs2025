@@ -14,7 +14,6 @@ if len(container.get_containers()) != 1:
 host = f'{container.get_service_host("database", 5432)}'
 test_table = "test_table"
 
-@pytest.fixture(scope='session')
 def db_connection():
     db_settings = {
         'database'        : 'test_database',
@@ -30,6 +29,8 @@ def db_connection():
     cur.execute(base_query)
     conn.commit()
     return conn
+
+db_connection = db_connection()
 
 # unit test for check functions
 def test_check_user_input():
@@ -72,14 +73,14 @@ def test_user_object():
 
 
 # integration with db
-def test_create_table(db_connection):
+def test_create_table():
     # create table with none type connection
     assert create_table(None) == 1
     assert create_table(db_connection) == 0
     # create table again (should return true since IF NOT EXISTS checks internally)
     assert create_table(db_connection) == 0
 
-def test_add_user(db_connection):
+def test_add_user():
     # add user with none type connection
     assert add_user_with_crypt_pass(None, "", "", []) == 1
     # add user with wrong password
@@ -94,7 +95,7 @@ def test_add_user(db_connection):
     assert add_user_with_crypt_pass(db_connection, "test_user", "123456AB", []) == 3
 
 
-def test_update_user(db_connection):
+def test_update_user():
     # update user with none type connection
     assert update_user_from_db(None, "", []) == 1
     # update user with wrong name input
@@ -105,7 +106,7 @@ def test_update_user(db_connection):
     assert update_user_from_db(db_connection, "test_user", [1, "2", 3]) == 0
     
 
-def test_get_user_from_db(db_connection):
+def test_get_user_from_db():
     # get user with none type connection
     assert get_user_from_db(None, "").__eq__(UserObj.create_empty())
     # get user with wrong username type
@@ -115,7 +116,7 @@ def test_get_user_from_db(db_connection):
     # get user successfully
     assert get_user_from_db(db_connection, "test_user").__eq__(UserObj(1, "test_user", [1, 2, 3]))
 
-def test_authenticate_user_from_db(db_connection):
+def test_authenticate_user_from_db():
     # authenticate user with none type connection
     assert authenticate_user_from_db(None, "", "").__eq__(UserObj.create_empty())
     # authenticate user with wrong name type
@@ -125,7 +126,7 @@ def test_authenticate_user_from_db(db_connection):
     # authenticate user successfully
     assert authenticate_user_from_db(db_connection, "test_user", "123456AB").__eq__(UserObj(1, "test_user", [1, 2, 3]))
 
-def test_delete_user(db_connection):
+def test_delete_user():
     # delete user with none type connection
     assert delete_user_from_db(None, "") == 1
     # delete user with wrong user input
@@ -134,18 +135,18 @@ def test_delete_user(db_connection):
     assert delete_user_from_db(db_connection, "test_user") == 0
 
 
-def test_clean_table(db_connection):
+def test_clean_table():
     assert clean_table(None) == 1
     assert clean_table(db_connection, table_name="not_existing") == 2
     assert clean_table(db_connection) == 0
 
 
-def test_delete_table(db_connection):
+def test_delete_table():
     assert delete_table(None) == 1
     assert delete_table(db_connection, table_name="not_existing") == 0
     assert delete_table(db_connection) == 0
 
 
-def test_close_connection(db_connection):
+def test_close_connection():
     assert close_connection(None) == 1
     assert close_connection(db_connection) == 0
