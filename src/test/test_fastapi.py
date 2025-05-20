@@ -32,4 +32,6 @@ def test_read_main():
     response = client.get("/")
     assert response.status_code == 200
 
-api.db.close()
+def test_stop_db():
+    api.db.close()
+    assert True
