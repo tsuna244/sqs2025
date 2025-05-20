@@ -1,8 +1,8 @@
 // pokemon search function
 function onSearch() {
-    loading_elem = $("#loading");
+    let loading_elem = $("#loading");
     loading_elem.text("Loading");
-    pokemon_elem = $("#poke_elem");
+    let pokemon_elem = $("#poke_elem");
     $("#poke_elem").hide();
     const serach_value = $("#search_input").val();
     fetch("/Pokemon_Name/" + serach_value, {
@@ -15,7 +15,7 @@ function onSearch() {
             $("#poke_name").text(data["pokemon_name"]);
             $("#poke_gen").text(data["pokemon_generation"]);
             $("#poke_rarity").text(data["pokemon_rarity"]);
-            var pokemon_stats = data["pokemon_stats"];
+            let pokemon_stats = data["pokemon_stats"];
             $("#poke_hp").text(pokemon_stats[0]["stat_value"]);
             $("#poke_atk").text(pokemon_stats[1]["stat_value"]);
             $("#poke_def").text(pokemon_stats[2]["stat_value"]);
@@ -37,7 +37,7 @@ function onSearch() {
 
 // login function
 function send() {
-    var formData = new FormData();
+    let formData = new FormData();
     formData.append("username", document.loginform.username.value);
     formData.append("password", document.loginform.password.value);
 
@@ -62,10 +62,10 @@ function send() {
 
 // registration function
 function send_registration() {
-    var username =  document.loginform.username.value;
-    var password = document.loginform.password.value;
-    var repeat_passwd = document.loginform.password_repeat.value;
-    var fail = false;
+    let username =  document.loginform.username.value;
+    let password = document.loginform.password.value;
+    let repeat_passwd = document.loginform.password_repeat.value;
+    let fail = false;
     if (!validatePassword(password)) {
         fail = true;
         $("#modalMessage").text("Password validation failed");
@@ -100,8 +100,8 @@ function send_registration() {
 
 // validation function for password repeat
 function validateRepeat(repeat_passwd) {
-    passwd = $("#password").val();
-    check = repeat_passwd === passwd;
+    let passwd = $("#password").val();
+    let check = repeat_passwd === passwd;
     err_message = $("#repeatMessage");
     if (check) {
         err_message.text('Same password');
@@ -136,7 +136,7 @@ function validatePassword(password) {
     const elem_digit = $("#number");
     const elem_lower = $("#letter");
 
-    var fail = false;
+    let fail = false;
 
     if (password.length >= 8) {
         set_passwd_class(elem_len, true);
@@ -159,7 +159,7 @@ function validatePassword(password) {
         set_passwd_class(elem_lower, false);
     }
 
-    if (/[0-9]/.test(password)) {
+    if (/\d/.test(password)) {
         set_passwd_class(elem_digit, true);
     }else {
         fail = true;
@@ -168,7 +168,7 @@ function validatePassword(password) {
 
     const errorMessage = $('errorMessage');
 
-    if (fail == true) {
+    if (fail) {
         errorMessage.text('Weak Password');
         errorMessage.removeClass('text-success');
         errorMessage.addClass('text-danger');
@@ -184,9 +184,9 @@ function validatePassword(password) {
 
 // authentication (inside the navbar and webpages)
 function authenticate_navbar() {
-    var token = window.sessionStorage.token
+    let token = window.sessionStorage.token
     if (token == "undefined" || token == "null") return;
-    var current_token = JSON.parse(token);
+    let current_token = JSON.parse(token);
     if (current_token != "undefined" || current_token != "null") {
 
         const headers = { 'Authorization': current_token["token_type"] + " " + current_token["access_token"] }; // auth header with bearer token
@@ -197,7 +197,7 @@ function authenticate_navbar() {
         .then(response => response.json())
         .then(data => {
                 if (data.hasOwnProperty('user_name')) {
-                    var html = `<span class="navbar-text mr-2">${data["user_name"]}</span>
+                    let html = `<span class="navbar-text mr-2">${data["user_name"]}</span>
                         <button class="btn btn-outline-success" type="button" onclick="logout()">Logout</button>
                         `;
                     $('#login_register').html(html);

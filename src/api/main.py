@@ -114,6 +114,10 @@ async def user_registration_page(request: Request):
 
 @app.post("/register_user")
 async def register_new_user(request: RegistrationModel):
+    if not isinstance(request.username, str) or not request.username.isalpha():
+        return {"details": "Input error! Username must be alpha only"}
+    if not isinstance(request.password, str) or not request.password.isascii():
+        return {"details": "Input error! Password must be ascii chars only"}
     result = db.add_user(request.username, request.password, [])
     if result == 0:
         # check inside registration if user already exists in db!!!
