@@ -102,7 +102,7 @@ function send_registration() {
 function validateRepeat(repeat_passwd) {
     let passwd = $("#password").val();
     let check = repeat_passwd === passwd;
-    err_message = $("#repeatMessage");
+    let err_message = $("#repeatMessage");
     if (check) {
         err_message.text('Same password');
         err_message.removeClass("text-danger");
