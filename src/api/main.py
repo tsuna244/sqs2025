@@ -133,6 +133,10 @@ async def register_new_user(request: RegistrationModel):
 async def get_user(current_user: User = Depends(get_current_user)):
     return current_user
 
+@app.post("/get_users")
+async def get_users():
+    return db.get_users()
+
 @app.get("/leaderboard")
 async def leaderboard_page():
     return {"TBD": "TBD"}

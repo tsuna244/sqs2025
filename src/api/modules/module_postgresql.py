@@ -441,6 +441,53 @@ def get_user_from_db(conn, user_name: str, table_name="users") -> UserObj:
         conn.rollback()
         return UserObj.create_empty()
 
+def get_all_users_from_db(conn, table_name="users") -> dict:
+    """Returns a dictionary containing all users in the table
+
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: dictionary containing all users: {"users": list(UserObj)}
+    :rtype: dict
+    """
+    function_name="get_all_users_from_db"
+
+    # check connection
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Fetching users failed. Error: Connection to DB missing.", "error")
+        return {}
+    
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to fetch all users")
+        # create querry. get current courser of database, execute querry and commit changes
+        query_base = sql.SQL("""SELECT id, {col_1}, {col_3} FROM {table_name}""").format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0]),
+        col_2=sql.Identifier(TABLE_COL_NAMES[1]),
+        col_3=sql.Identifier(TABLE_COL_NAMES[2])
+        )
+
+        cursor = conn.cursor()
+        cursor.execute(query_base)
+        conn.commit()
+        fetch = cursor.fetchall()
+        
+        # check if the fetch was successful -> User exists or not?
+        if fetch is not None:
+            user_arry = []
+            for elem in fetch:
+                _id, _name, _deck_ids = elem
+                user_arry.append(UserObj(_id, _name, _deck_ids).__dict__())
+            return {"users": user_arry}
+        else:
+            log_function(MODULE_NAME, function_name, f"Table empty", "warn")
+            return {"users": []}
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Fetching users failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return {}
 
 def authenticate_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
     """Returns a user from a table inside the database if password is correct

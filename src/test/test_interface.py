@@ -135,5 +135,6 @@ def test_database():
     assert db_obj.update_user("test_user", [2, 3, 4]) == 0
     assert db_obj.delete_user("test_user") == 0
     assert db_obj.clean_table() == 0
+    assert db_obj.get_users() == {"users": []}
     assert db_obj.close() == 0
 

@@ -142,6 +142,13 @@ def test_clean_table():
     assert clean_table(db_connection, table_name="not_existing") == 2
     assert clean_table(db_connection) == 0
 
+def test_get_all_users_from_db():
+    # get users with none type connection
+    assert get_all_users_from_db(None) == {}
+    # get users from empty table
+    assert get_all_users_from_db(db_connection) == {"users": []}
+    add_user_with_crypt_pass(db_connection, "test_user_second", "1234ABcd", [1, 2, 3])
+    assert len(get_all_users_from_db(db_connection)["users"]) == 1
 
 def test_delete_table():
     assert delete_table(None) == 1

@@ -16,6 +16,7 @@ from .module_postgresql import (
     delete_table,
     get_postgress_conn,
     get_user_from_db,
+    get_all_users_from_db,
     authenticate_user_from_db,
     update_user_from_db,
     delete_user_from_db,
@@ -333,6 +334,18 @@ class Database(object):
         """
         
         return get_user_from_db(self._conn, user_name).__dict__()
+
+    def get_users(self):
+        """Returns a dictionary containing a list of all users in the table
+
+        :return: A dictionary containing information about all the users:
+                  `{"users": [{"user_id": int, "user_name": str, "deck_ids": list[int]}, ...]}` if table is not empty
+                  `{"users": []}` if table is empty
+                  `{}` if fetch failed
+        :rtype: dict
+        """
+        
+        return get_all_users_from_db(self._conn)
 
     def authenticate_user(self, user_name: str, user_password: str) -> dict:
         """Returns a user in dictionary format containing his id, name, and list of pokemon_ids inside his deck called deck_id
