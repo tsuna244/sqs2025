@@ -75,7 +75,8 @@ def check_pokemon_name(function_name: str, pokemon_name: str):
     """
     if not isinstance(pokemon_name, str):
         log_function(MODULE_NAME, function_name, "Pokemon name must be of type str", "error")
-    
+        return -1
+
     regex = re.compile('[^a-zA-Z]+')
     if pokemon_name is None:
         log_function(MODULE_NAME, function_name, f"Pokemon name must not be None!!! Pokemon_name = {pokemon_name}", "error")
@@ -202,17 +203,10 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
         return []
 
 
-def get_pokemon_id_from_name(pokemon_name: str, depth = 0) -> int:
+def get_pokemon_id_from_name(pokemon_name: str) -> int:
     func_name = "get_pokemon_id_from_name"
     
     if check_pokemon_name(func_name, pokemon_name) == -1:
-        return -1
-    
-    depth = check_input(func_name, depth, "depth")
-    
-    # check depth
-    if depth > 1:
-        log_function(MODULE_NAME, func_name, f"Could not load pokemon with id {pokemon_name}", "error")
         return -1
     
     try:

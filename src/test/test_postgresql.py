@@ -123,8 +123,9 @@ def test_authenticate_user_from_db():
     assert authenticate_user_from_db(db_connection, 123, "123456AB")
     # authenticate user with wrong password type
     assert authenticate_user_from_db(db_connection, "test_user", 123)
+    # test non existing user
+    assert authenticate_user_from_db(db_connection, "nonexistinguser", "1234AbCd").__empty__()
     # authenticate user successfully
-    print(authenticate_user_from_db(db_connection, "test_user", "123456AB"))
     assert authenticate_user_from_db(db_connection, "test_user", "123456AB").__eq__(UserObj(2, "test_user", [1, 2, 3]))
 
 def test_delete_user():

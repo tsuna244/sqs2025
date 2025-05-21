@@ -12,12 +12,37 @@ def manage_test_environment():
     TMP_DIR = tempfile.mkdtemp()
     TMP_CACHE = TMP_DIR + "/static/.cache/"
     pb.cache.set_cache(TMP_CACHE)
-    
+    FILE_CACHE_NAME = CACHE_DIR + "test_cache.json"
+
     # execute tests
     yield
 
     # cleanup
     shutil.rmtree(TMP_DIR)
+
+def test_cached_name_id_list():
+    # adding name and write test value to have test file (if not working second assert will fail -> tests add name function as well)
+    add_name_id_to_cache("./test_cache.json", "ditto", 132)
+    # try loading non existing cache file
+    assert load_cached_name_id_list("nonexisting.txt") == {}
+    # try loading succesfully (test add name id function as well)
+    assert load_cached_name_id_list("./test_cache.json") == {"ditto": 132}
+    # remove test file
+    os.remove("./test_cache.json")
+
+def test_check_pokemon_name():
+    # pokename not str
+    assert check_pokemon_name("test_func", 123) == -1
+    # pokename is none
+    assert check_pokemon_name("test_func", None) == -1
+    # pokemonname empty
+    assert check_pokemon_name("test_func", "") == -1
+    # pokemonname contains digit
+    assert check_pokemon_name("test_func", "ditto1") == -1
+    # pokemonname has other char than letter
+    assert check_pokemon_name("test_func", "ditto*") == -1
+    # pokename is fine
+    assert check_pokemon_name("test_func", "ditto") == 0
 
 def test_check_input():
     func_name="test_check_input"
@@ -59,6 +84,15 @@ def test_check_poke_rarity():
     fetched_PSM.is_mythical = True
     assert _check_poke_rarity(fetched_PSM, False) == PokemonRarity.MYTHIC
     
+
+def test_get_pokemon_by_id_from_name():
+    assert get_pokemon_id_from_name(123) == -1
+    # should not exist yet
+    assert get_pokemon_id_from_name("ditto") == 132
+    # should exist now
+    assert get_pokemon_id_from_name("ditto") == 132
+    # non existing pokemon
+    assert get_pokemon_id_from_name("doesnotexist") == -1
 
 def test_get_pokesprite_url_by_id():
     test_id = 20
