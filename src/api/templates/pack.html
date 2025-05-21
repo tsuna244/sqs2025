@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block scripts %} 
+
+<script>
+    authenticate_content();
+</script>
+
+{% endblock %}
+
+{% block body %}
+
+<link rel="stylesheet" href="{{ url_for('static', path='/css/deck_style.css') }}">
+
+<div id="table" class="container" style="margin-top: 20px;">
+
+    <h1>Packopening: <span id="loading_pack"></span></h1>
+
+    <div class="row">
+        <div class="col-4"><button class="gen_selection btn btn-outline-primary" onclick="get_random_pokemon_by_gen_id(1)">Generation 1</button></div>
+        <div class="col-4"><button class="gen_selection btn btn-outline-primary" onclick="get_random_pokemon_by_gen_id(2)">Generation 2</button></div>
+        <div class="col-4"><button class="gen_selection btn btn-outline-primary" onclick="get_random_pokemon_by_gen_id(3)">Generation 3</button></div>
+    </div>
+
+    <div id="poke_result"></div>
+
+</div>
+
+
+{% endblock %}

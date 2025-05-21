@@ -27,6 +27,10 @@ db = None
 if os.environ.get("TEST", 'Not Set') != "1":
     db = Database()
 
+gen_1 = GenerationObj(1)
+gen_2 = GenerationObj(2)
+gen_3 = GenerationObj(3)
+
 def create_db(db_settings):
     return Database(db_settings)
 if os.environ.get("TEST", 'Not Set') != "1":
@@ -44,11 +48,15 @@ class TokenData(BaseModel):
 class User(BaseModel):
     user_id: int
     user_name: str
-    deck_ids: list[int]
+    deck_ids: list
 
 class RegistrationModel(BaseModel):
     username: str
     password: str
+
+class AddDeckModel(BaseModel):
+    username: str
+    new_elem: dict
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -138,16 +146,32 @@ async def get_users():
     return db.get_users()
 
 @app.get("/leaderboard")
-async def leaderboard_page():
-    return {"TBD": "TBD"}
+async def leaderboard_page(request: Request):
+    return templates.TemplateResponse(
+        name="leaderboard.html",
+        request=request
+    )
 
 @app.get("/my_deck")
-async def my_deck_page():
-    return {"TBD": "TBD"}
+async def my_deck_page(request: Request):
+    return templates.TemplateResponse(
+        name="mydeck.html",
+        request=request
+    )
 
 @app.get("/pack_opening")
-async def get_pack_opening():
-    return {"TBD": "TBD"}
+async def get_pack_opening(request: Request):
+    return templates.TemplateResponse(
+        name="pack.html",
+        request=request
+    )
+
+@app.get("/unauth")
+async def unauthorized_access(request: Request):
+    return templates.TemplateResponse(
+        name="unauth.html",
+        request=request
+    )
 
 @app.post("/Pokemon_Id/{pokemon_id}")
 async def read_pokemon(pokemon_id: int, request: Request):
@@ -160,6 +184,28 @@ async def get_pokemon_by_name(pokemon_name:str, request: Request):
         return pokemon
     else:
         return pokemon.__dict__()
+
+@app.post("/Pokemon_Rand/{gen_id}")
+async def get_random_pokemon_from_gen(gen_id: int, request: Request):
+    if gen_id == 1:
+        return gen_1.get_random_pokemon().__dict__()
+    elif gen_id == 2:
+        return gen_2.get_random_pokemon().__dict__()
+    elif gen_id == 3:
+        return gen_3.get_random_pokemon().__dict__()
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Only generation 1 to 3 are supported")
+
+@app.post("/add_to_deck")
+async def add_elem_to_user_deck(request: AddDeckModel):
+    if not isinstance(request.username, str):
+        return {"details": "Error occured! Did not add element to user"}
+    if not isinstance(request.new_elem, dict):
+        return {"details": "Error occured! Did not add element to user"}
+    if db.add_elem_to_user_deck(request.username, request.new_elem) != 0:
+        return {"details": "Error occured! Did not add element to user"}
+    else:
+        return {"details": "New element got added to user"}
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

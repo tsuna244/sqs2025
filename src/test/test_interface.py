@@ -132,7 +132,7 @@ def test_database():
     assert db_obj.add_user("test_user", "1234ABCD", []) == 0
     assert db_obj.authenticate_user("test_user", "1234ABCD").__str__() == {"user_id": 1, "user_name": "test_user", "deck_ids": []}.__str__() 
     assert db_obj.get_user("test_user").__str__() == {"user_id": 1, "user_name": "test_user", "deck_ids": []}.__str__()
-    assert db_obj.update_user("test_user", [2, 3, 4]) == 0
+    assert db_obj.update_user("test_user", [{"_id": 1, "_name": 1}]) == 0
     assert db_obj.delete_user("test_user") == 0
     assert db_obj.clean_table() == 0
     assert db_obj.get_users() == {"users": []}

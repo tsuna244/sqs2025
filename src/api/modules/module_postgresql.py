@@ -3,6 +3,7 @@ from psycopg2 import sql
 import os
 from dotenv import load_dotenv
 from .module_logger import log_function
+import json
 
 load_dotenv()
 
@@ -138,11 +139,11 @@ def check_user_input(user_name: str, function_name="check_user_input") -> int:
     return 0
 
 # check deck ids input
-def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_input") -> int:
+def check_deck_ids_input(deck_ids: list, function_name="check_deck_ids_input") -> int:
     """Check the deck_ids input if it is correct
 
     :param deck_ids: The deck_ids that will be checked
-    :type deck_ids: list[int]
+    :type deck_ids: list
     :param function_name: The name of the function that calls this check, defaults to "check_deck_ids_input"
     :type function_name: str, optional
     :return: `0` if check succesfull, `7` if deck_ids is empty, `8` if the list contains something diffrent than an integer
@@ -154,13 +155,10 @@ def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_inpu
         log_function(MODULE_NAME, function_name, "deck_ids must be of type list", "Error")
         return 7
     # check if list is empty and if list contains elements that are not integer. If element is str but contains only a digit convert it to int
-    deck_len = len(deck_ids)
-    if deck_len > 0:
-        for i in range(0, deck_len):
-            try:
-                deck_ids[i] = int(deck_ids[i])
-            except ValueError:
-                log_function(MODULE_NAME, function_name, "deck_ids list must contain digits only", "Error")
+    if len(deck_ids) > 0:
+        for elem in deck_ids:
+            if not isinstance(elem, dict):
+                log_function(MODULE_NAME, function_name, "deck_ids list must contain dictionary objects only", "Error")
                 return 8
     log_function(MODULE_NAME, function_name, "Deck_Ids check was successful")
     return 0
@@ -215,7 +213,7 @@ def create_table(conn, table_name="users") -> int:
                 id INT GENERATED ALWAYS AS IDENTITY,
                 {user_name} VARCHAR(255) UNIQUE NOT NULL,
                 {password} TEXT NOT NULL,
-                {deck_ids} INTEGER[]
+                {deck_ids} JSONB
             )
             """).format(
                 table_name=sql.Identifier(table_name),
@@ -315,7 +313,7 @@ def delete_table(conn, table_name="users") -> int:
         return 2
 
 
-def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[int], table_name="users") -> int:
+def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list, table_name="users") -> int:
     """Add a new user to a table inside the database
 
     :param conn: Connection object must not be None type
@@ -372,7 +370,7 @@ def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[i
         )
 
         cursor = conn.cursor()
-        cursor.execute(query_base, [user_name, passwd, deck_ids])
+        cursor.execute(query_base, [user_name, passwd, json.dumps(deck_ids)])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Added user {user_name} successfully")
         return 0
@@ -552,7 +550,7 @@ def authenticate_user_from_db(conn, user_name: str, user_password: str, table_na
         return UserObj.create_empty()
 
 
-def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="users") -> int:
+def update_user_from_db(conn, user_name: str, deck_ids: list, table_name="users") -> int:
     """Update a user from a table inside the database
 
     :param conn: Connection object must not be None type
@@ -599,7 +597,7 @@ def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="u
         )
 
         cursor = conn.cursor()
-        cursor.execute(query_base, [deck_ids, user_name])
+        cursor.execute(query_base, [json.dumps(deck_ids), user_name])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Updated user {user_name} successfully")
         return 0
