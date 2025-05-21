@@ -193,7 +193,7 @@ class GenerationObj(object):
             log.error("Index out of bounds")
             raise IndexError("Index out of bounds")
         if len(self._pokemon_list) > 0:
-            pokemon_json = self._pokemon_list[0]
+            pokemon_json = self._pokemon_list[index]
             return PokemonObj(pokemon_json["pokemon_id"])
         else:
             log.error("Pokemon list is empty")

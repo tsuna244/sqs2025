@@ -73,14 +73,15 @@ def check_pokemon_name(function_name: str, pokemon_name: str):
     :return: `-1` if the pokemon name is wrong, '0' otherwise
     :rtype: int
     """
+    if pokemon_name is None:
+        log_function(MODULE_NAME, function_name, f"Pokemon name must not be None!!! Pokemon_name = {pokemon_name}", "error")
+        return -1
+
     if not isinstance(pokemon_name, str):
         log_function(MODULE_NAME, function_name, "Pokemon name must be of type str", "error")
         return -1
 
     regex = re.compile('[^a-zA-Z]+')
-    if pokemon_name is None:
-        log_function(MODULE_NAME, function_name, f"Pokemon name must not be None!!! Pokemon_name = {pokemon_name}", "error")
-        return -1
     if pokemon_name == "":
         log_function(MODULE_NAME, function_name, f"Pokemon name must not be emtpy!!! Pokemon_name = {pokemon_name}", "error")
         return -1
