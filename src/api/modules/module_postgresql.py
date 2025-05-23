@@ -3,6 +3,7 @@ from psycopg2 import sql
 import os
 from dotenv import load_dotenv
 from .module_logger import log_function
+import json
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ class UserObj():
     :type deck_ids: list | None
     """
     
-    def __init__(self, user_id: str, user_name: str, deck_ids = None):
+    def __init__(self, user_id: str, user_name: str, deck_ids = None, points = None):
         """constructor method
     
         :param user_id: id of the user inside the database
@@ -39,6 +40,10 @@ class UserObj():
             self.deck_ids = []
         else:
             self.deck_ids = deck_ids
+        if points is None:
+            self.points = 0
+        else:
+            self.points = points
 
     @classmethod
     def create_empty(cls):
@@ -56,13 +61,13 @@ class UserObj():
         return self.user_id < 0
 
     def __dict__(self):
-        return {"user_id": self.user_id, "user_name": self.user_name, "deck_ids": self.deck_ids}
+        return {"user_id": self.user_id, "user_name": self.user_name, "deck_ids": self.deck_ids, "points": self.points}
     
     def __str__(self):
         return self.__dict__().__str__()
 
 # declaere column names of table
-TABLE_COL_NAMES = ['user_name','password','deck_ids']
+TABLE_COL_NAMES = ['user_name','password','deck_ids', 'points']
 
 # db connection settings
 DB_SETTINGS = {
@@ -138,11 +143,11 @@ def check_user_input(user_name: str, function_name="check_user_input") -> int:
     return 0
 
 # check deck ids input
-def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_input") -> int:
+def check_deck_ids_input(deck_ids: list, function_name="check_deck_ids_input") -> int:
     """Check the deck_ids input if it is correct
 
     :param deck_ids: The deck_ids that will be checked
-    :type deck_ids: list[int]
+    :type deck_ids: list
     :param function_name: The name of the function that calls this check, defaults to "check_deck_ids_input"
     :type function_name: str, optional
     :return: `0` if check succesfull, `7` if deck_ids is empty, `8` if the list contains something diffrent than an integer
@@ -154,15 +159,23 @@ def check_deck_ids_input(deck_ids: list[int], function_name="check_deck_ids_inpu
         log_function(MODULE_NAME, function_name, "deck_ids must be of type list", "Error")
         return 7
     # check if list is empty and if list contains elements that are not integer. If element is str but contains only a digit convert it to int
-    deck_len = len(deck_ids)
-    if deck_len > 0:
-        for i in range(0, deck_len):
-            try:
-                deck_ids[i] = int(deck_ids[i])
-            except ValueError:
-                log_function(MODULE_NAME, function_name, "deck_ids list must contain digits only", "Error")
+    if len(deck_ids) > 0:
+        for elem in deck_ids:
+            if not isinstance(elem, dict):
+                log_function(MODULE_NAME, function_name, "deck_ids list must contain dictionary objects only", "Error")
                 return 8
     log_function(MODULE_NAME, function_name, "Deck_Ids check was successful")
+    return 0
+
+
+def check_points_input(points: int, function_name = "check_points_input"):
+    if not isinstance(points, int):
+        log_function(MODULE_NAME, function_name, "points must be of type int", "Error")
+        return 9
+    if points < 0:
+        log_function(MODULE_NAME, function_name, "points must be positive value", "Error")
+        return 9
+    log_function(MODULE_NAME, function_name, "points checked successfully", "Error")
     return 0
 
 
@@ -215,13 +228,15 @@ def create_table(conn, table_name="users") -> int:
                 id INT GENERATED ALWAYS AS IDENTITY,
                 {user_name} VARCHAR(255) UNIQUE NOT NULL,
                 {password} TEXT NOT NULL,
-                {deck_ids} INTEGER[]
+                {deck_ids} JSONB,
+                {points} INTEGER
             )
             """).format(
                 table_name=sql.Identifier(table_name),
                 user_name=sql.Identifier(TABLE_COL_NAMES[0]),
                 password=sql.Identifier(TABLE_COL_NAMES[1]),
-                deck_ids=sql.Identifier(TABLE_COL_NAMES[2])
+                deck_ids=sql.Identifier(TABLE_COL_NAMES[2]),
+                points=sql.Identifier(TABLE_COL_NAMES[3])
             )
 
         # get cursor and execute querry
@@ -315,7 +330,7 @@ def delete_table(conn, table_name="users") -> int:
         return 2
 
 
-def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[int], table_name="users") -> int:
+def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list, table_name="users") -> int:
     """Add a new user to a table inside the database
 
     :param conn: Connection object must not be None type
@@ -365,6 +380,7 @@ def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[i
         query_base = sql.SQL("""insert into {table_name} ({col_names}) values (
             %s,
             crypt(%s, gen_salt('md5')),
+            %s,
             %s
         )""").format(
         table_name=sql.Identifier(table_name),
@@ -372,7 +388,7 @@ def add_user_with_crypt_pass(conn, user_name: str, passwd: str, deck_ids: list[i
         )
 
         cursor = conn.cursor()
-        cursor.execute(query_base, [user_name, passwd, deck_ids])
+        cursor.execute(query_base, [user_name, passwd, json.dumps(deck_ids), 0])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Added user {user_name} successfully")
         return 0
@@ -415,13 +431,14 @@ def get_user_from_db(conn, user_name: str, table_name="users") -> UserObj:
     try:
         log_function(MODULE_NAME, function_name, f"Trying to fetch user {user_name}")
         # create querry. get current courser of database, execute querry and commit changes
-        query_base = sql.SQL("""SELECT id, {col_1}, {col_3} FROM {table_name} 
+        query_base = sql.SQL("""SELECT id, {col_1}, {col_3}, {col_4} FROM {table_name} 
                              WHERE {col_1} = %s
                              """).format(
         table_name=sql.Identifier(table_name),
         col_1=sql.Identifier(TABLE_COL_NAMES[0]),
         col_2=sql.Identifier(TABLE_COL_NAMES[1]),
-        col_3=sql.Identifier(TABLE_COL_NAMES[2])
+        col_3=sql.Identifier(TABLE_COL_NAMES[2]),
+        col_4=sql.Identifier(TABLE_COL_NAMES[3])
         )
 
         cursor = conn.cursor()
@@ -430,9 +447,9 @@ def get_user_from_db(conn, user_name: str, table_name="users") -> UserObj:
         fetch = cursor.fetchone()
         # check if the fetch was successful -> User exists or not?
         if fetch is not None:
-            _id, _name, _deck_ids = fetch
+            _id, _name, _deck_ids, _points = fetch
             log_function(MODULE_NAME, function_name, f"Fetched user {user_name} successfully")
-            return UserObj(_id, _name, _deck_ids)
+            return UserObj(_id, _name, _deck_ids, _points)
         else:
             log_function(MODULE_NAME, function_name, f"Fetched user {user_name} not found", "warn")
             return UserObj.create_empty()
@@ -441,6 +458,53 @@ def get_user_from_db(conn, user_name: str, table_name="users") -> UserObj:
         conn.rollback()
         return UserObj.create_empty()
 
+def get_all_users_from_db(conn, table_name="users") -> dict:
+    """Returns a dictionary containing all users in the table
+
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: dictionary containing all users: {"users": list(UserObj)}
+    :rtype: dict
+    """
+    function_name="get_all_users_from_db"
+
+    # check connection
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Fetching users failed. Error: Connection to DB missing.", "error")
+        return {}
+    
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to fetch all users")
+        # create querry. get current courser of database, execute querry and commit changes
+        query_base = sql.SQL("""SELECT id, {col_1}, {col_3}, {col_4} FROM {table_name}""").format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0]),
+        col_3=sql.Identifier(TABLE_COL_NAMES[2]),
+        col_4=sql.Identifier(TABLE_COL_NAMES[3])
+        )
+
+        cursor = conn.cursor()
+        cursor.execute(query_base)
+        conn.commit()
+        fetch = cursor.fetchall()
+        
+        # check if the fetch was successful -> User exists or not?
+        if fetch is not None:
+            user_arry = []
+            for elem in fetch:
+                _id, _name, _deck_ids, _points = elem
+                user_arry.append(UserObj(_id, _name, _deck_ids, _points).__dict__())
+            return {"users": user_arry}
+        else:
+            log_function(MODULE_NAME, function_name, f"Table empty", "warn")
+            return {"users": []}
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Fetching users failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return {}
 
 def authenticate_user_from_db(conn, user_name: str, user_password: str, table_name="users") -> UserObj:
     """Returns a user from a table inside the database if password is correct
@@ -477,14 +541,15 @@ def authenticate_user_from_db(conn, user_name: str, user_password: str, table_na
     try:
         log_function(MODULE_NAME, function_name, f"Trying to fetch user {user_name}")
         # create querry. get current courser of database, execute querry and commit changes
-        query_base = sql.SQL("""SELECT id, {col_1}, {col_3} FROM {table_name} 
+        query_base = sql.SQL("""SELECT id, {col_1}, {col_3}, {col_4} FROM {table_name} 
                              WHERE {col_1} = %s
                              AND {col_2} = crypt(%s, password);
                              """).format(
         table_name=sql.Identifier(table_name),
         col_1=sql.Identifier(TABLE_COL_NAMES[0]),
         col_2=sql.Identifier(TABLE_COL_NAMES[1]),
-        col_3=sql.Identifier(TABLE_COL_NAMES[2])
+        col_3=sql.Identifier(TABLE_COL_NAMES[2]),
+        col_4=sql.Identifier(TABLE_COL_NAMES[3])
         )
 
         cursor = conn.cursor()
@@ -493,9 +558,9 @@ def authenticate_user_from_db(conn, user_name: str, user_password: str, table_na
         fetch = cursor.fetchone()
         # check if the fetch was successful -> User exists or not?
         if fetch is not None:
-            _id, _name, _deck_ids = fetch
+            _id, _name, _deck_ids, _points = fetch
             log_function(MODULE_NAME, function_name, f"Fetched user {user_name} successfully")
-            return UserObj(_id, _name, _deck_ids)
+            return UserObj(_id, _name, _deck_ids, _points)
         else:
             log_function(MODULE_NAME, function_name, f"Fetched user {user_name} not found", "warn")
             return UserObj.create_empty()
@@ -505,7 +570,7 @@ def authenticate_user_from_db(conn, user_name: str, user_password: str, table_na
         return UserObj.create_empty()
 
 
-def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="users") -> int:
+def update_user_from_db(conn, user_name: str, deck_ids: list, table_name="users") -> int:
     """Update a user from a table inside the database
 
     :param conn: Connection object must not be None type
@@ -552,7 +617,63 @@ def update_user_from_db(conn, user_name: str, deck_ids: list[int], table_name="u
         )
 
         cursor = conn.cursor()
-        cursor.execute(query_base, [deck_ids, user_name])
+        cursor.execute(query_base, [json.dumps(deck_ids), user_name])
+        conn.commit()
+        log_function(MODULE_NAME, function_name, f"Updated user {user_name} successfully")
+        return 0
+    except ps.Error as e:
+        log_function(MODULE_NAME, function_name, f"Updating user {user_name} failed. Error: {type(e)} | {e.__str__()}", "error")
+        conn.rollback()
+        return 2
+
+def update_user_from_db_points(conn, user_name: str, points: int, table_name="users") -> int:
+    """Update a user from a table inside the database
+
+    :param conn: Connection object must not be None type
+    :type conn: psycopg2.connect
+    :param user_name: the name of the user
+    :type user_name: str
+    :param deck_ids: list containing pokemon ids that resemble the deck of the user
+    :type deck_ids: list[int]
+    :param table_name: Name of the table, defaults to "users"
+    :type table_name: str, optional
+    :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens, 
+             `4` if username is not a string, `5` if username is empty, `6` if username does not start with a letter,
+             `7` if deck_ids is empty, `8` if the deck_ids list contains something diffrent that an integer
+    :rtype: int
+    """
+    
+    function_name="update_user_from_db"
+
+    # check connection
+    if conn is None:
+        log_function(MODULE_NAME, function_name, 
+        f"Updating user with name {user_name} failed. Error: Connection to DB missing.", "error")
+        return 1
+
+    # check input
+    user_name_check = check_user_input(user_name, function_name)
+    if user_name_check != 0:
+        return user_name_check
+    
+    points_check = check_points_input(points, function_name)
+    if points_check != 0:
+        return points_check
+
+    try:
+        log_function(MODULE_NAME, function_name, f"Trying to update user {user_name}")
+        # create querry. get current courser of database, execute querry and commit changes
+        query_base = sql.SQL("""UPDATE {table_name} 
+                             SET {col_4} = %s 
+                             WHERE {col_1} = %s
+                             """).format(
+        table_name=sql.Identifier(table_name),
+        col_1=sql.Identifier(TABLE_COL_NAMES[0]),
+        col_4=sql.Identifier(TABLE_COL_NAMES[3])
+        )
+
+        cursor = conn.cursor()
+        cursor.execute(query_base, [points, user_name])
         conn.commit()
         log_function(MODULE_NAME, function_name, f"Updated user {user_name} successfully")
         return 0

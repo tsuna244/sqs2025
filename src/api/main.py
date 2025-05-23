@@ -26,6 +26,11 @@ db = None
 
 if os.environ.get("TEST", 'Not Set') != "1":
     db = Database()
+    db.create_table()
+
+gen_1 = GenerationObj(1)
+gen_2 = GenerationObj(2)
+gen_3 = GenerationObj(3)
 
 def create_db(db_settings):
     return Database(db_settings)
@@ -44,11 +49,20 @@ class TokenData(BaseModel):
 class User(BaseModel):
     user_id: int
     user_name: str
-    deck_ids: list[int]
+    deck_ids: list
+    points: int
 
 class RegistrationModel(BaseModel):
     username: str
     password: str
+
+class AddDeckModel(BaseModel):
+    username: str
+    new_elem: dict
+
+class AddPointsModel(BaseModel):
+    username: str
+    points_elem: int
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -83,7 +97,7 @@ async def get_current_user(token: str = Depends(oauth_2_scheme)):
     if datetime.now().timestamp() > token_data.expires:
         raise credential_exception
     
-    return User(user_id=user["user_id"], user_name=user["user_name"], deck_ids=user["deck_ids"])
+    return User(user_id=user["user_id"], user_name=user["user_name"], deck_ids=user["deck_ids"], points=user["points"])
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="api/static"), name="static")
@@ -133,17 +147,37 @@ async def register_new_user(request: RegistrationModel):
 async def get_user(current_user: User = Depends(get_current_user)):
     return current_user
 
+@app.post("/get_users")
+async def get_users():
+    return db.get_users()
+
 @app.get("/leaderboard")
-async def leaderboard_page():
-    return {"TBD": "TBD"}
+async def leaderboard_page(request: Request):
+    return templates.TemplateResponse(
+        name="leaderboard.html",
+        request=request
+    )
 
 @app.get("/my_deck")
-async def my_deck_page():
-    return {"TBD": "TBD"}
+async def my_deck_page(request: Request):
+    return templates.TemplateResponse(
+        name="mydeck.html",
+        request=request
+    )
 
 @app.get("/pack_opening")
-async def get_pack_opening():
-    return {"TBD": "TBD"}
+async def get_pack_opening(request: Request):
+    return templates.TemplateResponse(
+        name="pack.html",
+        request=request
+    )
+
+@app.get("/unauth")
+async def unauthorized_access(request: Request):
+    return templates.TemplateResponse(
+        name="unauth.html",
+        request=request
+    )
 
 @app.post("/Pokemon_Id/{pokemon_id}")
 async def read_pokemon(pokemon_id: int, request: Request):
@@ -156,6 +190,39 @@ async def get_pokemon_by_name(pokemon_name:str, request: Request):
         return pokemon
     else:
         return pokemon.__dict__()
+
+@app.post("/Pokemon_Rand/{gen_id}")
+async def get_random_pokemon_from_gen(gen_id: int, request: Request):
+    if gen_id == 1:
+        return gen_1.get_random_pokemon().__dict__()
+    elif gen_id == 2:
+        return gen_2.get_random_pokemon().__dict__()
+    elif gen_id == 3:
+        return gen_3.get_random_pokemon().__dict__()
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Only generation 1 to 3 are supported")
+
+@app.post("/add_to_deck")
+async def add_elem_to_user_deck(request: AddDeckModel):
+    if not isinstance(request.username, str):
+        return {"details": "Error occured! Did not add element to user"}
+    if not isinstance(request.new_elem, dict):
+        return {"details": "Error occured! Did not add element to user"}
+    if db.add_elem_to_user_deck(request.username, request.new_elem) != 0:
+        return {"details": "Error occured! Did not add element to user"}
+    else:
+        return {"details": "New element got added to user"}
+
+@app.post("/update_points")
+async def update_points_of_user(request: AddPointsModel):
+    err_dict = {"details": "Error occured! Did not add element to user"}
+    if not isinstance(request.username, str):
+        return err_dict
+    if not isinstance(request.points_elem, int):
+        return err_dict
+    if db.update_user_points(request.username, request.points_elem) != 0:
+        return err_dict
+    return {"details": "Added points to user successfully"}
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

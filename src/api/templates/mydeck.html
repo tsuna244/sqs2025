@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block scripts %} 
+
+<script>
+    authenticate_content();
+</script>
+
+{% endblock %}
+
+{% block body %}
+
+<link rel="stylesheet" href="{{ url_for('static', path='/css/deck_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/modal_style.css') }}">
+
+<div id="table" class="container">
+    
+    <h4>My_Deck</h4>
+
+    <div>
+        <div class="row">
+            <div class="col-4 poke-selection">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="d-menu-btn-1" data-toggle="dropdown" aria-expanded="false">
+                        Select a pokemon
+                    </button>
+                    <ul id="selection-list-1" class="dropdown-menu" aria-labelledby="d-menu-btn-1">
+                        <li><a class="d-menu-item-1 dropdown-item" data-value="placeholder-0" href="#">placeholder</a></li>
+                    </ul>
+                </div>
+                <div id="selection-1">Selection Points: <span id="poke-points-1">0</span></div>
+            </div>
+            <div class="col-4 poke-selection">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="d-menu-btn-2" data-toggle="dropdown" aria-expanded="false">
+                        Select a pokemon
+                    </button>
+                    <ul id="selection-list-2" class="dropdown-menu" aria-labelledby="d-menu-btn-2">
+                        <li><a class="d-menu-item-2 dropdown-item" data-value="placeholder-0" href="#">placeholder</a></li>
+                    </ul>
+                </div>
+                <div id="selection-2">Selection Points: <span id="poke-points-2">0</span></div>
+            </div>
+            <div class="col-4 poke-selection">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="d-menu-btn-3" data-toggle="dropdown" aria-expanded="false">
+                        Select a pokemon
+                    </button>
+                    <ul id="selection-list-3" class="dropdown-menu" aria-labelledby="d-menu-btn-3">
+                        <li><a class="d-menu-item-3 dropdown-item" data-value="placeholder-0" href="#">placeholder</a></li>
+                    </ul>
+                </div>
+                <div id="selection-3">Selection Points: <span id="poke-points-3">0</span></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-4 poke-selection">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="d-menu-btn-4" data-toggle="dropdown" aria-expanded="false">
+                        Select a pokemon
+                    </button>
+                    <ul id="selection-list-4" class="dropdown-menu" aria-labelledby="d-menu-btn-4">
+                        <li><a class="d-menu-item-4 dropdown-item" data-value="placeholder-0" href="#">placeholder</a></li>
+                    </ul>
+                </div>
+                <div id="selection-4">Selection Points: <span id="poke-points-4">0</span></div>
+            </div>
+            <div class="col-4 poke-selection">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="d-menu-btn-5" data-toggle="dropdown" aria-expanded="false">
+                        Select a pokemon
+                    </button>
+                    <ul id="selection-list-5" class="dropdown-menu" aria-labelledby="d-menu-btn-5">
+                        <li><a class="d-menu-item-5 dropdown-item" data-value="placeholder-0" href="#">placeholder</a></li>
+                    </ul>
+                </div>
+                <div id="selection-5">Selection Points: <span id="poke-points-5">0</span></div>
+            </div>
+            <div class="col-4 poke-selection">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="d-menu-btn-6" data-toggle="dropdown" aria-expanded="false">
+                        Select a pokemon
+                    </button>
+                    <ul id="selection-list-6" class="dropdown-menu" aria-labelledby="d-menu-btn-6">
+                        <li><a class="d-menu-item-6 dropdown-item" data-value="placeholder-0" href="#">placeholder</a></li>
+                    </ul>
+                </div>
+                <div id="selection-6">Selection Points: <span id="poke-points-6">0</span></div>
+            </div>
+        </div>
+        <div class="row"><button id="save_points_btn" class="btn btn-outline-primary col-12 mt-5" onclick="calc_and_update_points()">Save Points</button></div>
+        
+    <div>
+
+</div>
+
+<!-- Modal Popup -->
+<div class="modal fade" id="popupModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <h4> Registration Failed!!! </h4>
+      <h4 id="modalMessage">Message Block</h4>
+    </div>
+  </div>
+</div>
+
+<script>
+    // create dropdown menus for 6 segments
+    create_deck_page();
+    
+</script>
+
+
+{% endblock %}
