@@ -11,6 +11,7 @@
 {% block body %}
 
 <link rel="stylesheet" href="{{ url_for('static', path='/css/deck_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/modal_style.css') }}">
 
 <div id="table" class="container">
     
@@ -88,8 +89,20 @@
                 <div id="selection-6">Selection Points: <span id="poke-points-6">0</span></div>
             </div>
         </div>
+        <div class="row"><button id="save_points_btn" class="btn btn-outline-primary col-12 mt-5" onclick="calc_and_update_points()">Save Points</button></div>
+        
     <div>
 
+</div>
+
+<!-- Modal Popup -->
+<div class="modal fade" id="popupModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <h4> Registration Failed!!! </h4>
+      <h4 id="modalMessage">Message Block</h4>
+    </div>
+  </div>
 </div>
 
 <script>

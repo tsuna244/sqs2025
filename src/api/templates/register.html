@@ -22,7 +22,7 @@
         <form class="myform" name="loginform">
 					<div class="form-group">
     				<input id="username" name="username" type="text" class="form-control" placeholder="Username">
-            <span id="username_block">Your username must not be empty and start with a letter.</span>
+            <span id="username_block">Your username must not be empty and start with a letter. Username must be alpha only</span>
   				</div>
  					<div class="form-group">
     				<input id="password" name="password" type="password" class="form-control" placeholder="Password" oninput="validatePassword(this.value)">
@@ -33,7 +33,7 @@
             <span id="repeatMessage" class="font-weight-bold text-danger"></span>
           </div>
   				<div class="form-group mt-3">
-  					<button type="button" class="btn btn-block btn-outline-primary btn-lg" onclick="send_registration()"><small><i class="bi bi-person pr-2"></i>Register</small></button>
+  					<button id="register_btn" type="button" class="btn btn-block btn-outline-primary btn-lg" onclick="send_registration()"><small><i class="bi bi-person pr-2"></i>Register</small></button>
   				</div>
 				</form>
 

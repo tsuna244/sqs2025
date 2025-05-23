@@ -26,6 +26,7 @@ db = None
 
 if os.environ.get("TEST", 'Not Set') != "1":
     db = Database()
+    db.create_table()
 
 gen_1 = GenerationObj(1)
 gen_2 = GenerationObj(2)
@@ -49,6 +50,7 @@ class User(BaseModel):
     user_id: int
     user_name: str
     deck_ids: list
+    points: int
 
 class RegistrationModel(BaseModel):
     username: str
@@ -57,6 +59,10 @@ class RegistrationModel(BaseModel):
 class AddDeckModel(BaseModel):
     username: str
     new_elem: dict
+
+class AddPointsModel(BaseModel):
+    username: str
+    points_elem: int
 
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -91,7 +97,7 @@ async def get_current_user(token: str = Depends(oauth_2_scheme)):
     if datetime.now().timestamp() > token_data.expires:
         raise credential_exception
     
-    return User(user_id=user["user_id"], user_name=user["user_name"], deck_ids=user["deck_ids"])
+    return User(user_id=user["user_id"], user_name=user["user_name"], deck_ids=user["deck_ids"], points=user["points"])
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="api/static"), name="static")
@@ -206,6 +212,17 @@ async def add_elem_to_user_deck(request: AddDeckModel):
         return {"details": "Error occured! Did not add element to user"}
     else:
         return {"details": "New element got added to user"}
+
+@app.post("/update_points")
+async def update_points_of_user(request: AddPointsModel):
+    err_dict = {"details": "Error occured! Did not add element to user"}
+    if not isinstance(request.username, str):
+        return err_dict
+    if not isinstance(request.points_elem, int):
+        return err_dict
+    if db.update_user_points(request.username, request.points_elem) != 0:
+        return err_dict
+    return {"details": "Added points to user successfully"}
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):

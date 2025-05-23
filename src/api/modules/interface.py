@@ -19,6 +19,7 @@ from .module_postgresql import (
     get_all_users_from_db,
     authenticate_user_from_db,
     update_user_from_db,
+    update_user_from_db_points,
     delete_user_from_db,
     DatabaseError
 )
@@ -135,7 +136,7 @@ class PokemonObj(object):
 
     def __dict__(self):
         return {"pokemon_id": self.get_id(), "pokemon_name": self.get_name(), "pokemon_generation": self.get_generation(), 
-                "pokemon_rarity": self.get_rarity().value, "pokemon_stats": self.get_stats(), "pokemon_sprite_path": self.get_sprite_path()}
+                "pokemon_rarity": self.get_rarity().value, "pokemon_points": self.get_points(), "pokemon_stats": self.get_stats(), "pokemon_sprite_path": self.get_sprite_path()}
 
     def __str__(self):
         return self.__dict__().__str__()
@@ -406,6 +407,27 @@ class Database(object):
         """
         
         output = update_user_from_db(self._conn, user_name, pokemon_list)
+        if output == 1:
+            raise ConnectionError("Update user function received none type object for connection")
+        elif output == 2:
+            raise DatabaseError("Unresolved error occured, could not update user")
+        else:
+            return output
+
+    def update_user_points(self, user_name: str, points: int) -> int:
+        """Updates the points of a user.
+
+        :param user_name: The user thats deck should be updated
+        :type user_name: str
+        :param points: The new points of a user, defaults to 0
+        :type points: int
+        :raises ConnectionError: raises if the connection is a none type object
+        :raises DatabaseError: raises if updating the user failes
+        :return: `0` if successfull, `1` if ConnectionError, `2` if DatabaseError
+        :rtype: int
+        """
+        
+        output = update_user_from_db_points(self._conn, user_name, points)
         if output == 1:
             raise ConnectionError("Update user function received none type object for connection")
         elif output == 2:

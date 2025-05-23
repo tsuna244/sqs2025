@@ -1,5 +1,6 @@
 // pokemon search function
 function onSearch() {
+    $("#search_btn").prop("disabled", true);
     let loading_elem = $("#loading");
     loading_elem.text("Loading");
     let pokemon_elem = $("#poke_elem");
@@ -31,12 +32,13 @@ function onSearch() {
             loading_elem.text("Pokemon not found!");
             pokemon_elem.hide();
         }
-
+        $("#search_btn").prop("disabled", false);
     });
 }
 
 // login function
 function send() {
+    $("#login_btn").prop("disabled", true);
     let formData = new FormData();
     formData.append("username", document.loginform.username.value);
     formData.append("password", document.loginform.password.value);
@@ -52,7 +54,12 @@ function send() {
             document.location.href = "/";
         }
         else {
-            console.log(JSON.stringify(data));
+            // TODO: reset input for login, popup LOGIN FAILED, change href to home on login
+            document.loginform.username.value = ""
+            document.loginform.password.value = ""
+            $("#modalMessage").text("Username or Password wrong")
+            $("#popupModal").modal()
+            $("#login_btn").prop("disabled", false);
         }
     })
     .catch(error => {
@@ -62,6 +69,7 @@ function send() {
 
 // registration function
 function send_registration() {
+    $("#register_btn").prop("disabled", true);
     let username =  document.loginform.username.value;
     let password = document.loginform.password.value;
     let repeat_passwd = document.loginform.password_repeat.value;
@@ -92,10 +100,17 @@ function send_registration() {
         })
         .then(response => response.json())
         .then(data => { // data is a JSON object
-            console.log(JSON.stringify(data));
+            document.loginform.username.value = "";
+            document.loginform.password.value = "";
+            document.loginform.password_repeat.value = "";
+            $("#modalMessage").text(data["details"]);
+            $("#popupModal").modal();
+            if(data["details"].includes("successfully")) {
+                location.href="/login";
+            }
         })
     }
-
+    $("#register_btn").prop("disabled", false);
 }
 
 // validation function for password repeat
@@ -268,7 +283,7 @@ function add_click_event_to_selection(selection_id) {
         })
         .then(response => response.json())
         .then(data => {
-                const html_str = `<img src="/static/${data["pokemon_sprite_path"]}">Points: <span id="poke-points-${selection_id}">${data["pokemon_rarity"]}</span>`
+                const html_str = `<img src="/static/${data["pokemon_sprite_path"]}">Points: <span id="poke-points-${selection_id}">${data["pokemon_points"]}</span>`
                 $(selection_html_id).html(html_str);
             }
         )
@@ -276,8 +291,52 @@ function add_click_event_to_selection(selection_id) {
   });
 }
 
-function calc_points() {
-    // TODO
+function calc_and_update_points() {
+    $("#save_points_btn").prop("disabled", true);
+    let points_sum = 0;
+    for (let i = 1; i < 7; i++) {
+        let val = $(`#poke-points-${i}`).text();
+        points_sum += parseInt(val);
+    }
+
+    let token = window.sessionStorage.token
+    if (typeof token == "undefined" || token == "null") location.href = "/unauth";
+    let current_token = JSON.parse(token);
+    if (typeof current_token != "undefined" && current_token != "null") {
+        const headers = { 'Authorization': current_token["token_type"] + " " + current_token["access_token"] }; // auth header with bearer token
+        fetch("/get_user", { 
+            method: "POST",
+            headers: headers 
+        })
+        .then(response => response.json())
+        .then(data => {
+                if (data.hasOwnProperty("user_name")) {
+                    const user_name = data["user_name"]
+                    update_points(user_name, points_sum);
+                }else {
+                    $("#modalMessage").text("Could not get user. Adding Pokemon to deck failed!")
+                    $("#popupModal").modal()
+                }
+                $("#save_points_btn").prop("disabled", false);
+            }
+        )
+    }
+}
+
+function update_points(user_name, points_elem) {
+     fetch("/update_points", { 
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({username: user_name, points_elem: points_elem})
+    })
+    .then(response => response.json())
+    .then(data => {
+            $("#modalMessage").text(data["details"])
+            $("#popupModal").modal()
+        }
+    )
 }
 
 function create_deck_page() {
@@ -315,9 +374,10 @@ function get_random_pokemon_by_gen_id(generation_id) {
     })
     .then(response => response.json())
     .then(data => {
-            console.log(JSON.stringify(data));
             if (data.hasOwnProperty("pokemon_id")) {
                 // add pokemon to user (update_user)
+                let result_field = $("#poke_result")
+                result_field.html(`<span>${data["pokemon_name"]}: ${data["pokemon_points"]} Points</span><img src="/static/${data["pokemon_sprite_path"]}">`)
                 add_rand_poke_to_user({_id: data["pokemon_id"], _name: data["pokemon_name"]});
             }
             gen_btns.each(function () {
@@ -343,6 +403,9 @@ function add_rand_poke_to_user(new_elem) {
                 if (data.hasOwnProperty("user_name")) {
                     const user_name = data["user_name"]
                     update_user(user_name, new_elem);
+                }else {
+                    $("#modalMessage").text("Could not get user. Adding Pokemon to deck failed!")
+                    $("#popupModal").modal()
                 }
             }
         )
@@ -359,7 +422,32 @@ function update_user(user_name, new_elem) {
     })
     .then(response => response.json())
     .then(data => {
-            console.log(JSON.stringify(data));
+            $("#modalMessage").text(data["details"])
+            $("#popupModal").modal()
+        }
+    )
+}
+
+function update_leaderboard() {
+    $("#update_lb_btn").prop("disabled", true);
+    fetch("/get_users", { 
+        method: "POST"
+    })
+    .then(response => response.json())
+    .then(data => {
+            console.log(data);
+            if (data.hasOwnProperty("users")) {
+                let l = data["users"].length;
+                if (l > 10) l = 10;
+                html_str = ""
+                for (let i = 0; i < l; i++) {
+                    html_str += `<li>${data["users"][i]["user_name"]} : ${data["users"][i]["points"]}</li> \n`;
+                }
+                $("#user_list").html(html_str);
+            }else {
+                $("#user_list").text("No users found");
+            }
+            $("#update_lb_btn").prop("disabled", false);
         }
     )
 }

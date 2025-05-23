@@ -18,6 +18,7 @@ def test_pokemonobj():
         'pokemon_name': 'bulbasaur', 
         'pokemon_generation': 'generation-i', 
         'pokemon_rarity': 'normal',
+        'pokemon_points': 45,
         'pokemon_stats': [
             {'stat_name': 'hp', 'stat_value': 45}, 
             {'stat_name': 'attack', 'stat_value': 49}, 
@@ -35,6 +36,7 @@ def test_pokemonobj():
         'pokemon_name': 'bulbasaur', 
         'pokemon_generation': 'generation-i', 
         'pokemon_rarity': 'normal',
+        'pokemon_points': 45,
         'pokemon_stats': [
             {'stat_name': 'hp', 'stat_value': 45}, 
             {'stat_name': 'attack', 'stat_value': 49}, 
@@ -130,9 +132,10 @@ def test_database():
     assert db_obj.delete_table() == 0
     assert db_obj.create_table() == 0
     assert db_obj.add_user("test_user", "1234ABCD", []) == 0
-    assert db_obj.authenticate_user("test_user", "1234ABCD").__str__() == {"user_id": 1, "user_name": "test_user", "deck_ids": []}.__str__() 
-    assert db_obj.get_user("test_user").__str__() == {"user_id": 1, "user_name": "test_user", "deck_ids": []}.__str__()
+    assert db_obj.authenticate_user("test_user", "1234ABCD").__str__() == {"user_id": 1, "user_name": "test_user", "deck_ids": [], "points": 0}.__str__() 
+    assert db_obj.get_user("test_user").__str__() == {"user_id": 1, "user_name": "test_user", "deck_ids": [], "points": 0}.__str__()
     assert db_obj.update_user("test_user", [{"_id": 1, "_name": 1}]) == 0
+    assert db_obj.update_user_points("test_user", 20) == 0
     assert db_obj.delete_user("test_user") == 0
     assert db_obj.clean_table() == 0
     assert db_obj.get_users() == {"users": []}

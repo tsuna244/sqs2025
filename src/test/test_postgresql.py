@@ -56,16 +56,21 @@ def test_check_deck_ids_input():
     deck_ids = [{"_id": 1, "_name": "name"}, {"_id": 2, "_name": "name_two"}]
     assert check_deck_ids_input(deck_ids) == 0
 
+def test_check_points_input():
+    assert check_points_input("") == 9
+    assert check_points_input(-1) == 9
+    assert check_points_input(10) == 0
 
 def test_user_object():
     empty_obj = UserObj.create_empty()
     assert empty_obj.user_id == -1
     assert empty_obj.user_name == ""
     assert empty_obj.deck_ids == []
+    assert empty_obj.points == 0
     assert empty_obj.__empty__() == True
-    not_empty_obj = UserObj(1, "test_name", [{"_id": 1, "_name": "name"}])
-    assert not_empty_obj.__eq__(UserObj(1, "test_name", [{"_id": 1, "_name": "name"}])) == True
-    test_dict = {"user_id": 1, "user_name": "test_name", "deck_ids": [{"_id": 1, "_name": "name"}]}
+    not_empty_obj = UserObj(1, "test_name", [{"_id": 1, "_name": "name"}], 3)
+    assert not_empty_obj.__eq__(UserObj(1, "test_name", [{"_id": 1, "_name": "name"}], 3)) == True
+    test_dict = {"user_id": 1, "user_name": "test_name", "deck_ids": [{"_id": 1, "_name": "name"}], "points": 3}
     assert not_empty_obj.__dict__() == test_dict
     assert not_empty_obj.__str__() == test_dict.__str__()
 
@@ -102,7 +107,12 @@ def test_update_user():
     assert update_user_from_db(db_connection, "test_user", "") == 7
     # update user successfully
     assert update_user_from_db(db_connection, "test_user", [{"_id": 1, "_name": "name"}, {"_id": 2, "_name": "name2"}]) == 0
-    
+
+def test_update_user_points():
+    assert update_user_from_db_points(None, "", []) == 1
+    assert update_user_from_db_points(db_connection, 123, 0) == 4
+    assert update_user_from_db_points(db_connection, "test_user", -1) == 9
+    assert update_user_from_db_points(db_connection, "test_user", 17) == 0
 
 def test_get_user_from_db():
     # get user with none type connection
@@ -113,7 +123,7 @@ def test_get_user_from_db():
     assert get_user_from_db(db_connection, "idontexist").__eq__(UserObj.create_empty())
     # get user successfully
     print(get_user_from_db(db_connection, "test_user"))
-    assert get_user_from_db(db_connection, "test_user").__eq__(UserObj(2, "test_user", [{"_id": 1, "_name": "name"}, {"_id": 2, "_name": "name2"}]))
+    assert get_user_from_db(db_connection, "test_user").__eq__(UserObj(2, "test_user", [{"_id": 1, "_name": "name"}, {"_id": 2, "_name": "name2"}], 17))
 
 def test_authenticate_user_from_db():
     # authenticate user with none type connection
@@ -126,7 +136,7 @@ def test_authenticate_user_from_db():
     assert authenticate_user_from_db(db_connection, "nonexistinguser", "1234AbCd").__empty__()
     # authenticate user successfully
     print(authenticate_user_from_db(db_connection, "test_user", "123456AB"))
-    assert authenticate_user_from_db(db_connection, "test_user", "123456AB").__eq__(UserObj(2, "test_user", [{"_id": 1, "_name": "name"}, {"_id": 2, "_name": "name2"}]))
+    assert authenticate_user_from_db(db_connection, "test_user", "123456AB").__eq__(UserObj(2, "test_user", [{"_id": 1, "_name": "name"}, {"_id": 2, "_name": "name2"}], 17))
 
 def test_delete_user():
     # delete user with none type connection

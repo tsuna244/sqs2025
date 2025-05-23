@@ -2,14 +2,21 @@
 
 {% block body %}
 
-
+<link rel="stylesheet" href="{{ url_for('static', path='/css/search_style.css') }}">
 
 <div class="container-fluid">
     <h4>Leaderboard</h4>
     <div class="container">
-        Table Content
+        <button id="update_lb_btn" class="btn btn-outline-primary" onclick="update_leaderboard()">Update Leaderboard</button>
+        <ul id="user_list">
+
+        </ul>
     </div>
     
 </div>
+
+<script>
+    update_leaderboard();
+</script>
 
 {% endblock %}

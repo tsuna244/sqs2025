@@ -11,6 +11,7 @@
 {% block body %}
 
 <link rel="stylesheet" href="{{ url_for('static', path='/css/deck_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/modal_style.css') }}">
 
 <div id="table" class="container" style="margin-top: 20px;">
 
@@ -26,5 +27,14 @@
 
 </div>
 
+<!-- Modal Popup -->
+<div class="modal fade" id="popupModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <h4> Updating User</h4>
+      <h4 id="modalMessage">Message Block</h4>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
