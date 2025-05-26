@@ -27,9 +27,11 @@ os.environ["TEST"] = "1"
 
 import api
 
-api.create_db(db_settings)
-
 client = TestClient(api.app)
+
+def test_create_db():
+    api.create_db(db_settings)
+    assert True
 
 def test_read_main():
     response = client.get("/")
