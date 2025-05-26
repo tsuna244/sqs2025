@@ -202,24 +202,25 @@ async def get_random_pokemon_from_gen(gen_id: int, request: Request):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Only generation 1 to 3 are supported")
 
+err_dict = {"details": "Error occured! Did not add element to user"}
+
 @app.post("/add_to_deck")
 async def add_elem_to_user_deck(request: AddDeckModel):
-    if not isinstance(request.username, str):
-        return {"details": "Error occured! Did not add element to user"}
+    if not isinstance(request.username, str) or not request.username.isalpha():
+        return {"details": "Input error! Username must be alpha only"}
     if not isinstance(request.new_elem, dict):
-        return {"details": "Error occured! Did not add element to user"}
+        return err_dict
     if db.add_elem_to_user_deck(request.username, request.new_elem) != 0:
-        return {"details": "Error occured! Did not add element to user"}
+        return err_dict
     else:
         return {"details": "New element got added to user"}
 
 @app.post("/update_points")
 async def update_points_of_user(request: AddPointsModel):
-    err_dict = {"details": "Error occured! Did not add element to user"}
-    if not isinstance(request.username, str):
-        return err_dict
-    if not isinstance(request.points_elem, int):
-        return err_dict
+    if not isinstance(request.username, str) or not request.username.isalpha():
+        return {"details": "Input error! Username must be alpha only"}
+    if not isinstance(request.points_elem, int) or not request.points_elem < 0:
+        return {"details": "Input error! Point elem must be positive integer"}
     if db.update_user_points(request.username, request.points_elem) != 0:
         return err_dict
     return {"details": "Added points to user successfully"}
