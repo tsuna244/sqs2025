@@ -54,7 +54,6 @@ function send() {
             document.location.href = "/";
         }
         else {
-            // TODO: reset input for login, popup LOGIN FAILED, change href to home on login
             document.loginform.username.value = ""
             document.loginform.password.value = ""
             $("#modalMessage").text("Username or Password wrong")
@@ -257,9 +256,9 @@ function authenticate_content() {
 // functions for deck!!!
 function create_dropdown_element_for_user(selection_id, deck_ids) {
     let html_str = "";
-    for(let i = 0; i < deck_ids.length; i++) {
-        poke_id = deck_ids[i]["_id"];
-        poke_name = deck_ids[i]["_name"];
+    for(let value of deck_ids) {
+        let poke_id = value["_id"];
+        let poke_name = value["_name"];
         html_str += `<li><a class="d-menu-item-${selection_id} dropdown-item" data-value="${poke_name}-${poke_id}" href="#">${poke_name}</a></li>` + "\n";
     }
     let selection_list = "#selection-list-" + selection_id;
@@ -439,7 +438,7 @@ function update_leaderboard() {
             if (data.hasOwnProperty("users")) {
                 let l = data["users"].length;
                 if (l > 10) l = 10;
-                html_str = ""
+                let html_str = ""
                 for (let i = 0; i < l; i++) {
                     html_str += `<li>${data["users"][i]["user_name"]} : ${data["users"][i]["points"]}</li> \n`;
                 }
