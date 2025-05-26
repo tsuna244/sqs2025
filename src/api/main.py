@@ -126,10 +126,12 @@ async def user_registration_page(request: Request):
         request=request
     )
 
+err_dict_user = {"details": "Input error! Username must be alpha only"}
+
 @app.post("/register_user")
 async def register_new_user(request: RegistrationModel):
     if not isinstance(request.username, str) or not request.username.isalpha():
-        return {"details": "Input error! Username must be alpha only"}
+        return err_dict_user
     if not isinstance(request.password, str) or not request.password.isascii():
         return {"details": "Input error! Password must be ascii chars only"}
     result = db.add_user(request.username, request.password, [])
@@ -207,7 +209,7 @@ err_dict = {"details": "Error occured! Did not add element to user"}
 @app.post("/add_to_deck")
 async def add_elem_to_user_deck(request: AddDeckModel):
     if not isinstance(request.username, str) or not request.username.isalpha():
-        return {"details": "Input error! Username must be alpha only"}
+        return err_dict_user
     if not isinstance(request.new_elem, dict):
         return err_dict
     if db.add_elem_to_user_deck(request.username, request.new_elem) != 0:
@@ -218,8 +220,8 @@ async def add_elem_to_user_deck(request: AddDeckModel):
 @app.post("/update_points")
 async def update_points_of_user(request: AddPointsModel):
     if not isinstance(request.username, str) or not request.username.isalpha():
-        return {"details": "Input error! Username must be alpha only"}
-    if not isinstance(request.points_elem, int) or not request.points_elem < 0:
+        return err_dict_user
+    if not isinstance(request.points_elem, int) or request.points_elem < 0:
         return {"details": "Input error! Point elem must be positive integer"}
     if db.update_user_points(request.username, request.points_elem) != 0:
         return err_dict

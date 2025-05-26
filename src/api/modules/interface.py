@@ -388,7 +388,7 @@ class Database(object):
 
     def add_elem_to_user_deck(self, user_name: str, new_elem):
         user = get_user_from_db(self._conn, user_name)
-        if not user.__empty__() and not new_elem in user.deck_ids:
+        if not user.__empty__() and new_elem not in user.deck_ids:
             user.deck_ids.append(new_elem)
             print(user.deck_ids)
             return self.update_user(user_name, user.deck_ids)

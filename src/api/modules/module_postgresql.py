@@ -473,11 +473,11 @@ def get_all_users_from_db(conn, table_name="users") -> dict:
     # check connection
     if conn is None:
         log_function(MODULE_NAME, function_name, 
-        f"Fetching users failed. Error: Connection to DB missing.", "error")
+        "Fetching users failed. Error: Connection to DB missing.", "error")
         return {}
     
     try:
-        log_function(MODULE_NAME, function_name, f"Trying to fetch all users")
+        log_function(MODULE_NAME, function_name, "Trying to fetch all users")
         # create querry. get current courser of database, execute querry and commit changes
         query_base = sql.SQL("""SELECT id, {col_1}, {col_3}, {col_4} FROM {table_name}""").format(
         table_name=sql.Identifier(table_name),
@@ -499,7 +499,7 @@ def get_all_users_from_db(conn, table_name="users") -> dict:
                 user_arry.append(UserObj(_id, _name, _deck_ids, _points).__dict__())
             return {"users": user_arry}
         else:
-            log_function(MODULE_NAME, function_name, f"Table empty", "warn")
+            log_function(MODULE_NAME, function_name, "Table empty", "warn")
             return {"users": []}
     except ps.Error as e:
         log_function(MODULE_NAME, function_name, f"Fetching users failed. Error: {type(e)} | {e.__str__()}", "error")
