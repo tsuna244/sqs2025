@@ -27,17 +27,28 @@ db = None
 if os.environ.get("TEST", 'Not Set') != "1":
     db = Database()
     db.create_table()
+    templates = Jinja2Templates(directory="api/templates")
+else:
+    templates = Jinja2Templates(directory=os.path.abspath("src/api/templates"))
 
 gen_1 = GenerationObj(1)
 gen_2 = GenerationObj(2)
 gen_3 = GenerationObj(3)
 
 def create_db(db_settings):
-    return Database(db_settings)
-if os.environ.get("TEST", 'Not Set') != "1":
-    templates = Jinja2Templates(directory="api/templates")
-else:
-    templates = Jinja2Templates(directory=os.path.abspath("src/api/templates"))
+    if os.environ.get("TEST", 'Not Set') != "1":
+        raise ImportError("This function is only for testing purposes")
+    global db
+    db = Database(db_settings)
+    db.create_table()
+    db.clean_table()
+
+def close_db():
+    if os.environ.get("TEST", 'Not Set') != "1":
+        raise ImportError("This function is only for testing purposes")
+    global db
+    db.close()
+
 class Token(BaseModel):
     access_token: str
     token_type: str

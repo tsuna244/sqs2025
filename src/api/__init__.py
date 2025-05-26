@@ -1,1 +1,1 @@
-from .main import app, db, create_db
+from .main import app, db, create_db, close_db
