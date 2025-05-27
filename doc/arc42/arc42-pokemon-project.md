@@ -144,7 +144,7 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 ---
 
 ## 9. Design Decisions
-{% import ./adr/0001-record-architecture-decisions.md %}
+[adr-0001](./adr/0001-record-architecture-decisions.md)
 
 - Use of modular design for maintainability.
 - Chose PokeAPI as a lightweight, public Pokémon data provider.
