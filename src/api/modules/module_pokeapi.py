@@ -205,6 +205,13 @@ def get_pokemon_id_names_by_generation(generation: int, depth=0) -> list:
 
 
 def get_pokemon_id_from_name(pokemon_name: str) -> int:
+    """Returns a pokemon id of the pokemon with the name pokemon_name
+
+    :param pokemon_name: the name of the pokemon
+    :type pokemon_name: str
+    :return: `pokemon_id` of the pokemon if successfull, `-1` otherwise
+    :rtype: int
+    """
     func_name = "get_pokemon_id_from_name"
     
     if check_pokemon_name(func_name, pokemon_name) == -1:

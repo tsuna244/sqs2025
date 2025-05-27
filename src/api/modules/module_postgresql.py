@@ -169,6 +169,15 @@ def check_deck_ids_input(deck_ids: list, function_name="check_deck_ids_input") -
 
 
 def check_points_input(points: int, function_name = "check_points_input"):
+    """Check the points input if it is correct
+
+    :param points: The points that will be checked
+    :type points: int
+    :param function_name: The name of the function that calls this check, defaults to "check_points_input"
+    :type function_name: str, optional
+    :return: `0` if check succesfull, `9` otherwise
+    :rtype: int
+    """
     if not isinstance(points, int):
         log_function(MODULE_NAME, function_name, "points must be of type int", "Error")
         return 9
@@ -633,13 +642,13 @@ def update_user_from_db_points(conn, user_name: str, points: int, table_name="us
     :type conn: psycopg2.connect
     :param user_name: the name of the user
     :type user_name: str
-    :param deck_ids: list containing pokemon ids that resemble the deck of the user
-    :type deck_ids: list[int]
+    :param points: points of the user that should be updated
+    :type points: int
     :param table_name: Name of the table, defaults to "users"
     :type table_name: str, optional
     :return: `0` if successful, `1` if None Type connection, `2` if unusual error happens, 
              `4` if username is not a string, `5` if username is empty, `6` if username does not start with a letter,
-             `7` if deck_ids is empty, `8` if the deck_ids list contains something diffrent that an integer
+             `9` if points are negative or not integer
     :rtype: int
     """
     

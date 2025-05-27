@@ -147,7 +147,7 @@ class PokemonObj(object):
 class GenerationObj(object):
     """This class represents all Pokemon in a Generation
 
-    :param gen_id: The id of the generation. Must be one 1, 2 or 3
+    :param gen_id: The id of the generation. Must be 1, 2 or 3
     :type gen_id: int
     
     :raises ValueError: Generation id must be an integer and between 1 to 3
@@ -349,7 +349,7 @@ class Database(object):
         return get_all_users_from_db(self._conn)
 
     def authenticate_user(self, user_name: str, user_password: str) -> dict:
-        """Returns a user in dictionary format containing his id, name, and list of pokemon_ids inside his deck called deck_id
+        """Authenticates the user and if the authentication is successfully it returns the user
 
         :param user_name: the user name of the user to get
         :type user_name: str
@@ -387,6 +387,16 @@ class Database(object):
             return output
 
     def add_elem_to_user_deck(self, user_name: str, new_elem):
+        """Add an element to a users deck
+
+        :param user_name: The name of the user
+        :type user_name: str
+        :param new_elem: the element that should be added to the user of form `{"_id": int, "_name": str}`
+        :type new_elem: dict
+
+        :return: `0` if successfull
+        :rtype: int | void
+        """
         user = get_user_from_db(self._conn, user_name)
         if not user.__empty__() and new_elem not in user.deck_ids:
             user.deck_ids.append(new_elem)
