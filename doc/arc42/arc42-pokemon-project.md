@@ -144,7 +144,8 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 ---
 
 ## 9. Design Decisions
-(ADR)
+{% import ./adr/0001-record-architecture-decisions.md %}
+
 - Use of modular design for maintainability.
 - Chose PokeAPI as a lightweight, public Pokémon data provider.
 - PostgreSQL for relational storage of user and deck data. Includes integrated security extention for password hashing.

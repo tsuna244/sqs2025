@@ -5,4 +5,4 @@ architecture
     :maxdepth: 2
     :caption: architecture
 
-    arc42-template-EN.md
+    arc42-pokemon-project.md
