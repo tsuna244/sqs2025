@@ -144,7 +144,17 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 ---
 
 ## 9. Design Decisions
-[adr-0001](./adr/0001-record-architecture-decisions.md)
+### ADRs
+[0001-record-architecture-decisions.md](./adr/0001-record-architecture-decisions.md)
+[0002-pokebase-as-api-for-this-project.md](./adr/0002-pokebase-as-api-for-this-project.md)
+[0003-python-3-12-as-language-for-this-project.md](./adr/0003-python-3-12-as-language-for-this-project.md)
+[0004-fastapi-as-rest-api.md](./adr/0004-fastapi-as-rest-api.md)
+[0005-starlette-and-jinja2-for-templating.md](./adr/0005-starlette-and-jinja2-for-templating.md)
+[0006-postgresql-as-database.md](./adr/0006-postgresql-as-database.md)
+[0007-logging-integration.md](./adr/0007-logging-integration.md)
+[0008-dockerize-the-application.md](./adr/0008-dockerize-the-application.md)
+[0009-ci-cd-and-sonarcloud.md](./adr/0009-ci-cd-and-sonarcloud.md)
+[0010-using-pytest-and-pytest-cov-for-testing.md](./adr/0010-using-pytest-and-pytest-cov-for-testing.md)
 
 - Use of modular design for maintainability.
 - Chose PokeAPI as a lightweight, public Pokémon data provider.
