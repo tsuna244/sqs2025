@@ -36,6 +36,12 @@ gen_2 = GenerationObj(2)
 gen_3 = GenerationObj(3)
 
 def create_db(db_settings):
+    """Test function that creates a db object for testing with the given settings. only works if TEST env var is set
+
+    :param db_settings: settings for the test db connection
+    :type db_settings: dict
+    :raises ImportError: raises error if not in test mode
+    """
     if os.environ.get("TEST", 'Not Set') != "1":
         raise ImportError("This function is only for testing purposes")
     global db
@@ -44,6 +50,10 @@ def create_db(db_settings):
     db.clean_table()
 
 def close_db():
+    """Test function to close the test db. only works if TEST env var is set
+
+    :raises ImportError: raises error if not in test mode
+    """
     if os.environ.get("TEST", 'Not Set') != "1":
         raise ImportError("This function is only for testing purposes")
     global db
@@ -78,6 +88,15 @@ class AddPointsModel(BaseModel):
 oauth_2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    """Creates an access token using the data and an expiring time in minutes
+
+    :param data: dictionary containing data to include in the access token
+    :type data: dict
+    :param expires_delta: time in Minutes the token expires in, defaults to None
+    :type expires_delta: timedelta | None, optional
+    :return: jwt token
+    :rtype: str
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now() + expires_delta
@@ -88,6 +107,18 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 async def get_current_user(token: str = Depends(oauth_2_scheme)):
+    """fetches the user from the given token and authorizes him
+
+    :param token: the jwt token str, defaults to Depends(oauth_2_scheme)
+    :type token: str, optional
+    :raises credential_exception: raises if username inside the token is none
+    :raises credential_exception: raises if JWT Error occures
+    :raises credential_exception: raises if user id is -1
+    :raises credential_exception: raises if expiration date is not set
+    :raises credential_exception: raises if token is expired
+    :return: User object containg user information: user_id, user_name, deck_ids list and points
+    :rtype: User
+    """
     credential_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials", headers={"WWW_Authenticate": "Bearer"})
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -116,6 +147,13 @@ app.mount("/static", StaticFiles(directory="api/static"), name="static")
 
 @app.get("/")
 async def read_root(request: Request):
+    """Api call: root "/" home page.
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed home.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="home.html",
         request=request
@@ -124,6 +162,13 @@ async def read_root(request: Request):
 # only page not function
 @app.get("/login")
 async def user_login_page(request: Request):
+    """Api call: login page "/login"
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed login.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="login.html",
         request=request
@@ -132,6 +177,13 @@ async def user_login_page(request: Request):
 # only page not function
 @app.get("/register")
 async def user_registration_page(request: Request):
+    """Api call: register page "/register"
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed register.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="register.html",
         request=request
@@ -141,6 +193,13 @@ err_dict_user = {"details": "Input error! Username must be alpha only"}
 
 @app.post("/register_user")
 async def register_new_user(request: RegistrationModel):
+    """Api call: Post request to register a new user
+
+    :param request: contains information to register a new user: username, password
+    :type request: RegistrationModel
+    :return: dict containing information about the registration: {"details": msg: str}
+    :rtype: dict
+    """
     if not isinstance(request.username, str) or not request.username.isalpha():
         return err_dict_user
     if not isinstance(request.password, str) or not request.password.isascii():
@@ -158,14 +217,33 @@ async def register_new_user(request: RegistrationModel):
 
 @app.post("/get_user", response_model=User)
 async def get_user(current_user: User = Depends(get_current_user)):
+    """API call: returns and authenticates a user
+
+    :param current_user: will be retrieved from the token inside of authentication header, defaults to Depends(get_current_user)
+    :type current_user: User, optional
+    :return: the user of the token inside the header
+    :rtype: User
+    """
     return current_user
 
 @app.post("/get_users")
 async def get_users():
+    """Api call: returns a dict with all users
+
+    :return: list with all users inside of dict: {"users": [{...}, {...}]}
+    :rtype: dict
+    """
     return db.get_users()
 
 @app.get("/leaderboard")
 async def leaderboard_page(request: Request):
+    """Api call: leaderboard page "/leaderboard"
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed leaderboard.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="leaderboard.html",
         request=request
@@ -173,6 +251,13 @@ async def leaderboard_page(request: Request):
 
 @app.get("/my_deck")
 async def my_deck_page(request: Request):
+    """Api call: My Deck page "/my_deck"
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed mydeck.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="mydeck.html",
         request=request
@@ -180,6 +265,13 @@ async def my_deck_page(request: Request):
 
 @app.get("/pack_opening")
 async def get_pack_opening(request: Request):
+    """Api call: Pack opening page "/pack_opening"
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed pack.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="pack.html",
         request=request
@@ -187,6 +279,13 @@ async def get_pack_opening(request: Request):
 
 @app.get("/unauth")
 async def unauthorized_access(request: Request):
+    """Api call: Unauthorized page "/unauth"
+
+    :param request: the get request
+    :type request: Request
+    :return: html response with parsed unauth.html
+    :rtype: jinja TemplateResponse
+    """
     return templates.TemplateResponse(
         name="unauth.html",
         request=request
@@ -194,10 +293,28 @@ async def unauthorized_access(request: Request):
 
 @app.post("/Pokemon_Id/{pokemon_id}")
 async def read_pokemon(pokemon_id: int, request: Request):
+    """Api call: Post request to retrieve a pokemon by id
+
+    :param pokemon_id: id of the pokemon
+    :type pokemon_id: int
+    :param request: the get request
+    :type request: Request
+    :return: PokemonObj in form of a dictionary
+    :rtype: dict
+    """
     return PokemonObj(pokemon_id).__dict__()
 
 @app.post("/Pokemon_Name/{pokemon_name}")
 async def get_pokemon_by_name(pokemon_name:str, request: Request):
+    """Api call: Post request to retrive a pokemon by name
+
+    :param pokemon_name: the name of the pokemon
+    :type pokemon_name: str
+    :param request: the get request
+    :type request: Request
+    :return: PokemonObj in form of a dictionary
+    :rtype: dict
+    """
     pokemon = PokemonObj.from_pokemon_name(pokemon_name)
     if isinstance(pokemon, dict):
         return pokemon
@@ -206,6 +323,16 @@ async def get_pokemon_by_name(pokemon_name:str, request: Request):
 
 @app.post("/Pokemon_Rand/{gen_id}")
 async def get_random_pokemon_from_gen(gen_id: int, request: Request):
+    """Api call: Post request to retrieve a random pokemon of a given generation (1-3)
+
+    :param gen_id: the id of the generation (1-3 are supported only)
+    :type gen_id: int
+    :param request: the get Request
+    :type request: Request
+    :raises HTTPException: raises if the generation is not 1-3
+    :return: PokemonObj in form of a dictionary
+    :rtype: dict
+    """
     if gen_id == 1:
         return gen_1.get_random_pokemon().__dict__()
     elif gen_id == 2:
@@ -219,6 +346,13 @@ err_dict = {"details": "Error occured! Did not add element to user"}
 
 @app.post("/add_to_deck")
 async def add_elem_to_user_deck(request: AddDeckModel):
+    """Api call: Post request to add an element to the deck of a user
+
+    :param request: json body containing the username and the new element (dict) that will be added to the user
+    :type request: AddDeckModel
+    :return: dictionary contaiing details of the result: {"details": msg_str}
+    :rtype: dict
+    """
     if not isinstance(request.username, str) or not request.username.isalpha():
         return err_dict_user
     if not isinstance(request.new_elem, dict):
@@ -230,6 +364,13 @@ async def add_elem_to_user_deck(request: AddDeckModel):
 
 @app.post("/update_points")
 async def update_points_of_user(request: AddPointsModel):
+    """Api call: Post request to update the points of a user
+
+    :param request: json body containing the username and the points (int) that will be updated
+    :type request: AddDeckModel
+    :return: dictionary contaiing details of the result: {"details": msg_str}
+    :rtype: dict
+    """
     if not isinstance(request.username, str) or not request.username.isalpha():
         return err_dict_user
     if not isinstance(request.points_elem, int) or request.points_elem < 0:
@@ -240,6 +381,14 @@ async def update_points_of_user(request: AddPointsModel):
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Api call: Post request to generate a token with login credentials: username, password
+
+    :param form_data: login form containing username and password, defaults to Depends()
+    :type form_data: OAuth2PasswordRequestForm, optional
+    :raises HTTPException: raises if authentication fails
+    :return: dict containing token and type: {"access_token": token, "token_type": type}
+    :rtype: dict
+    """
     user = db.authenticate_user(form_data.username, form_data.password)
     if user["user_id"] == -1:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers={"WWW_Authenticate": "Bearer"})
