@@ -10,6 +10,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath("../src"))
 
+os.environ['TEST'] = 1
+
 project = 'sqs2025'
 copyright = '2025, Emre Gülcino'
 author = 'Emre Gülcino'
