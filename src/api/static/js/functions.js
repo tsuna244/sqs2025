@@ -77,8 +77,10 @@ function send_registration() {
         fail = true;
         $("#modalMessage").text("Password validation failed");
         $("#popupModal").modal();
-    }else if (!validateRepeat(repeat_passwd)) {
-        $("#modalMessage").text("Password was repeated incorrectly");
+    }
+    if (!validateRepeat(repeat_passwd)) {
+        fail = true;
+        $("#modalMessage").text("Repeated password must be same");
         $("#popupModal").modal();
     }
     let regExp = /[a-z]/i;
