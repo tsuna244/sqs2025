@@ -9,7 +9,10 @@ build:
   os: ubuntu-24.04
   tools:
     python: "3.12"
-
+  jobs:
+    post_build:
+      - TEST=1
+      
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
     configuration: doc/conf.py
