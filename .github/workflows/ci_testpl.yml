@@ -1,0 +1,31 @@
+name: Python run java test development
+
+on: ['push']
+
+env:
+  PYTHON_VERSION: '3.12'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  TEST_IMG: ghcr.io/${{ github.repository }}:testing
+
+jobs:
+  test-jest:
+    if: ${{ github.ref != 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+      - run: yarn global add jest-cli
+      - run: jest ./src/api/static/js/functions.test.js --coverage
+      - name: Upload jest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-coverage
+          path: |
+            coverage.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
