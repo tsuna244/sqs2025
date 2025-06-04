@@ -20,7 +20,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
       - run: yarn global add jest-cli
-      - run: jest ./src/api/static/js/functions.test.js --coverage
+      - run: jest ./src/api/static/js/functions.test.js --config=./src/api/static/js/jest.config.js --coverage
       - name: Upload jest test results
         uses: actions/upload-artifact@v4
         with:
