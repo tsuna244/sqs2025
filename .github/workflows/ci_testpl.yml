@@ -21,6 +21,8 @@ jobs:
         uses: actions/setup-node@v3
       - run: yarn global add jest-cli
       - run: jest functions.test.js --config=./src/api/static/js/jest.config.js --coverage
+      - run: ls -al ./src/api/static/js/
+      - run: ls -al
       - name: Upload jest test results
         uses: actions/upload-artifact@v4
         with:
