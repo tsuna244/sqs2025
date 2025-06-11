@@ -291,56 +291,76 @@ async def unauthorized_access(request: Request):
         request=request
     )
 
-@app.post("/Pokemon_Id/{pokemon_id}")
-async def read_pokemon(pokemon_id: int, request: Request):
-    """Api call: Post request to retrieve a pokemon by id
+if os.environ.get("TEST", 'Not Set') == "2":
 
-    :param pokemon_id: id of the pokemon
-    :type pokemon_id: int
-    :param request: the get request
-    :type request: Request
-    :return: PokemonObj in form of a dictionary
-    :rtype: dict
-    """
-    return PokemonObj(pokemon_id).__dict__()
+    test_pokemon = {'pokemon_id': 132, 'pokemon_name': 'ditto', 'pokemon_generation': 'generation-i', 'pokemon_rarity': 'normal', 'pokemon_points': 48, 'pokemon_stats': [{'stat_name': 'hp', 'stat_value': 48}, {'stat_name': 'attack', 'stat_value': 48}, {'stat_name': 'defense', 'stat_value': 48}, {'stat_name': 'special-attack', 'stat_value': 48}, {'stat_name': 'special-defense', 'stat_value': 48}, {'stat_name': 'speed', 'stat_value': 48}], 'pokemon_sprite_path': ''}
 
-@app.post("/Pokemon_Name/{pokemon_name}")
-async def get_pokemon_by_name(pokemon_name:str, request: Request):
-    """Api call: Post request to retrive a pokemon by name
+    @app.post("/Pokemon_Id/{pokemon_id}")
+    async def read_pokemon(pokemon_id: int, request: Request):
+        return test_pokemon # TODO: return pokemon object as dict (example)
 
-    :param pokemon_name: the name of the pokemon
-    :type pokemon_name: str
-    :param request: the get request
-    :type request: Request
-    :return: PokemonObj in form of a dictionary
-    :rtype: dict
-    """
-    pokemon = PokemonObj.from_pokemon_name(pokemon_name)
-    if isinstance(pokemon, dict):
-        return pokemon
-    else:
-        return pokemon.__dict__()
+    @app.post("/Pokemon_Name/{pokemon_name}")
+    async def get_pokemon_by_name(pokemon_name:str, request: Request):
+        return test_pokemon
 
-@app.post("/Pokemon_Rand/{gen_id}")
-async def get_random_pokemon_from_gen(gen_id: int, request: Request):
-    """Api call: Post request to retrieve a random pokemon of a given generation (1-3)
+    @app.post("/Pokemon_Rand/{gen_id}")
+    async def get_random_pokemon_from_gen(gen_id: int, request: Request):
+        if gen_id == 1 or gen_id == 2 or gen_id == 3:
+            return test_pokemon # TODO: return pokemon object as dict (example)
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Only generation 1 to 3 are supported")
+else:
+    @app.post("/Pokemon_Id/{pokemon_id}")
+    async def read_pokemon(pokemon_id: int, request: Request):
+        """Api call: Post request to retrieve a pokemon by id
 
-    :param gen_id: the id of the generation (1-3 are supported only)
-    :type gen_id: int
-    :param request: the get Request
-    :type request: Request
-    :raises HTTPException: raises if the generation is not 1-3
-    :return: PokemonObj in form of a dictionary
-    :rtype: dict
-    """
-    if gen_id == 1:
-        return gen_1.get_random_pokemon().__dict__()
-    elif gen_id == 2:
-        return gen_2.get_random_pokemon().__dict__()
-    elif gen_id == 3:
-        return gen_3.get_random_pokemon().__dict__()
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Only generation 1 to 3 are supported")
+        :param pokemon_id: id of the pokemon
+        :type pokemon_id: int
+        :param request: the get request
+        :type request: Request
+        :return: PokemonObj in form of a dictionary
+        :rtype: dict
+        """
+        return PokemonObj(pokemon_id).__dict__()
+
+    @app.post("/Pokemon_Name/{pokemon_name}")
+    async def get_pokemon_by_name(pokemon_name:str, request: Request):
+        """Api call: Post request to retrive a pokemon by name
+
+        :param pokemon_name: the name of the pokemon
+        :type pokemon_name: str
+        :param request: the get request
+        :type request: Request
+        :return: PokemonObj in form of a dictionary
+        :rtype: dict
+        """
+        pokemon = PokemonObj.from_pokemon_name(pokemon_name)
+        if isinstance(pokemon, dict):
+            return pokemon
+        else:
+            print(pokemon.__dict__())
+            return pokemon.__dict__()
+
+    @app.post("/Pokemon_Rand/{gen_id}")
+    async def get_random_pokemon_from_gen(gen_id: int, request: Request):
+        """Api call: Post request to retrieve a random pokemon of a given generation (1-3)
+
+        :param gen_id: the id of the generation (1-3 are supported only)
+        :type gen_id: int
+        :param request: the get Request
+        :type request: Request
+        :raises HTTPException: raises if the generation is not 1-3
+        :return: PokemonObj in form of a dictionary
+        :rtype: dict
+        """
+        if gen_id == 1:
+            return gen_1.get_random_pokemon().__dict__()
+        elif gen_id == 2:
+            return gen_2.get_random_pokemon().__dict__()
+        elif gen_id == 3:
+            return gen_3.get_random_pokemon().__dict__()
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Only generation 1 to 3 are supported")
 
 err_dict = {"details": "Error occured! Did not add element to user"}
 
