@@ -19,6 +19,9 @@ pytest-mock
 pytest-docker
 testcontainers
 
+# stress testing
+locust
+
 # PokeAPI wrapper
 pokebase
 

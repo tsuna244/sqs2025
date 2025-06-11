@@ -200,6 +200,7 @@ async def register_new_user(request: RegistrationModel):
     :return: dict containing information about the registration: {"details": msg: str}
     :rtype: dict
     """
+    # TODO: change to alpha numeric for username
     if not isinstance(request.username, str) or not request.username.isalpha():
         return err_dict_user
     if not isinstance(request.password, str) or not request.password.isascii():
