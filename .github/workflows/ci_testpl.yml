@@ -42,7 +42,7 @@ jobs:
       - run: pip install -r src/requirements.txt
       - run: export TEST=2
       - run: docker ps -a
-      - run: locust -f src/locust_config.py --host http://127.0.0.1:8000 -t 30s -u 5 --headless > stress_test.txt --skip-log --json
+      - run: locust -f src/locust_config.py --host http://127.0.0.1:8000 -t 30s -u 5 --headless --skip-log --json
       - name: Upload locust output results
         uses: actions/upload-artifact@v4
         with:
