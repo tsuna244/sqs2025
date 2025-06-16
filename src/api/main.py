@@ -28,7 +28,7 @@ if os.environ.get("TEST", 'Not Set') != "1":
     db = Database()
     db.create_table()
     templates = Jinja2Templates(directory="api/templates")
-    if os.environ.get("TEST", 'Not Set') == "1":
+    if os.environ.get("TEST", 'Not Set') == "2":
         db.add_user("testuser", "Asdf1234", [])
 else:
     templates = Jinja2Templates(directory=os.path.abspath("src/api/templates"))
