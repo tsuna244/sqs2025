@@ -6,28 +6,6 @@ from api.modules.module_postgresql import *
 # set env var TEST to 2 for stress testing (1 is for unit test !!!)
 os.environ['TEST'] = '2'
 
-def db_connection():
-    db_settings = {
-        'database'        : 'postgres',
-        'user'            : 'postgres',
-        'host'            : "127.0.0.1",
-        'password'        : 'example',
-        'port'            : 5432
-    }
-    conn = get_postgress_conn(db_settings)
-    conn.autocommit = True
-    base_query = "DROP TABLE IF EXISTS users"
-    cur = conn.cursor()
-    cur.execute(base_query)
-    conn.commit()
-    return conn
-
-# create db conn
-db_connection = db_connection()
-# add user for testing manually !!!
-create_table(db_connection)
-add_user_with_crypt_pass(db_connection, "testuser", "Asdf1234", [])
-
 class WebsiteUser(HttpUser):
     wait_time = between(5, 15)
     
