@@ -39,7 +39,7 @@ jobs:
           fetch-depth: 0
       - name: Run docker compose with test environment for api
         run: docker compose -f docker-compose-test.yml up -d
-      - run: pip install -r ./requirements.txt
+      - run: pip install -r src/requirements.txt
       - run: export TEST=2
       - run: locust -f src/locust_config.py --host http://127.0.0.1:8000 -t 30s -u 5 --headless > stress_test.txt
       - name: Upload locust output results
