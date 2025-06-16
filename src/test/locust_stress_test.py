@@ -32,7 +32,7 @@ class WebsiteUser(HttpUser):
     wait_time = between(5, 15)
     
     def on_start(self):
-        self.client.post("/token", json={"username":"testuser", "password":"Asdf1234"})
+        self.client.post("/token", data={"username":"testuser", "password":"Asdf1234"})
     
     # ===== PAGES =====
 
@@ -85,3 +85,4 @@ class WebsiteUser(HttpUser):
         self.client.post("/update_points", json={"username":"testuser", "points_elem":244})
 
     # ===== 
+    # cmd locust -f test/locust_stress_test.py --host http://127.0.0.1:8000 -t 30s -u 5 --headless
