@@ -37,9 +37,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: ls -al
       - run: cd src
-      - run: pip install -r requirements.txt
+      - run: ls -al
+      - run: pip install -r ./requirements.txt
       - run: export TEST=2
       - run: fastapi run api/main.py &
       - run: locust -f test/locust_stress_test.py --host http://127.0.0.1:8000 -t 30s -u 5 --headless > stress_test.txt
