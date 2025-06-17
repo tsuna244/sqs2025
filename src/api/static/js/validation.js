@@ -1,4 +1,4 @@
-export function validatePassword_logic(password) {
+function validatePassword_logic(password) {
     if (password.length < 8) {
         return 1;
     }
@@ -18,6 +18,6 @@ export function validatePassword_logic(password) {
     return 0;
 }
 
-export function validateRepeat_logic(password, repeat) {
+function validateRepeat_logic(password, repeat) {
     return password == repeat;
 }

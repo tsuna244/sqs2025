@@ -1,4 +1,4 @@
-import { validatePassword_logic, validateRepeat_logic } from "./src/api/static/js/validation";
+import { validatePassword_logic, validateRepeat_logic } from "./validation";
 
 describe('Unit Test Category UI', () => {
     it('Validation for password is correct', async () => {
