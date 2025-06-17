@@ -51,7 +51,7 @@ jobs:
       - name: install browsers
         run: playwright install
       - name: Run docker compose
-        run: docker compose -f docker-compose-develop.yml up
+        run: docker compose -f docker-compose_develop.yml up -d
       # Execute test with pytest and pytest-cov
       - name: Test with pytest
         run: pytest src/test/test_playwright.py --junitxml=junit/test-results-3.12.xml
