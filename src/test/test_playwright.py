@@ -21,6 +21,7 @@ def test_search_bar(page: Page):
     page.get_by_role("searchbox", name="Search").fill("test")
     print(page.get_by_role("searchbox", name="Search").input_value())
     page.get_by_role("button", name="Search").click()
+    
     expect(page.locator("#loading")).to_contain_text("Pokemon not found!")
     # success
     page.goto("http://127.0.0.1:8000/")
@@ -63,7 +64,7 @@ def test_register_user(page: Page):
     # successfull register
     page.goto("http://127.0.0.1:8000/register")
 
-    page.get_by_role("textbox", name="Username").fill("testmich")
+    page.get_by_role("textbox", name="Username").fill("testuser")
     page.get_by_role("textbox", name="Password", exact=True).fill("Asdf1234")
     page.get_by_role("textbox", name="Repeat password").fill("Asdf1234")
     page.get_by_role("button", name=" Register").click()
@@ -72,4 +73,20 @@ def test_register_user(page: Page):
     expect(page.get_by_text("Login with username and")).to_be_visible()
 
 def test_login(page: Page):
-    pass
+    # no password
+    page.goto("http://127.0.0.1:8000/login")
+    page.get_by_role("textbox", name="Username").fill("testuser")
+    page.get_by_role("button", name=" Login").click()
+    expect(page.locator("#modalMessage")).to_contain_text("Username or Password wrong")
+    # wrong password
+    page.goto("http://127.0.0.1:8000/login")
+    page.get_by_role("textbox", name="Username").fill("testuser")
+    page.get_by_role("textbox", name="Password").fill("wrongpswd")
+    page.get_by_role("button", name=" Login").click()
+    expect(page.locator("#modalMessage")).to_contain_text("Username or Password wrong")
+    # successfull login
+    page.goto("http://127.0.0.1:8000/login")
+    page.get_by_role("textbox", name="Username").fill("testuser")
+    page.get_by_role("textbox", name="Password").fill("Asdf1234")
+    page.get_by_role("button", name=" Login").click()
+    expect(page.locator("#login_register")).to_contain_text("testuser")
