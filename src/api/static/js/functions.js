@@ -73,7 +73,7 @@ function send_registration() {
     let password = document.loginform.password.value;
     let repeat_passwd = document.loginform.password_repeat.value;
     let fail = false;
-    if (!validatePassword_logic(password)) {
+    if (validatePassword_logic(password) > 0) {
         fail = true;
         $("#modalMessage").text("Password validation failed");
         $("#popupModal").modal();
