@@ -78,7 +78,7 @@ function send_registration() {
         $("#modalMessage").text("Password validation failed");
         $("#popupModal").modal();
     }
-    if (!validateRepeat_logic(passwd, repeat_passwd)) {
+    if (!validateRepeat_logic(password, repeat_passwd)) {
         fail = true;
         $("#modalMessage").text("Repeated password must be same");
         $("#popupModal").modal();
@@ -117,7 +117,7 @@ function send_registration() {
 // validation function for password repeat
 function validateRepeat(repeat_passwd) {
     let passwd = $("#password").val();
-    let check = validatePassword_logic(passwd, repeat_passwd)
+    let check = validateRepeat_logic(passwd, repeat_passwd)
     let err_message = $("#repeatMessage");
     if (check) {
         err_message.text('Same password');
