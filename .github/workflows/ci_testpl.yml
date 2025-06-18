@@ -50,9 +50,6 @@ jobs:
           pip install -r src/requirements.txt
       - name: install browsers
         run: playwright install
-      - name: Run docker compose
-        run: docker compose -f docker-compose_develop.yml up -d
-      - run: sleep 10
       # Execute test with pytest and pytest-cov
       - name: Test with pytest
         run: pytest src/test/test_playwright.py --junitxml=junit/test-results-3.12.xml

@@ -1,7 +1,16 @@
 import re
 from playwright.sync_api import Page, expect
 
-base_url = "http://localhost:8000"
+import testcontainers.compose
+
+# start the docker containers, based on tests/mocks/docker-compose.yml file
+container = testcontainers.compose.DockerCompose(os.path.abspath("tests_playwright/"))
+if len(container.get_containers()) != 1:
+    container.start()
+
+host = f'{container.get_service_host("api", 8000)}'
+
+base_url = host + ":8000"
 
 def test_has_title(page: Page):
     page.goto(base_url + "/")
