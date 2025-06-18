@@ -73,12 +73,12 @@ function send_registration() {
     let password = document.loginform.password.value;
     let repeat_passwd = document.loginform.password_repeat.value;
     let fail = false;
-    if (!validatePassword(password)) {
+    if (validatePassword_logic(password) > 0) {
         fail = true;
         $("#modalMessage").text("Password validation failed");
         $("#popupModal").modal();
     }
-    if (!validateRepeat(repeat_passwd)) {
+    if (!validateRepeat_logic(password, repeat_passwd)) {
         fail = true;
         $("#modalMessage").text("Repeated password must be same");
         $("#popupModal").modal();
@@ -117,7 +117,7 @@ function send_registration() {
 // validation function for password repeat
 function validateRepeat(repeat_passwd) {
     let passwd = $("#password").val();
-    let check = repeat_passwd === passwd;
+    let check = validateRepeat_logic(passwd, repeat_passwd)
     let err_message = $("#repeatMessage");
     if (check) {
         err_message.text('Same password');
@@ -128,7 +128,6 @@ function validateRepeat(repeat_passwd) {
         err_message.removeClass("text-success");
         err_message.addClass("text-danger");
     }
-    return check;
 }
 
 function set_passwd_class(element, success) {
@@ -193,8 +192,6 @@ function validatePassword(password) {
         errorMessage.removeClass('text-danger');
         errorMessage.addClass('text-success');
     }
-
-    return !fail;
 
 }
 

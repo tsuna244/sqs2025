@@ -10,6 +10,7 @@ services:
       DB_USER: "postgres"
       DB_PASS: "example"
       DB_PORT: 5432
+      TEST: 2
     ports:
       - 8000:80
     depends_on:

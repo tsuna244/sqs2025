@@ -17,7 +17,12 @@ httpx
 pytest
 pytest-mock
 pytest-docker
+pytest-playwright
+pytest-asyncio
 testcontainers
+
+# stress testing
+locust
 
 # PokeAPI wrapper
 pokebase
