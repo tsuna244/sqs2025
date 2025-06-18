@@ -9,7 +9,7 @@ container = testcontainers.compose.DockerCompose(os.path.abspath("tests_playwrig
 if len(container.get_containers()) != 1:
     container.start()
 
-host = f'{container.get_service_host("api", 8000)}'
+host = f'{container.get_service_host("api", 80)}'
 
 base_url = host + ":8000"
 
