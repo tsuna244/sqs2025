@@ -1,13 +1,20 @@
 import re
 from playwright.sync_api import Page, expect
 
+base_url = "http://localhost:8000"
+
 def test_has_title(page: Page):
-    page.goto("http://0.0.0.0:8000/")
+    page.goto(base_url + "/")
     # Expect a title "to contain" a substring.
     expect(page).to_have_title(re.compile("Sqs2025"))
 
-def test_get_started_link(page: Page):
-    page.goto("http://127.0.0.1:8000/")
+def test_get_navbar(page: Page):
+    page.goto(base_url + "/")
+
+    page.get_by_role("link", name="Packopening").click()
+    expect(page).to_have_url(base_url + "/#")
+    page.get_by_role("link", name="My-Deck").click()
+    expect(page).to_have_url(base_url + "/#")
 
     # Click the get started link.
     page.get_by_role("link", name="Leaderboard").click()
@@ -16,7 +23,7 @@ def test_get_started_link(page: Page):
 
 def test_search_bar(page: Page):
 
-    page.goto("http://127.0.0.1:8000/")
+    page.goto(base_url + "/")
     # fail
     page.get_by_role("searchbox", name="Search").fill("test")
     print(page.get_by_role("searchbox", name="Search").input_value())
@@ -24,14 +31,14 @@ def test_search_bar(page: Page):
     
     expect(page.locator("#loading")).to_contain_text("Pokemon not found!")
     # success
-    page.goto("http://127.0.0.1:8000/")
+    page.goto(base_url + "/")
     page.get_by_role("searchbox", name="Search").fill("ditto")
     page.get_by_role("button", name="Search").click()
     expect(page.locator("#poke_elem")).to_contain_text("Pokemon Id:")
 
 
 def test_register_user(page: Page):
-    page.goto("http://127.0.0.1:8000/")
+    page.goto(base_url + "/")
     # press register button
     page.get_by_role("button", name="Register", exact=True).click()
     # test user with 
@@ -62,31 +69,57 @@ def test_register_user(page: Page):
     page.get_by_text("Home Leaderboard Packopening My-Deck Login Register Register with username and").press("Escape")
 
     # successfull register
-    page.goto("http://127.0.0.1:8000/register")
+    page.goto(base_url + "/register")
 
     page.get_by_role("textbox", name="Username").fill("testuser")
     page.get_by_role("textbox", name="Password", exact=True).fill("Asdf1234")
     page.get_by_role("textbox", name="Repeat password").fill("Asdf1234")
     page.get_by_role("button", name=" Register").click()
     
-    expect(page).to_have_url("http://127.0.0.1:8000/login")
+    expect(page).to_have_url(base_url + "/login")
     expect(page.get_by_text("Login with username and")).to_be_visible()
 
 def test_login(page: Page):
     # no password
-    page.goto("http://127.0.0.1:8000/login")
+    page.goto(base_url + "/login")
     page.get_by_role("textbox", name="Username").fill("testuser")
     page.get_by_role("button", name=" Login").click()
     expect(page.locator("#modalMessage")).to_contain_text("Username or Password wrong")
     # wrong password
-    page.goto("http://127.0.0.1:8000/login")
+    page.goto(base_url + "/login")
     page.get_by_role("textbox", name="Username").fill("testuser")
     page.get_by_role("textbox", name="Password").fill("wrongpswd")
     page.get_by_role("button", name=" Login").click()
     expect(page.locator("#modalMessage")).to_contain_text("Username or Password wrong")
     # successfull login
-    page.goto("http://127.0.0.1:8000/login")
+    page.goto(base_url + "/login")
     page.get_by_role("textbox", name="Username").fill("testuser")
     page.get_by_role("textbox", name="Password").fill("Asdf1234")
     page.get_by_role("button", name=" Login").click()
     expect(page.locator("#login_register")).to_contain_text("testuser")
+
+def test_deck_page_and_logout(page):
+
+    # login
+    page.goto(base_url + "/login")
+    page.get_by_role("textbox", name="Username").fill("testuser")
+    page.get_by_role("textbox", name="Password").fill("Asdf1234")
+    page.get_by_role("button", name=" Login").click()
+
+    page.get_by_role("link", name="My-Deck").click()
+    expect(page.get_by_role("heading")).to_contain_text("My_Deck")
+
+    # test logout
+    page.get_by_role("button", name="Logout").click()
+    expect(page.get_by_role("button", name="Login")).to_be_visible()
+
+def test_get_pokemon(page: Page):
+    
+    # login
+    page.goto(base_url + "/login")
+    page.get_by_role("textbox", name="Username").fill("testuser")
+    page.get_by_role("textbox", name="Password").fill("Asdf1234")
+    page.get_by_role("button", name=" Login").click()
+
+    page.get_by_role("link", name="Packopening").click()
+    expect(page.get_by_role("heading")).to_contain_text("Packopening:")

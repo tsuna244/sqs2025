@@ -70,7 +70,7 @@ jobs:
             -Dsonar.python.version=3.12
             -Dsonar.sources=.
             -Dsonar.test.exclusions=**/test/**
-            -Dsonar.exclusions=**/doc/**,**/test/**
+            -Dsonar.exclusions=**/doc/**,**/test/**,**/api/static/js/functions.*,**/api/static/js/jest.*
 
   build-and-deploy:
     if: ${{ github.event_name == 'push' }}

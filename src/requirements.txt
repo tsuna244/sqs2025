@@ -18,6 +18,7 @@ pytest
 pytest-mock
 pytest-docker
 pytest-playwright
+pytest-asyncio
 testcontainers
 
 # stress testing
