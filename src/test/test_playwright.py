@@ -11,7 +11,7 @@ if len(container.get_containers()) != 1:
 
 host = f'{container.get_service_host("api", 80)}'
 
-base_url = host + ":8000"
+base_url = "http://" + host + ":8000"
 
 def test_has_title(page: Page):
     page.goto(base_url + "/")
