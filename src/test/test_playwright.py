@@ -1,6 +1,7 @@
 import re
 from playwright.sync_api import Page, expect
 
+import os
 import testcontainers.compose
 
 # start the docker containers, based on tests/mocks/docker-compose.yml file
