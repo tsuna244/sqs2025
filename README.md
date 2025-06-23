@@ -14,8 +14,24 @@ This is a project for learning purposes. It will consist of a webserver that con
 
 ## Developer: Emre Gülcino
 
-## ADRs
-Under the folder ```doc/adr``` you can find all the ADRs.
+## Installation
+Use the docker-compose file inside the repository:
+
+### login to github package registry:
+CR_PAT = Classic Access Token (Ask repositry owner to publish Access Token)
+```bash
+$ echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
+$ docker-compose up
+```
+this will pull all the neccessary images and run the application.
+
+## Access
+The webpage will be available on port 8000:
+```http://127.0.0.1:8000```
 
 ## Documentation
+For api specific documentation visit the following page while the application is running:
+```http://127.0.0.1:8000/docs```
+
+For more indepth documentation visit the readthedocs:
 ```https://sqs2025.readthedocs.io/en/latest/```
