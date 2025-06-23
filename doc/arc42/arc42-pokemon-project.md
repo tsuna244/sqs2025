@@ -41,19 +41,9 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 
 ### 3.2 Technical Context
 
-```
-+-------------+      HTTP       +-----------------+
-|   Browser   |  <----------->  |  Web Server API |
-+-------------+                 +-----------------+
-                                      |
-                                      v
-         +-----------------+   +------------------+
-         | PokeAPI Module  |   | PostgreSQL Module|
-         +-----------------+   +------------------+
-                 |
-                 v
-         External PokeAPI Service
-```
+- Browser: User interface choosen by the user.
+- PokeAPI: Provides information about pokemon
+- Database: Posgres-Database to save user information
 
 ---
 
@@ -68,8 +58,31 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 ---
 
 ## 5. Building Block View
-(TBD)
+
 ### 5.1 Whitebox Overall System
+
+![image](images\structurizr-1-Diagram1.png)
+
+### 5.2 Container View
+
+![image](images\structurizr-1-Diagram2.png)
+
+### 5.3 Components
+
+#### 5.3.1 Web Application
+
+![image](images\structurizr-1-Diagram3.png)
+
+#### 5.3.2 Web Application
+
+![image](images\structurizr-1-Diagram4.png)
+
+#### 5.3.3 Web Application
+
+![image](images\structurizr-1-Diagram5.png)
+
+### 5.4 Code
+
 **Components**:
 - `main.py`: Entry point of the webserver.
 - `modules/logger-module.py`: Central logging utility.
@@ -79,15 +92,6 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 - `static/`: CSS, JS.
 - `templates/`: Jinja2 HTML templates.
 - `init.py`: Module setup files.
-
-### 5.2 Level 2: Modules
-| Module                 | Responsibility                           |
-|------------------------|-------------------------------------------|
-| `logger-module.py`     | Standardized logging                      |
-| `pokeapi-module.py`    | Fetching Pokémon data from PokeAPI        |
-| `postgresql-module.py` | User and deck data persistence            |
-| `main.py`              | Routing and controller logic              |
-
 ---
 
 ## 6. Runtime View
@@ -176,6 +180,7 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 
 - Dependency on third-party PokeAPI (no control over availability).
 - Pokemon Games are very common, thus large competition.
+- Generating multiple tokens for the same user is technically possible -> mulltiple user sessions (feature or bug?)
 
 ---
 
