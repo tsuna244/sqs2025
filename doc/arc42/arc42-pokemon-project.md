@@ -61,25 +61,25 @@ The webserver enables Pokémon game-like interaction in a browser environment wi
 
 ### 5.1 Whitebox Overall System
 
-![image1](arc42/images/structurizr-1-Diagram1.png)
+![image1](images/structurizr-1-Diagram1.png)
 
 ### 5.2 Container View
 
-![image2](arc42/images/structurizr-1-Diagram2.png)
+![image2](images/structurizr-1-Diagram2.png)
 
 ### 5.3 Components
 
 #### 5.3.1 Web Application
 
-![image3](arc42/images/structurizr-1-Diagram3.png)
+![image3](images/structurizr-1-Diagram3.png)
 
 #### 5.3.2 Web Application
 
-![image4](arc42/images/structurizr-1-Diagram4.png)
+![image4](images/structurizr-1-Diagram4.png)
 
 #### 5.3.3 Web Application
 
-![image5](arc42/images/structurizr-1-Diagram5.png)
+![image5](images/structurizr-1-Diagram5.png)
 
 ### 5.4 Code
 
