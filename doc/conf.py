@@ -21,6 +21,7 @@ author = 'Emre Gülcino'
 
 extensions = ['myst_parser', 'sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc']
 
+# template
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thubs.db', '.DS_Store']
 
